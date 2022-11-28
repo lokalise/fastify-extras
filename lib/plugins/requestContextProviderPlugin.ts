@@ -24,13 +24,14 @@ export interface RequestContext {
   reqId: string
 }
 
-export function getRequestIdFastifyAppConfig() {
-  const result: Pick<FastifyServerOptions, 'genReqId' | 'requestIdHeader'> = {
+export function getRequestIdFastifyAppConfig(): Pick<
+  FastifyServerOptions,
+  'genReqId' | 'requestIdHeader'
+> {
+  return {
     genReqId: () => randomUUID(),
     requestIdHeader: 'x-request-id',
   }
-
-  return result
 }
 
 function plugin(fastify: FastifyInstance, opts: unknown, done: () => void) {
