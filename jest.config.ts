@@ -9,7 +9,7 @@ const config: Config = {
   },
   testEnvironment: 'node',
   reporters: ['default'],
-  // src/index.ts is the imperative shell and will not be tested
+  // lib/index.ts is the imperative shell and will not be tested
   coveragePathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/coverage/', 'lib/index.ts'],
   coverageThreshold: {
     global: {

@@ -19,8 +19,8 @@ declare module 'fastify' {
   }
 }
 
-export type RequestContext = {
-  logger?: FastifyBaseLogger
+export interface RequestContext {
+  logger: FastifyBaseLogger
   reqId: string
 }
 

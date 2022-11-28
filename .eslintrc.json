@@ -2,6 +2,8 @@
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/recommended-requiring-type-checking",
+    "plugin:@typescript-eslint/strict",
     "plugin:prettier/recommended",
     "plugin:jest/recommended",
     "plugin:jest/style",
@@ -12,10 +14,13 @@
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "ecmaVersion": 2022,
-    "sourceType": "module"
+    "sourceType": "module",
+    "tsconfigRootDir": "./",
+    "project": ["./tsconfig.json"]
   },
   "rules": {
     "prettier/prettier": "error",
+    "@typescript-eslint/consistent-type-definitions": ["error", "interface"],
     "@typescript-eslint/no-empty-interface": "warn",
     "@typescript-eslint/ban-ts-comment": "off",
     "@typescript-eslint/no-use-before-define": "off",
@@ -46,5 +51,5 @@
       }
     ]
   },
-  "ignorePatterns": ["node_modules"]
+  "ignorePatterns": ["node_modules", "jest.config.ts"]
 }

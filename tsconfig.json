@@ -22,5 +22,5 @@
     "resolveJsonModule": true
   },
   "include": ["lib/**/*.ts"],
-  "exclude": ["node_modules", "dist", "lib/**/*.spec.ts"]
+  "exclude": ["node_modules", "dist"]
 }

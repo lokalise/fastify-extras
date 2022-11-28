@@ -6,7 +6,7 @@ import fp from 'fastify-plugin'
 
 export type Severity = Event['severity']
 
-export type ErrorReport = {
+export interface ErrorReport {
   error: NotifiableError
   severity?: Severity
   unhandled?: boolean

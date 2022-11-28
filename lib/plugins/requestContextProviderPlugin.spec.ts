@@ -7,7 +7,7 @@ import {
   requestContextProviderPlugin,
 } from './requestContextProviderPlugin'
 
-async function initApp(routeHandler: RouteHandlerMethod, awaitApp = true) {
+async function initApp(routeHandler: RouteHandlerMethod) {
   const app = fastify({
     ...getRequestIdFastifyAppConfig(),
   })
@@ -18,9 +18,7 @@ async function initApp(routeHandler: RouteHandlerMethod, awaitApp = true) {
     url: '/',
     handler: routeHandler,
   })
-  if (awaitApp) {
-    await app.ready()
-  }
+  await app.ready()
   return app
 }
 
@@ -33,7 +31,7 @@ describe('errorHandler', () => {
   it('sets reqId on request and response', async () => {
     expect.assertions(3)
 
-    let reqId
+    let reqId = 'invalid'
     app = await initApp((req, res) => {
       expect(req.reqContext.reqId).toEqual(expect.any(String))
       reqId = req.reqContext.reqId
