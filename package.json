@@ -1,11 +1,25 @@
 {
-  "name": "fastify-extras",
+  "name": "@lokalise/fastify-extras",
   "version": "1.0.0",
+  "description": "Opinionated set of fastify plugins, commonly used in Lokalise",
   "author": {
     "name": "Lokalise",
     "url": "https://lokalise.com/"
   },
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/lokalise/fastify-extras.git"
+  },
+  "keywords": [
+    "fastify",
+    "newrelic",
+    "bugsnag",
+    "request-context",
+    "als",
+    "request-id",
+  ],
+  "homepage": "https://github.com/lokalise/fastify-extras",
   "files": [
     "dist/**",
     "LICENSE",
