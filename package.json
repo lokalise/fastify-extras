@@ -17,7 +17,7 @@
     "bugsnag",
     "request-context",
     "als",
-    "request-id",
+    "request-id"
   ],
   "homepage": "https://github.com/lokalise/fastify-extras",
   "files": [
