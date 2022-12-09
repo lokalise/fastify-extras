@@ -32,23 +32,26 @@
     "fastify-plugin": "^4.3.0"
   },
   "peerDependencies": {
-    "@fastify/request-context": "^4.0.0",
-    "fastify": "^4.0.0"
+    "@fastify/request-context": "^4.2.0",
+    "fastify": "^4.10.2",
+    "newrelic": "^9.7.2"
   },
   "devDependencies": {
     "@fastify/request-context": "^4.1.0",
-    "@types/jest": "^29.2.3",
-    "@types/node": "^18.11.9",
-    "@typescript-eslint/eslint-plugin": "^5.44.0",
-    "@typescript-eslint/parser": "^5.44.0",
+    "@types/jest": "^29.2.4",
+    "@types/newrelic": "^9.4.0",
+    "@types/node": "^18.11.12",
+    "@typescript-eslint/eslint-plugin": "^5.46.0",
+    "@typescript-eslint/parser": "^5.46.0",
     "auto-changelog": "^2.4.0",
-    "eslint": "^8.28.0",
+    "eslint": "^8.29.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-jest": "^27.1.6",
     "eslint-plugin-prettier": "^4.2.1",
     "fastify": "^4.10.2",
     "jest": "^29.3.1",
+    "newrelic": "^9.7.2",
     "prettier": "^2.8.0",
     "shx": "^0.3.4",
     "ts-jest": "^29.0.3",

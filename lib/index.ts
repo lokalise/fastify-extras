@@ -6,3 +6,9 @@ export {
   getRequestIdFastifyAppConfig,
 } from './plugins/requestContextProviderPlugin'
 export type { RequestContext } from './plugins/requestContextProviderPlugin'
+
+export { newrelicTransactionManagerPlugin } from './plugins/newrelicTransactionManagerPlugin'
+export type {
+  NewRelicTransactionManager,
+  NewRelicTransactionManagerOptions,
+} from './plugins/newrelicTransactionManagerPlugin'
