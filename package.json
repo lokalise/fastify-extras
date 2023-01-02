@@ -42,10 +42,10 @@
     "version": "auto-changelog -p && git add CHANGELOG.md"
   },
   "dependencies": {
-    "@bugsnag/js": "^7.18.0",
     "fastify-plugin": "^4.4.0"
   },
   "peerDependencies": {
+    "@bugsnag/js": "^7.18.0",
     "@fastify/request-context": "^4.2.0",
     "fastify": "^4.10.2",
     "fastify-metrics": "^10.0.1",
@@ -53,6 +53,7 @@
     "pino": "^8.8.0"
   },
   "devDependencies": {
+    "@bugsnag/js": "^7.18.0",
     "@fastify/request-context": "^4.2.0",
     "@lokalise/node-core": "^2.0.1",
     "@types/jest": "^29.2.5",
