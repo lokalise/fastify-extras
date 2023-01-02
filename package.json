@@ -42,15 +42,16 @@
     "version": "auto-changelog -p && git add CHANGELOG.md"
   },
   "dependencies": {
-    "@bugsnag/js": "^7.18.0",
     "fastify-plugin": "^4.4.0"
   },
   "peerDependencies": {
+    "@bugsnag/js": "^7.18.0",
     "@fastify/request-context": "^4.2.0",
     "fastify": "^4.10.2",
     "newrelic": "^9.7.4"
   },
   "devDependencies": {
+    "@bugsnag/js": "^7.18.0",
     "@fastify/request-context": "^4.2.0",
     "@types/jest": "^29.2.5",
     "@types/newrelic": "^9.4.0",
