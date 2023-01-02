@@ -7,8 +7,11 @@ export {
 } from './plugins/requestContextProviderPlugin'
 export type { RequestContext } from './plugins/requestContextProviderPlugin'
 
-export { newrelicTransactionManagerPlugin } from './plugins/newrelicTransactionManagerPlugin'
-export type {
+export {
+  newrelicTransactionManagerPlugin,
   NewRelicTransactionManager,
-  NewRelicTransactionManagerOptions,
 } from './plugins/newrelicTransactionManagerPlugin'
+export type { NewRelicTransactionManagerOptions } from './plugins/newrelicTransactionManagerPlugin'
+
+export { metricsPlugin } from './plugins/metricsPlugin'
+export type { ErrorObjectResolver, MetricsPluginOptions } from './plugins/metricsPlugin'
