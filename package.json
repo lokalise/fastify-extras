@@ -1,11 +1,25 @@
 {
-  "name": "fastify-extras",
+  "name": "@lokalise/fastify-extras",
   "version": "1.0.0",
+  "description": "Opinionated set of fastify plugins, commonly used in Lokalise",
   "author": {
     "name": "Lokalise",
     "url": "https://lokalise.com/"
   },
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/lokalise/fastify-extras.git"
+  },
+  "keywords": [
+    "fastify",
+    "newrelic",
+    "bugsnag",
+    "request-context",
+    "als",
+    "request-id"
+  ],
+  "homepage": "https://github.com/lokalise/fastify-extras",
   "files": [
     "dist/**",
     "LICENSE",
@@ -29,30 +43,30 @@
   },
   "dependencies": {
     "@bugsnag/js": "^7.18.0",
-    "fastify-plugin": "^4.3.0"
+    "fastify-plugin": "^4.4.0"
   },
   "peerDependencies": {
     "@fastify/request-context": "^4.2.0",
     "fastify": "^4.10.2",
-    "newrelic": "^9.7.2"
+    "newrelic": "^9.7.4"
   },
   "devDependencies": {
-    "@fastify/request-context": "^4.1.0",
-    "@types/jest": "^29.2.4",
+    "@fastify/request-context": "^4.2.0",
+    "@types/jest": "^29.2.5",
     "@types/newrelic": "^9.4.0",
-    "@types/node": "^18.11.12",
-    "@typescript-eslint/eslint-plugin": "^5.46.0",
-    "@typescript-eslint/parser": "^5.46.0",
+    "@types/node": "^18.11.18",
+    "@typescript-eslint/eslint-plugin": "^5.47.1",
+    "@typescript-eslint/parser": "^5.47.1",
     "auto-changelog": "^2.4.0",
-    "eslint": "^8.29.0",
+    "eslint": "^8.31.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-import": "^2.26.0",
-    "eslint-plugin-jest": "^27.1.6",
+    "eslint-plugin-jest": "^27.2.0",
     "eslint-plugin-prettier": "^4.2.1",
-    "fastify": "^4.10.2",
+    "fastify": "^4.11.0",
     "jest": "^29.3.1",
-    "newrelic": "^9.7.2",
-    "prettier": "^2.8.0",
+    "newrelic": "^9.7.4",
+    "prettier": "^2.8.1",
     "shx": "^0.3.4",
     "ts-jest": "^29.0.3",
     "ts-node": "^10.9.1",
