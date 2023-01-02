@@ -28,8 +28,15 @@ export const reportErrorToBugsnag = ({
     }
   })
 
-function plugin(app: FastifyInstance, opts: NodeConfig, done: () => void) {
-  Bugsnag.start(opts)
+export interface BugsnagPluginConfig {
+  bugsnag: NodeConfig
+  isEnabled: boolean
+}
+
+function plugin(app: FastifyInstance, opts: BugsnagPluginConfig, done: () => void) {
+  if (opts.isEnabled) {
+    Bugsnag.start(opts.bugsnag)
+  }
 
   done()
 }

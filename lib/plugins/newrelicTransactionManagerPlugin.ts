@@ -1,7 +1,19 @@
 import type { FastifyInstance } from 'fastify'
 import fp from 'fastify-plugin'
-import type { TransactionHandle } from 'newrelic'
-import { getTransaction, startBackgroundTransaction, shutdown } from 'newrelic'
+import type {
+  TransactionHandle,
+  startBackgroundTransaction as startBackgroundTransactionType,
+  shutdown as Shutdown,
+  getTransaction as GetTransaction,
+} from 'newrelic'
+
+interface Newrelic {
+  startBackgroundTransaction: typeof startBackgroundTransactionType
+  shutdown: typeof Shutdown
+  getTransaction: typeof GetTransaction
+}
+
+let newrelic: Newrelic
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -18,6 +30,11 @@ export class NewRelicTransactionManager {
   private readonly transactionMap: Map<string, TransactionHandle>
 
   constructor(isNewRelicEnabled: boolean) {
+    if (isNewRelicEnabled) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      newrelic = require('newrelic')
+    }
+
     this.isEnabled = isNewRelicEnabled
     this.transactionMap = new Map()
   }
@@ -27,8 +44,8 @@ export class NewRelicTransactionManager {
       return
     }
 
-    startBackgroundTransaction(jobName, () => {
-      this.transactionMap.set(jobName, getTransaction())
+    newrelic.startBackgroundTransaction(jobName, () => {
+      this.transactionMap.set(jobName, newrelic.getTransaction())
     })
   }
 
@@ -55,16 +72,18 @@ function plugin(
 
   fastify.decorate('newrelicTransactionManager', manager)
 
-  fastify.addHook('onClose', async () => {
-    return new Promise((resolve, reject) => {
-      shutdown((error) => {
-        if (error) {
-          return reject(error)
-        }
-        resolve()
+  if (opts.isEnabled) {
+    fastify.addHook('onClose', async () => {
+      return new Promise((resolve, reject) => {
+        newrelic.shutdown((error) => {
+          if (error) {
+            return reject(error)
+          }
+          resolve()
+        })
       })
     })
-  })
+  }
 
   done()
 }
