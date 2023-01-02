@@ -4,6 +4,7 @@ export type { ErrorReport } from './plugins/bugsnagPlugin'
 export {
   requestContextProviderPlugin,
   getRequestIdFastifyAppConfig,
+  REQUEST_ID_STORE_KEY,
 } from './plugins/requestContextProviderPlugin'
 export type { RequestContext } from './plugins/requestContextProviderPlugin'
 
