@@ -13,10 +13,10 @@ const config: Config = {
   coveragePathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/coverage/', 'lib/index.ts'],
   coverageThreshold: {
     global: {
-      statements: 88,
+      statements: 100,
       branches: 100,
-      functions: 90,
-      lines: 88,
+      functions: 100,
+      lines: 100,
     },
   },
 }

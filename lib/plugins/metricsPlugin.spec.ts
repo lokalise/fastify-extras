@@ -4,12 +4,12 @@ import fastify from 'fastify'
 
 import { metricsPlugin } from './metricsPlugin'
 
-async function initApp() {
+async function initApp(errorObjectResolver = (err: unknown) => err) {
   const app = fastify()
   await app.register(metricsPlugin, {
     bindAddress: '0.0.0.0',
     loggerOptions: false,
-    errorObjectResolver: (err) => err,
+    errorObjectResolver,
   })
 
   await app.ready()
@@ -30,5 +30,25 @@ describe('metricsPlugin', () => {
 
     expect(response.statusCode).toBe(200)
     expect(response.body).toEqual(expect.any(String))
+  })
+
+  it('handles an error', async () => {
+    expect.assertions(2)
+    let handledError
+    try {
+      await initApp((err) => {
+        handledError = err
+        return err
+      })
+    } catch (err) {
+      // eslint-disable-next-line jest/no-conditional-expect
+      expect(err).toMatchObject({
+        message: 'Critical error when trying to launch metrics server',
+      })
+    }
+
+    expect(handledError).toMatchObject({
+      code: 'EADDRINUSE',
+    })
   })
 })

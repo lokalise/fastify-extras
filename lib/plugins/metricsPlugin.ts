@@ -15,7 +15,7 @@ export interface MetricsPluginOptions {
   errorObjectResolver: ErrorObjectResolver
 }
 
-function plugin(app: FastifyInstance, opts: MetricsPluginOptions, done: () => void) {
+function plugin(app: FastifyInstance, opts: MetricsPluginOptions) {
   void app.register(fastifyMetrics, {
     defaultMetrics: { enabled: true },
     endpoint: null,
@@ -48,19 +48,15 @@ function plugin(app: FastifyInstance, opts: MetricsPluginOptions, done: () => vo
     await promServer.close()
   })
 
-  void promServer
+  return promServer
     .listen({
       port: METRICS_PORT,
       host: opts.bindAddress,
     })
-    .then(() => {
-      done()
-    })
     .catch((err) => {
       const logObject = opts.errorObjectResolver(err)
       promServer.log.error(logObject)
-      promServer.log.error('Critical error when trying to launch metrics server. Stopping process.')
-      process.exit(1)
+      throw new Error('Critical error when trying to launch metrics server')
     })
 }
 
