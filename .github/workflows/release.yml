@@ -19,6 +19,7 @@ jobs:
         with:
           ref: main
           fetch-depth: 0 # fetch all commits so auto-changelog is correctly generating
+          token: ${{ secrets.BOT_ACCESS_TOKEN }}
 
       - name: Setup Node
         uses: actions/setup-node@v3
