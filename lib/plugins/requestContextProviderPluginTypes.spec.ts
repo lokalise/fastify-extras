@@ -36,7 +36,7 @@ describe('requestContextProviderPlugin custom request context', () => {
   })
 
   it('sets custom context field correctly', async () => {
-    expect.assertions(2)
+    expect.assertions(1)
 
     app = await initApp((req, res) => {
       req.reqContext.jwtToken = 'dummy token'
