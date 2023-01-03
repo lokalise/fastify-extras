@@ -13,15 +13,21 @@ import fp from 'fastify-plugin'
 
 export const REQUEST_ID_STORE_KEY = 'request_id'
 
+// Augment existing FastifyRequest interface with new fields
 declare module 'fastify' {
   interface FastifyRequest {
     reqContext: RequestContext
   }
 }
 
-export interface RequestContext {
+export interface BaseRequestContext {
   logger: FastifyBaseLogger
   reqId: string
+}
+
+// Add new interface to the fastify module
+declare module 'fastify' {
+  interface RequestContext extends BaseRequestContext {}
 }
 
 export function getRequestIdFastifyAppConfig(): Pick<

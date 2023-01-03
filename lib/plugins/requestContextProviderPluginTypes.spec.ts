@@ -7,6 +7,13 @@ import {
   requestContextProviderPlugin,
 } from './requestContextProviderPlugin'
 
+declare module 'fastify' {
+  interface RequestContext {
+    jwtToken?: string
+    requestingUserId?: string
+  }
+}
+
 async function initApp(routeHandler: RouteHandlerMethod) {
   const app = fastify({
     ...getRequestIdFastifyAppConfig(),
@@ -22,33 +29,18 @@ async function initApp(routeHandler: RouteHandlerMethod) {
   return app
 }
 
-describe('requestContextProviderPlugin', () => {
+describe('requestContextProviderPlugin custom request context', () => {
   let app: FastifyInstance
   afterAll(async () => {
     await app.close()
   })
 
-  it('sets reqId on request and response', async () => {
-    expect.assertions(3)
-
-    let reqId = 'invalid'
-    app = await initApp((req, res) => {
-      expect(req.reqContext.reqId).toEqual(expect.any(String))
-      reqId = req.reqContext.reqId
-      return res.status(204).send()
-    })
-
-    const response = await app.inject().get('/').end()
-    expect(response.statusCode).toBe(204)
-    expect(response.headers['x-request-id']).toBe(reqId)
-  })
-
-  it('sets logger', async () => {
+  it('sets custom context field correctly', async () => {
     expect.assertions(2)
 
     app = await initApp((req, res) => {
-      expect(req.reqContext.logger).toBeDefined()
-      req.reqContext.logger.info('Dummy log message')
+      req.reqContext.jwtToken = 'dummy token'
+      req.reqContext.reqId = 'someReqId'
       return res.status(204).send()
     })
 
