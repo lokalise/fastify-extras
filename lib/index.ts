@@ -6,7 +6,7 @@ export {
   getRequestIdFastifyAppConfig,
   REQUEST_ID_STORE_KEY,
 } from './plugins/requestContextProviderPlugin'
-export type { BaseRequestContext } from './plugins/requestContextProviderPlugin'
+export type { BaseRequestContext as RequestContext } from './plugins/requestContextProviderPlugin'
 
 export {
   newrelicTransactionManagerPlugin,
