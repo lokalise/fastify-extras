@@ -15,9 +15,7 @@ declare module 'fastify' {
 }
 
 async function initApp(routeHandler: RouteHandlerMethod) {
-  const app = fastify({
-    ...getRequestIdFastifyAppConfig(),
-  })
+  const app = fastify(getRequestIdFastifyAppConfig())
   await app.register(requestContextProviderPlugin)
 
   app.route({
