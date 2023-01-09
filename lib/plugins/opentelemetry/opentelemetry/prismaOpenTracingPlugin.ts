@@ -49,5 +49,5 @@ function plugin(app: FastifyInstance, opts: PrismaOpenTracingPluginConfig, done:
 
 export const prismaOpenTracingPlugin = fp(plugin, {
   fastify: '4.x',
-  name: 'prisma-open-tracing-plugin',
+  name: 'prisma-otel-tracing-plugin',
 })
