@@ -17,5 +17,5 @@ export type { NewRelicTransactionManagerOptions } from './plugins/newrelicTransa
 export { metricsPlugin } from './plugins/metricsPlugin'
 export type { ErrorObjectResolver, MetricsPluginOptions } from './plugins/metricsPlugin'
 
-export { prismaOpenTracingPlugin } from './plugins/opentelemetry/opentelemetry/prismaOpenTracingPlugin'
-export type { PrismaOpenTracingPluginConfig } from './plugins/opentelemetry/opentelemetry/prismaOpenTracingPlugin'
+export { prismaOtelTracingPlugin } from './plugins/opentelemetry/prismaOtelTracingPlugin'
+export type { PrismaOtelTracingPluginConfig } from './plugins/opentelemetry/prismaOtelTracingPlugin'

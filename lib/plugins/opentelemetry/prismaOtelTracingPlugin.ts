@@ -10,14 +10,14 @@ import fp from 'fastify-plugin'
 
 import { LokaliseBatchSpanProcessor, LokaliseSimpleSpanProcessor } from './spanProcessors'
 
-export interface PrismaOpenTracingPluginConfig {
+export interface PrismaOtelTracingPluginConfig {
   isEnabled: boolean
   useBatchSpans: boolean
   samplingRatio: number
   serviceName: string
 }
 
-function plugin(app: FastifyInstance, opts: PrismaOpenTracingPluginConfig, done: () => void) {
+function plugin(app: FastifyInstance, opts: PrismaOtelTracingPluginConfig, done: () => void) {
   if (opts.isEnabled) {
     const provider = new NodeTracerProvider({
       sampler: new TraceIdRatioBasedSampler(opts.samplingRatio),
@@ -47,7 +47,7 @@ function plugin(app: FastifyInstance, opts: PrismaOpenTracingPluginConfig, done:
   done()
 }
 
-export const prismaOpenTracingPlugin = fp(plugin, {
+export const prismaOtelTracingPlugin = fp(plugin, {
   fastify: '4.x',
   name: 'prisma-otel-tracing-plugin',
 })
