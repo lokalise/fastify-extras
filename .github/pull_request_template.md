@@ -5,4 +5,5 @@ Please describe
 ## Checklist
 
 - [ ] Apply one of following labels; `major`, `minor`, `patch` or `skip-release`
-- [ ] Link to [JIRA issue](https://lokalise.atlassian.net/browse/XXX)
+- [ ] I've updated the documentation, or no changes were necessary
+- [ ] I've updated the tests, or no changes were necessary
