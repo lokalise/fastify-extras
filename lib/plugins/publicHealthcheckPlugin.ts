@@ -1,7 +1,12 @@
 import type { FastifyInstance } from 'fastify'
 import fp from 'fastify-plugin'
 
-function plugin(app: FastifyInstance, _opts: unknown, done: () => void) {
+export interface PublicHealthcheckPluginOptions {
+  responsePayload?: Record<string, unknown>
+}
+
+function plugin(app: FastifyInstance, opts: PublicHealthcheckPluginOptions, done: () => void) {
+  const responsePayload = opts.responsePayload ?? { status: 'OK' }
   app.route({
     url: '/',
     method: 'GET',
@@ -12,7 +17,7 @@ function plugin(app: FastifyInstance, _opts: unknown, done: () => void) {
       hide: true,
     },
     handler: async (_, reply) => {
-      return reply.send({ status: 'OK' })
+      return reply.send(responsePayload)
     },
   })
   done()
