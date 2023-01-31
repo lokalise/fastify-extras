@@ -19,3 +19,5 @@ export type { ErrorObjectResolver, MetricsPluginOptions } from './plugins/metric
 
 export { prismaOtelTracingPlugin } from './plugins/opentelemetry/prismaOtelTracingPlugin'
 export type { PrismaOtelTracingPluginConfig } from './plugins/opentelemetry/prismaOtelTracingPlugin'
+
+export { publicHealthcheckPlugin } from './plugins/publicHealthcheckPlugin'
