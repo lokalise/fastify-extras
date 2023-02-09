@@ -1,4 +1,5 @@
 import * as path from 'path'
+import * as process from 'process'
 
 import { SplitFactory } from '@splitsoftware/splitio'
 import type SplitIO from '@splitsoftware/splitio/types/splitio'
@@ -12,7 +13,7 @@ import type {
 import type { FastifyInstance } from 'fastify'
 import fp from 'fastify-plugin'
 
-const DISABLED_TREATMENT: Treatment = 'disabled'
+const DISABLED_TREATMENT: Treatment = 'control'
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -29,14 +30,8 @@ export interface SplitIOOptions {
 
 export class SplitIOFeatureManager {
   private readonly isEnabled: boolean
-  private sdkReady = false
-  private splitIOClient?: SplitIO.IClient
 
-  private waitForSdk = async () => {
-    while (!this.sdkReady) {
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-    }
-  }
+  private readonly splitIOClient?: SplitIO.IClient
 
   constructor(
     isSplitIOEnabled: boolean,
@@ -47,9 +42,9 @@ export class SplitIOFeatureManager {
     if (isSplitIOEnabled) {
       const factory: SplitIO.ISDK = SplitFactory({
         core: {
-          authorizationKey: localhostFilePath != null ? 'localhost' : apiKey,
+          authorizationKey: localhostFilePath ? 'localhost' : apiKey,
         },
-        features: localhostFilePath != null ? path.join(__dirname, localhostFilePath) : undefined,
+        features: localhostFilePath ? path.join(process.cwd(), localhostFilePath) : undefined,
         debug: debug,
       })
       this.splitIOClient = factory.client()
@@ -58,26 +53,25 @@ export class SplitIOFeatureManager {
     this.isEnabled = isSplitIOEnabled
   }
 
-  public async getTreatment(
-    key: SplitKey,
-    splitName: string,
-    attributes?: Attributes,
-  ): Promise<Treatment> {
-    await this.splitIOClient!!.ready()
-    return this.splitIOClient != null && this.isEnabled
-      ? this.splitIOClient.getTreatment(key, splitName, attributes)
-      : DISABLED_TREATMENT
+  async init() {
+    await this.splitIOClient?.ready()
   }
 
-  public async getTreatmentWithConfig(
+  public getTreatment(key: SplitKey, splitName: string, attributes?: Attributes): Treatment {
+    return this.splitIOClient?.getTreatment(key, splitName, attributes) ?? DISABLED_TREATMENT
+  }
+
+  public getTreatmentWithConfig(
     key: SplitKey,
     splitName: string,
     attributes?: Attributes,
-  ): Promise<TreatmentWithConfig> {
-    await this.waitForSdk()
-    return this.splitIOClient != null && this.isEnabled
-      ? this.splitIOClient.getTreatmentWithConfig(key, splitName, attributes)
-      : { treatment: DISABLED_TREATMENT, config: null }
+  ): TreatmentWithConfig {
+    return (
+      this.splitIOClient?.getTreatmentWithConfig(key, splitName, attributes) ?? {
+        treatment: DISABLED_TREATMENT,
+        config: null,
+      }
+    )
   }
 
   public track(
@@ -87,9 +81,7 @@ export class SplitIOFeatureManager {
     value?: number,
     properties?: Properties,
   ): boolean {
-    return this.splitIOClient != null && this.isEnabled
-      ? this.splitIOClient.track(key, trafficType, eventType, value, properties)
-      : false
+    return this.splitIOClient?.track(key, trafficType, eventType, value, properties) ?? false
   }
 
   public shutdown(): void {
@@ -119,7 +111,12 @@ function plugin(fastify: FastifyInstance, opts: SplitIOOptions, done: () => void
     })
   }
 
-  done()
+  void manager
+    .init()
+    .then(() => done())
+    .catch(() => {
+      throw new Error('Split IO client is not ready')
+    })
 }
 
 export const splitIOFeatureManagerPlugin = fp(plugin, {

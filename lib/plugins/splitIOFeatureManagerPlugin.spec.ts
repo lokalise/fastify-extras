@@ -13,49 +13,37 @@ async function initApp(opts?: SplitIOOptions) {
   return app
 }
 
-describe('splitIOFeatureManagerPlugin custom request context', () => {
+describe('splitIOFeatureManagerPlugin', () => {
   let app: FastifyInstance
   afterAll(async () => {
     await app.close()
   })
-
-  // it('returns disabled treatment', async () => {
-  //   expect.assertions(1)
-  //   const opts = {
-  //     isEnabled: false,
-  //     apiKey: '',
-  //     debugMode: false,
-  //   }
-  //
-  //   app = await initApp(opts)
-  //   const treatment = app.splitIOFeatureManager.getTreatment('', '')
-  //
-  //   expect(treatment).toBe('disabled')
-  // })
-  // it('returns disabled treatment', async () => {
-  //   expect.assertions(1)
-  //   const opts = {
-  //     isEnabled: true,
-  //     apiKey: '',
-  //     debugMode: false,
-  //   }
-  //
-  //   app = await initApp(opts)
-  //   const treatment = await app.splitIOFeatureManager.getTreatment('', '')
-  //
-  //   expect(treatment).toBe('control')
-  // })
-  it('returns localhost treatment', async () => {
+  it('returns control treatment on disabled client', async () => {
     expect.assertions(1)
+    const opts = {
+      isEnabled: false,
+      apiKey: '',
+      debugMode: false,
+    }
+
+    app = await initApp(opts)
+    const treatment = app.splitIOFeatureManager.getTreatment('', '')
+
+    expect(treatment).toBe('control')
+  })
+  it('returns treatments from local file', async () => {
+    expect.assertions(2)
     const opts = {
       isEnabled: true,
       apiKey: 'localhost',
       debugMode: false,
-      localhostFilePath: '../tests/.split.yaml',
+      localhostFilePath: '/lib/plugins/tests/.split.yaml',
     }
 
     app = await initApp(opts)
-    const treatment = await app.splitIOFeatureManager.getTreatment('mock_user_id', 'my_feature')
-    expect(treatment).toBe('on')
+    const onTreatment = app.splitIOFeatureManager.getTreatment('mock_user_id', 'my_feature')
+    const offTreatment = app.splitIOFeatureManager.getTreatment('unknown_id', 'my_feature')
+    expect(onTreatment).toBe('on')
+    expect(offTreatment).toBe('off')
   })
 })
