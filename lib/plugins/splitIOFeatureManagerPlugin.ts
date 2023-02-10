@@ -84,12 +84,12 @@ export class SplitIOFeatureManager {
     return this.splitIOClient?.track(key, trafficType, eventType, value, properties) ?? false
   }
 
-  public shutdown(): void {
+  public async shutdown(): Promise<void> {
     if (!this.isEnabled) {
       return
     }
 
-    void this.splitIOClient?.destroy()
+    await this.splitIOClient?.destroy()
   }
 }
 
@@ -105,9 +105,7 @@ function plugin(fastify: FastifyInstance, opts: SplitIOOptions, done: () => void
 
   if (opts.isEnabled) {
     fastify.addHook('onClose', async () => {
-      return new Promise(() => {
-        manager.shutdown()
-      })
+      await manager.shutdown()
     })
   }
 

@@ -18,6 +18,7 @@ describe('splitIOFeatureManagerPlugin', () => {
   afterAll(async () => {
     await app.close()
   })
+
   it('returns control treatment on disabled client', async () => {
     expect.assertions(1)
     const opts = {
@@ -31,6 +32,7 @@ describe('splitIOFeatureManagerPlugin', () => {
 
     expect(treatment).toBe('control')
   })
+
   it('returns treatments from local file', async () => {
     expect.assertions(2)
     const opts = {
