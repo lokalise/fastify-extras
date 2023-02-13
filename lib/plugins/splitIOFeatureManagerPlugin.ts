@@ -36,7 +36,7 @@ export class SplitIOFeatureManager {
   constructor(
     isSplitIOEnabled: boolean,
     apiKey: string,
-    debug: boolean,
+    debugMode: boolean,
     localhostFilePath?: string,
   ) {
     if (isSplitIOEnabled) {
@@ -45,7 +45,7 @@ export class SplitIOFeatureManager {
           authorizationKey: localhostFilePath ? 'localhost' : apiKey,
         },
         features: localhostFilePath ? path.join(process.cwd(), localhostFilePath) : undefined,
-        debug: debug,
+        debug: debugMode,
       })
       this.splitIOClient = factory.client()
     }
