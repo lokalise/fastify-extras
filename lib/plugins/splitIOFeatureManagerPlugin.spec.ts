@@ -117,7 +117,6 @@ describe('splitIOFeatureManagerPlugin', () => {
     }
 
     jest.spyOn(SplitIOFeatureManager.prototype, 'init').mockRejectedValue(new Error(''))
-    await initApp(opts)
     expect(async () => {
       await initApp(opts)
     }).toThrow()
