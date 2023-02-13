@@ -53,7 +53,7 @@ export class SplitIOFeatureManager {
     this.isEnabled = isSplitIOEnabled
   }
 
-  async init() {
+  public async init() {
     await this.splitIOClient?.ready()
   }
 
