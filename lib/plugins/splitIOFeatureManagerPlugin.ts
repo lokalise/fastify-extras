@@ -113,7 +113,6 @@ function plugin(fastify: FastifyInstance, opts: SplitIOOptions, done: () => void
     .init()
     .then(() => done())
     .catch(() => {
-      /* istanbul ignore next */
       throw new Error('Split IO client is not ready')
     })
 }

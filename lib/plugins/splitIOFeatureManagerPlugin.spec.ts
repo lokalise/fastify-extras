@@ -2,7 +2,7 @@ import type { FastifyInstance } from 'fastify'
 import fastify from 'fastify'
 
 import type { SplitIOOptions } from './splitIOFeatureManagerPlugin'
-import { SplitIOFeatureManager, splitIOFeatureManagerPlugin } from './splitIOFeatureManagerPlugin'
+import { splitIOFeatureManagerPlugin } from './splitIOFeatureManagerPlugin'
 
 declare module 'fastify' {}
 
@@ -15,7 +15,7 @@ async function initApp(opts?: SplitIOOptions) {
 
 describe('splitIOFeatureManagerPlugin', () => {
   let app: FastifyInstance
-  afterAll(async () => {
+  afterEach(async () => {
     await app.close()
   })
 
