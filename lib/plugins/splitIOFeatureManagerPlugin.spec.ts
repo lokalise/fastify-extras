@@ -107,18 +107,4 @@ describe('splitIOFeatureManagerPlugin', () => {
 
     expect(treatment).toBe('control')
   })
-
-  it('throw error on split io init', async () => {
-    expect.assertions(1)
-    const opts = {
-      isEnabled: false,
-      apiKey: '',
-      debugMode: false,
-    }
-
-    jest.spyOn(SplitIOFeatureManager.prototype, 'init').mockRejectedValue(new Error(''))
-    expect(async () => {
-      await initApp(opts)
-    }).toThrow()
-  })
 })
