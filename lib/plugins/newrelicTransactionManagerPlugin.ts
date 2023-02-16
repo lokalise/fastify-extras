@@ -11,6 +11,7 @@ interface Newrelic {
   startBackgroundTransaction: typeof startBackgroundTransactionType
   shutdown: typeof Shutdown
   getTransaction: typeof GetTransaction
+  addCustomAttribute(key: string, value: string | number | boolean): void
 }
 
 let newrelic: Newrelic
@@ -37,6 +38,14 @@ export class NewRelicTransactionManager {
 
     this.isEnabled = isNewRelicEnabled
     this.transactionMap = new Map()
+  }
+
+  public addCustomAttribte(attrName: string, attrValue: string | number | boolean) {
+    if (!this.isEnabled) {
+      return
+    }
+
+    newrelic.addCustomAttribute(attrName, attrValue)
   }
 
   public start(jobName: string): void {
