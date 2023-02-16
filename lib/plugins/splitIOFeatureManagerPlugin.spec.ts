@@ -4,8 +4,6 @@ import fastify from 'fastify'
 import type { SplitIOOptions } from './splitIOFeatureManagerPlugin'
 import { splitIOFeatureManagerPlugin } from './splitIOFeatureManagerPlugin'
 
-declare module 'fastify' {}
-
 async function initApp(opts?: SplitIOOptions) {
   const app = fastify()
   await app.register(splitIOFeatureManagerPlugin, opts)
