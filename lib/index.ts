@@ -14,6 +14,12 @@ export {
 } from './plugins/newrelicTransactionManagerPlugin'
 export type { NewRelicTransactionManagerOptions } from './plugins/newrelicTransactionManagerPlugin'
 
+export {
+  splitIOFeatureManagerPlugin,
+  SplitIOFeatureManager,
+} from './plugins/splitIOFeatureManagerPlugin'
+export type { SplitIOOptions } from './plugins/splitIOFeatureManagerPlugin'
+
 export { metricsPlugin } from './plugins/metricsPlugin'
 export type { ErrorObjectResolver, MetricsPluginOptions } from './plugins/metricsPlugin'
 
