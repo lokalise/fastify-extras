@@ -5,8 +5,8 @@
 There are a few basic ground-rules for contributors:
 
 1. **Non-main branches** ought to be used for ongoing work.
-1. Contributors should attempt to adhere to the prevailing code-style.
-1. Before submitting a PR for a major new feature, or introducing a significant change, please open an issue to discuss the proposal with maintainers.
+2. Contributors should attempt to adhere to the prevailing code-style.
+3. Before submitting a PR for a major new feature, or introducing a significant change, please open an issue to discuss the proposal with maintainers.
 
 ## Releases
 
