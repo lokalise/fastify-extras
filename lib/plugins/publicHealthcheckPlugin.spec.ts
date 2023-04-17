@@ -5,10 +5,10 @@ import type { HealthCheck, PublicHealthcheckPluginOptions } from './publicHealth
 import { publicHealthcheckPlugin } from './publicHealthcheckPlugin'
 
 const positiveHealthcheck: HealthCheck = () => {
-  return Promise.resolve(true)
+  return Promise.resolve({ result: true })
 }
 const negativeHealthcheck: HealthCheck = () => {
-  return Promise.resolve(false)
+  return Promise.resolve({ error: new Error('Something exploded') })
 }
 
 async function initApp(opts: PublicHealthcheckPluginOptions) {
