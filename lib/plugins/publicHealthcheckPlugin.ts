@@ -7,7 +7,7 @@ export interface PublicHealthcheckPluginOptions {
   healthChecks: readonly HealthCheck[]
 }
 
-export type HealthCheck = (app: FastifyInstance) => Promise<Either<Error, boolean>>
+export type HealthCheck = (app: FastifyInstance) => Promise<Either<Error, true>>
 
 function plugin(app: FastifyInstance, opts: PublicHealthcheckPluginOptions, done: () => void) {
   const responsePayload = opts.responsePayload ?? {}
