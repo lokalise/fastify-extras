@@ -6,7 +6,7 @@ export interface PublicHealthcheckPluginOptions {
   healthChecks: readonly HealthCheck[]
 }
 
-export type HealthCheck = () => Promise<boolean>
+export type HealthCheck = (app: FastifyInstance) => Promise<boolean>
 
 function plugin(app: FastifyInstance, opts: PublicHealthcheckPluginOptions, done: () => void) {
   const responsePayload = opts.responsePayload ?? {}
@@ -24,7 +24,7 @@ function plugin(app: FastifyInstance, opts: PublicHealthcheckPluginOptions, done
       if (opts.healthChecks.length) {
         const results = await Promise.all(
           opts.healthChecks.map((healthcheck) => {
-            return healthcheck()
+            return healthcheck(app)
           }),
         )
         if (
