@@ -1,3 +1,4 @@
+import type { Either } from '@lokalise/node-core'
 import type { FastifyInstance } from 'fastify'
 import fp from 'fastify-plugin'
 
@@ -6,7 +7,7 @@ export interface PublicHealthcheckPluginOptions {
   healthChecks: readonly HealthCheck[]
 }
 
-export type HealthCheck = (app: FastifyInstance) => Promise<boolean>
+export type HealthCheck = (app: FastifyInstance) => Promise<Either<Error, boolean>>
 
 function plugin(app: FastifyInstance, opts: PublicHealthcheckPluginOptions, done: () => void) {
   const responsePayload = opts.responsePayload ?? {}
@@ -29,8 +30,8 @@ function plugin(app: FastifyInstance, opts: PublicHealthcheckPluginOptions, done
         )
         if (
           results.find((entry) => {
-            return !entry
-          }) === false
+            return !!entry.error
+          })
         ) {
           isHealthy = false
         }
