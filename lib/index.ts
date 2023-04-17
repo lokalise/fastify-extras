@@ -27,4 +27,4 @@ export { prismaOtelTracingPlugin } from './plugins/opentelemetry/prismaOtelTraci
 export type { PrismaOtelTracingPluginConfig } from './plugins/opentelemetry/prismaOtelTracingPlugin'
 
 export { publicHealthcheckPlugin } from './plugins/publicHealthcheckPlugin'
-export type { PublicHealthcheckPluginOptions } from './plugins/publicHealthcheckPlugin'
+export type { PublicHealthcheckPluginOptions, HealthCheck } from './plugins/publicHealthcheckPlugin'
