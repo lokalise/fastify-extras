@@ -3,10 +3,13 @@ import fp from 'fastify-plugin'
 
 export interface PublicHealthcheckPluginOptions {
   responsePayload?: Record<string, unknown>
+  healthChecks: readonly HealthCheck[]
 }
 
+export type HealthCheck = () => Promise<boolean>
+
 function plugin(app: FastifyInstance, opts: PublicHealthcheckPluginOptions, done: () => void) {
-  const responsePayload = opts.responsePayload ?? { status: 'OK' }
+  const responsePayload = opts.responsePayload ?? {}
   app.route({
     url: '/',
     method: 'GET',
@@ -17,7 +20,26 @@ function plugin(app: FastifyInstance, opts: PublicHealthcheckPluginOptions, done
       hide: true,
     },
     handler: async (_, reply) => {
-      return reply.send(responsePayload)
+      let isHealthy = true
+      if (opts.healthChecks.length) {
+        const results = await Promise.all(
+          opts.healthChecks.map((healthcheck) => {
+            return healthcheck()
+          }),
+        )
+        if (
+          results.find((entry) => {
+            return !entry
+          }) === false
+        ) {
+          isHealthy = false
+        }
+      }
+
+      return reply.send({
+        ...responsePayload,
+        heartbeat: isHealthy ? 'HEALTHY' : 'FAIL',
+      })
     },
   })
   done()
