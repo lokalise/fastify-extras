@@ -47,7 +47,7 @@ describe('publicHealthcheckPlugin', () => {
     })
 
     const response = await app.inject().get('/').end()
-    expect(response.statusCode).toBe(200)
+    expect(response.statusCode).toBe(500)
     expect(response.json()).toEqual({ heartbeat: 'FAIL', version: 1 })
   })
 
