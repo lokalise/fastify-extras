@@ -37,7 +37,7 @@ function plugin(app: FastifyInstance, opts: PublicHealthcheckPluginOptions, done
         }
       }
 
-      return reply.send({
+      return reply.status(isHealthy ? 200 : 500).send({
         ...responsePayload,
         heartbeat: isHealthy ? 'HEALTHY' : 'FAIL',
       })
