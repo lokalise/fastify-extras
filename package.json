@@ -1,6 +1,6 @@
 {
   "name": "@lokalise/fastify-extras",
-  "version": "6.0.0",
+  "version": "6.0.1",
   "description": "Opinionated set of fastify plugins, commonly used in Lokalise",
   "author": {
     "name": "Lokalise",
@@ -53,7 +53,8 @@
     "@opentelemetry/semantic-conventions": "^1.8.0",
     "@prisma/instrumentation": "^4.9.0",
     "fastify-metrics": "^10.3.0",
-    "fastify-plugin": "^4.5.0"
+    "fastify-plugin": "^4.5.0",
+    "tslib": "^2.5.0"
   },
   "peerDependencies": {
     "@fastify/request-context": "^4.2.0",
