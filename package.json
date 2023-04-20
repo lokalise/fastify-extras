@@ -1,6 +1,6 @@
 {
   "name": "@lokalise/fastify-extras",
-  "version": "6.0.0",
+  "version": "6.0.1",
   "description": "Opinionated set of fastify plugins, commonly used in Lokalise",
   "author": {
     "name": "Lokalise",
