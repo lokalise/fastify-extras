@@ -52,6 +52,9 @@ function plugin(app: FastifyInstance, opts: MetricsPluginOptions) {
     .listen({
       port: METRICS_PORT,
       host: opts.bindAddress,
+      listenTextResolver: (address) => {
+        return `Prometheus metrics server listening at ${address}`
+      },
     })
     .catch((err) => {
       const logObject = opts.errorObjectResolver(err)
