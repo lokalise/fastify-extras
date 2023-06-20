@@ -30,6 +30,12 @@ declare module 'fastify' {
   interface RequestContext extends BaseRequestContext {}
 }
 
+declare module '@fastify/request-context' {
+  interface RequestContextData {
+    [REQUEST_ID_STORE_KEY]: string
+  }
+}
+
 export function getRequestIdFastifyAppConfig(): Pick<
   FastifyServerOptions,
   'genReqId' | 'requestIdHeader'
@@ -50,7 +56,7 @@ function plugin(fastify: FastifyInstance, opts: unknown, done: () => void) {
       }
 
       // Store request_id in AsyncLocalStorage to be picked up by instrumentation tooling, such as OpenTelemetry
-      requestContext.set(REQUEST_ID_STORE_KEY, req.id)
+      requestContext.set(REQUEST_ID_STORE_KEY, req.id as string)
 
       next()
     },
