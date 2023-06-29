@@ -28,3 +28,6 @@ export type { PrismaOtelTracingPluginConfig } from './plugins/opentelemetry/pris
 
 export { publicHealthcheckPlugin } from './plugins/publicHealthcheckPlugin'
 export type { PublicHealthcheckPluginOptions, HealthCheck } from './plugins/publicHealthcheckPlugin'
+
+export { amplitudePlugin, testTrack } from './plugins/amplitudePlugin'
+export type { AmplitudePluginConfig } from './plugins/amplitudePlugin'
