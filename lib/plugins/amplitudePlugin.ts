@@ -1,6 +1,13 @@
+import crypto from 'crypto'
+
 import { init, track } from '@amplitude/analytics-node'
-import type { AmplitudeReturn, NodeOptions, Result } from '@amplitude/analytics-types'
-import type { FastifyInstance } from 'fastify'
+import type { AmplitudeReturn, BaseEvent, NodeOptions, Result } from '@amplitude/analytics-types'
+import type {
+  FastifyInstance,
+  FastifyReply,
+  FastifyRequest,
+  HookHandlerDoneFunction,
+} from 'fastify'
 import fp from 'fastify-plugin'
 
 export interface AmplitudePluginConfig {
@@ -9,16 +16,33 @@ export interface AmplitudePluginConfig {
   amplitudeOptions?: NodeOptions
   apiUsageTracking?: {
     eventPrefix: string
-    trackingEndpoints?: Set<string>
+    // trackingEndpoints?: Set<string> // TODO: Do we want this?
   }
 }
 
-function apiUsageTracking(options: AmplitudePluginConfig) {
+function apiUsageTracking(fastify: FastifyInstance, options: AmplitudePluginConfig) {
   if (!options.apiUsageTracking) return
-
   const { apiUsageTracking } = options
-  if (apiUsageTracking.trackingEndpoints?.size == 0) return
-  // TODO
+
+  const apiHook = (req: FastifyRequest, res: FastifyReply, done: HookHandlerDoneFunction) => {
+    const endpoint = `${req.method} ${req.routerPath}`
+    amplitudeTrack({
+      event_type: `${apiUsageTracking.eventPrefix} - ${endpoint}`,
+      user_id: '00001', // TODO: requested field
+      insert_id: crypto.randomBytes(16).toString('hex'), // TODO: why do we need this?
+      groups: {
+        Teams: '', // TODO
+        Projects: '', // TODO
+      },
+      event_properties: {
+        endpoint: `${req.method} ${req.routerPath}`,
+        success: res.statusCode >= 200 && res.statusCode < 300,
+        request_params: req.params,
+      },
+    })
+    return done()
+  }
+  fastify.addHook('onResponse', apiHook)
 }
 
 async function plugin(
@@ -35,7 +59,7 @@ async function plugin(
   }
 
   await init(options.apiKey, options.amplitudeOptions).promise
-  apiUsageTracking(options)
+  apiUsageTracking(fastify, options)
 
   return next()
 }
