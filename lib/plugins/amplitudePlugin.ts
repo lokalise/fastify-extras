@@ -18,6 +18,7 @@ export interface AmplitudePluginConfig {
     eventPrefix: string
     // trackingEndpoints?: Set<string> // TODO: Do we want this?
   }
+  //TODO: have a look to plugins -> https://www.docs.developers.amplitude.com/data/sdks/typescript-node/#plugins
 }
 
 function apiUsageTracking(fastify: FastifyInstance, options: AmplitudePluginConfig) {
