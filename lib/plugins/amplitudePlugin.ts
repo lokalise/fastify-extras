@@ -45,7 +45,4 @@ export const amplitudePlugin = fp<AmplitudePluginConfig>(plugin, {
   name: 'amplitude-plugin',
 })
 
-// TODO: remove -> testing purposes
-export const testTrack = () => {
-  track('AP-21 testing', undefined, { user_id: '00001' })
-}
+export const amplitudeTrack = (event: BaseEvent): AmplitudeReturn<Result> => track(event)
