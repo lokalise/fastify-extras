@@ -30,4 +30,8 @@ export { publicHealthcheckPlugin } from './plugins/publicHealthcheckPlugin'
 export type { PublicHealthcheckPluginOptions, HealthCheck } from './plugins/publicHealthcheckPlugin'
 
 export { amplitudePlugin, amplitudeTrack } from './plugins/amplitudePlugin'
-export type { AmplitudePluginConfig } from './plugins/amplitudePlugin'
+export type {
+  AmplitudeConfig,
+  AmplitudeEvent,
+  ApiUsageTrackingCallback,
+} from './plugins/amplitudePlugin'
