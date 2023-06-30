@@ -10,7 +10,10 @@ import fp from 'fastify-plugin'
 
 //TODO: have a look to plugins -> https://www.docs.developers.amplitude.com/data/sdks/typescript-node/#plugins
 
-export type ApiUsageTrackingCallback = (req: FastifyRequest, res: FastifyReply) => AmplitudeEvent
+export type ApiUsageTrackingCallback = (
+  req: FastifyRequest,
+  res: FastifyReply,
+) => AmplitudeEvent | null
 
 export interface AmplitudeEvent extends BaseEvent {}
 
@@ -48,7 +51,10 @@ function apiUsageTracking(fastify: FastifyInstance, options: AmplitudeConfig) {
   fastify.addHook(
     'onResponse',
     (req: FastifyRequest, res: FastifyReply, done: HookHandlerDoneFunction) => {
-      amplitudeTrack(apiUsageTracking(req, res))
+      const event = apiUsageTracking(req, res)
+      if (event) {
+        amplitudeTrack(event)
+      }
       return done()
     },
   )
