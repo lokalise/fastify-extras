@@ -70,7 +70,7 @@
     "@types/jest": "^29.5.2",
     "@types/newrelic": "^9.14.0",
     "@types/node": "^18.16.18",
-    "@amplitude/analytics-types": "^2.1.0",
+    "@amplitude/analytics-types": "^2.1.1",
     "@typescript-eslint/eslint-plugin": "^5.60.0",
     "@typescript-eslint/parser": "^5.60.0",
     "auto-changelog": "^2.4.0",

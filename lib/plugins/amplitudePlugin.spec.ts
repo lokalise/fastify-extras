@@ -1,9 +1,9 @@
 import * as amplitude from '@amplitude/analytics-node'
+import type { BaseEvent, EnrichmentPlugin, Event } from '@amplitude/analytics-types'
 import { buildClient, sendGet } from '@lokalise/node-core'
 import type { FastifyInstance } from 'fastify'
 import fastify from 'fastify'
 
-import type { AmplitudeEvent } from './amplitudePlugin'
 import { amplitudePlugin, amplitudeTrack } from './amplitudePlugin'
 
 describe('amplitudePlugin', () => {
@@ -63,7 +63,7 @@ describe('amplitudePlugin', () => {
     await app.register(amplitudePlugin, {
       isEnabled: true,
       apiKey: 'This is an api key',
-      apiUsageTracking: (): AmplitudeEvent => ({
+      apiUsageTracking: (): BaseEvent => ({
         event_type: 'My test event',
       }),
     })
@@ -79,7 +79,7 @@ describe('amplitudePlugin', () => {
       apiKey: 'This is an api key',
     })
 
-    const event: AmplitudeEvent = { event_type: 'event tracked' }
+    const event: BaseEvent = { event_type: 'event tracked' }
     amplitudeTrack(event)
 
     expect(trackSpy).toHaveBeenCalledWith(event)
@@ -87,11 +87,11 @@ describe('amplitudePlugin', () => {
 
   it('api usage tracking', async () => {
     const trackSpy = jest.spyOn(amplitude, 'track')
-    const event: AmplitudeEvent = { event_type: 'My api event' }
+    const event: BaseEvent = { event_type: 'My api event' }
     await app.register(amplitudePlugin, {
       isEnabled: true,
       apiKey: 'This is an api key',
-      apiUsageTracking: (): AmplitudeEvent => event,
+      apiUsageTracking: (): BaseEvent => event,
     })
     await app
       .route({
@@ -112,4 +112,23 @@ describe('amplitudePlugin', () => {
     expect(response.result.body).toBe('Testing')
     expect(trackSpy).toHaveBeenCalledWith(event)
   })
+
+  it('adding plugins', async () => {
+    const addSpy = jest.spyOn(amplitude, 'add')
+    const plugin = new FakePlugin()
+
+    await app.register(amplitudePlugin, {
+      isEnabled: true,
+      apiKey: 'This is an api key',
+      plugins: [plugin],
+    })
+
+    expect(addSpy).toHaveBeenCalledWith(plugin)
+  })
 })
+
+class FakePlugin implements EnrichmentPlugin {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  setup = (): Promise<undefined> => Promise.resolve(undefined)
+  execute = (event: Event): Promise<Event> => Promise.resolve(event)
+}
