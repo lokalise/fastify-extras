@@ -20,38 +20,38 @@ export interface AmplitudeEvent extends BaseEvent {}
 export interface AmplitudeConfig {
   isEnabled: boolean
   apiKey?: string
-  amplitudeOptions?: NodeOptions
-  //amplitudePlugins?: Plugin[]
+  options?: NodeOptions
   apiUsageTracking?: ApiUsageTrackingCallback
+  //plugins?: Plugin[]
 }
 
 async function plugin(
   fastify: FastifyInstance,
-  options: AmplitudeConfig,
+  config: AmplitudeConfig,
   next: (err?: Error) => void,
 ) {
-  if (!options.isEnabled) {
+  if (!config.isEnabled) {
     return next()
   }
 
-  if (!options.apiKey) {
+  if (!config.apiKey) {
     throw Error('Amplitude key not defined')
   }
 
-  await init(options.apiKey, options.amplitudeOptions).promise
-  apiUsageTracking(fastify, options)
+  await init(config.apiKey, config.options).promise
+
+  if (config.apiUsageTracking) {
+    enableApiUsageTracking(fastify, config.apiUsageTracking)
+  }
 
   return next()
 }
 
-function apiUsageTracking(fastify: FastifyInstance, options: AmplitudeConfig) {
-  if (!options.apiUsageTracking) return
-
-  const { apiUsageTracking } = options
+function enableApiUsageTracking(fastify: FastifyInstance, callback: ApiUsageTrackingCallback) {
   fastify.addHook(
     'onResponse',
     (req: FastifyRequest, res: FastifyReply, done: HookHandlerDoneFunction) => {
-      const event = apiUsageTracking(req, res)
+      const event = callback(req, res)
       if (event) {
         amplitudeTrack(event)
       }
