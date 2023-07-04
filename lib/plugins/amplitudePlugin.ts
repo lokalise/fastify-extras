@@ -75,7 +75,7 @@ export type createApiTrackingEventFn = (req: FastifyRequest, res: FastifyReply) 
  * to learn more.
  *
  * @property {createApiTrackingEventFn} apiUsageTracking Callback used to create
- * the event that will be send automatically to track the API usage. If not
+ * the event that will be sent automatically to track the API usage. If not
  * specified the API usage track will be disabled.
  *
  * @property {Plugin[]} plugins Allow to extend plugin behavior by, for example,
