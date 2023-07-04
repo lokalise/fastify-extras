@@ -13,6 +13,7 @@ describe('amplitudePlugin', () => {
   })
 
   afterEach(async () => {
+    jest.clearAllMocks()
     await app.close()
   })
 
