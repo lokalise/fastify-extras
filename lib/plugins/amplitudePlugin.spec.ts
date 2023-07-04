@@ -1,5 +1,5 @@
 import * as amplitude from '@amplitude/analytics-node'
-import type { BaseEvent, EnrichmentPlugin, Event } from '@amplitude/analytics-types'
+import type { BaseEvent, EnrichmentPlugin, Result, Event } from '@amplitude/analytics-types'
 import { buildClient, sendGet } from '@lokalise/node-core'
 import type { FastifyInstance } from 'fastify'
 import fastify from 'fastify'
@@ -73,7 +73,13 @@ describe('amplitudePlugin', () => {
   })
 
   it('amplitude track', async () => {
-    const trackSpy = jest.spyOn(amplitude, 'track')
+    const trackSpy = jest.spyOn(amplitude, 'track').mockImplementation(() => ({
+      promise: Promise.resolve<Result>({
+        event: { event_type: 'test' },
+        code: 1,
+        message: 'message',
+      }),
+    }))
     await app.register(amplitudePlugin, {
       isEnabled: true,
       apiKey: 'This is an api key',
@@ -86,7 +92,13 @@ describe('amplitudePlugin', () => {
   })
 
   it('api usage tracking', async () => {
-    const trackSpy = jest.spyOn(amplitude, 'track')
+    const trackSpy = jest.spyOn(amplitude, 'track').mockImplementation(() => ({
+      promise: Promise.resolve<Result>({
+        event: { event_type: 'test' },
+        code: 1,
+        message: 'message',
+      }),
+    }))
     const event: BaseEvent = { event_type: 'My api event' }
     await app.register(amplitudePlugin, {
       isEnabled: true,
