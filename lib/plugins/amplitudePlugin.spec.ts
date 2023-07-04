@@ -48,25 +48,6 @@ describe('amplitudePlugin', () => {
     expect(error).not.toBeNull()
   })
 
-  it('registered amplitude plugin is used when making an amplitude request', async () => {
-    // TODO: re-check if it is possible to check that we call to plugin.execute
-    // Given
-    const addSpy = jest.spyOn(amplitude, 'add')
-    const plugin = new FakePlugin()
-    const pluginSetUpSpy = jest.spyOn(plugin, 'setup')
-
-    // When
-    await app.register(amplitudePlugin, {
-      isEnabled: true,
-      apiKey: 'This is an api key',
-      plugins: [plugin],
-    })
-
-    // Then
-    expect(addSpy).toHaveBeenCalledWith(plugin)
-    expect(pluginSetUpSpy).toHaveBeenCalled()
-  })
-
   it('amplitudeTrack avoids track if plugin is not enabled', async () => {
     // Given
     const trackSpy = jest.spyOn(amplitude, 'track')
@@ -170,9 +151,28 @@ describe('amplitudePlugin', () => {
     expect(response.body).toBe('Testing')
     expect(trackSpy).not.toHaveBeenCalled()
   })
+
+  it('defined amplitude plugins are set up', async () => {
+    // Given
+    const addSpy = jest.spyOn(amplitude, 'add')
+    const plugin = new FakePlugin()
+    const pluginSetUpSpy = jest.spyOn(plugin, 'setup')
+
+    // When
+    await app.register(amplitudePlugin, {
+      isEnabled: true,
+      apiKey: 'This is an api key',
+      plugins: [plugin],
+    })
+
+    // Then
+    expect(addSpy).toHaveBeenCalledWith(plugin)
+    expect(pluginSetUpSpy).toHaveBeenCalled()
+  })
 })
 
 class FakePlugin implements EnrichmentPlugin {
+  type = 'enrichment' as const
   setup = (): Promise<undefined> => Promise.resolve(undefined)
   execute = (event: Event): Promise<Event> => Promise.resolve(event)
 }
