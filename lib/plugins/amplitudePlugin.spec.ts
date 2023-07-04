@@ -114,11 +114,11 @@ describe('amplitudePlugin', () => {
         },
       })
       .listen({
-        port: 30,
+        port: 9080,
         host: '0.0.0.0',
       })
 
-    const response = await sendGet(buildClient('http://127.0.0.1:30'), '/test')
+    const response = await sendGet(buildClient('http://127.0.0.1:9080'), '/test')
 
     expect(response.result.statusCode).toBe(200)
     expect(response.result.body).toBe('Testing')
