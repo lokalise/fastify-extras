@@ -14,17 +14,21 @@ import type {
 } from 'fastify'
 import fp from 'fastify-plugin'
 
+let pluginConfig: AmplitudeConfig | null = null
+
 async function plugin(
   fastify: FastifyInstance,
   config: AmplitudeConfig,
   next: (err?: Error) => void,
 ) {
+  pluginConfig = config
+
   if (!config.isEnabled) {
     return next()
   }
 
   if (!config.apiKey) {
-    throw Error('Amplitude key not defined')
+    return next(Error('Amplitude key not defined'))
   }
 
   await init(config.apiKey, config.options).promise
@@ -117,4 +121,5 @@ export const amplitudePlugin = fp<AmplitudeConfig>(plugin, {
  * [this](https://amplitude.github.io/Amplitude-TypeScript/interfaces/_amplitude_analytics_node.Types.BaseEvent.html)
  * to get more info about the BaseEvent type
  */
-export const amplitudeTrack = (event: BaseEvent): AmplitudeReturn<Result> => track(event)
+export const amplitudeTrack = (event: BaseEvent): AmplitudeReturn<Result | null> =>
+  pluginConfig?.isEnabled ? track(event) : { promise: Promise.resolve(null) }
