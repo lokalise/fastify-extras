@@ -40,7 +40,7 @@ export class NewRelicTransactionManager {
     this.transactionMap = new Map()
   }
 
-  public addCustomAttribte(attrName: string, attrValue: string | number | boolean) {
+  public addCustomAttribute(attrName: string, attrValue: string | number | boolean) {
     if (!this.isEnabled) {
       return
     }
