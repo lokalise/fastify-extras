@@ -3,7 +3,7 @@ import type { BaseEvent, EnrichmentPlugin, Result, Event } from '@amplitude/anal
 import type { FastifyInstance } from 'fastify'
 import fastify from 'fastify'
 
-import { amplitudePlugin, amplitudeTrack } from './amplitudePlugin'
+import { amplitudePlugin } from './amplitudePlugin'
 
 describe('amplitudePlugin', () => {
   let app: FastifyInstance
@@ -57,7 +57,7 @@ describe('amplitudePlugin', () => {
     })
 
     // When
-    const result = await amplitudeTrack({ event_type: 'event not tracked' }).promise
+    const result = await app.amplitude.track({ event_type: 'event not tracked' }).promise
 
     // Then
     expect(result).toBeNull()
@@ -81,7 +81,7 @@ describe('amplitudePlugin', () => {
 
     // When
     const event: BaseEvent = { event_type: 'event tracked' }
-    const response = await amplitudeTrack(event).promise
+    const response = await app.amplitude.track(event).promise
 
     // Then
     expect(response).toBe(trackResponse)

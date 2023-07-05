@@ -14,14 +14,19 @@ import type {
 } from 'fastify'
 import fp from 'fastify-plugin'
 
-let pluginConfig: AmplitudeConfig | null = null
+declare module 'fastify' {
+  interface FastifyInstance {
+    amplitude: Amplitude
+  }
+}
 
 async function plugin(
   fastify: FastifyInstance,
   config: AmplitudeConfig,
   next: (err?: Error) => void,
 ) {
-  pluginConfig = config
+  const amplitudeInstance = new Amplitude(config.isEnabled)
+  fastify.decorate('amplitude', amplitudeInstance)
 
   if (!config.isEnabled) {
     return next()
@@ -34,7 +39,7 @@ async function plugin(
   await init(config.apiKey, config.options).promise
 
   if (config.apiUsageTracking) {
-    enableApiUsageTracking(fastify, config.apiUsageTracking)
+    enableApiUsageTracking(fastify, amplitudeInstance, config.apiUsageTracking)
   }
   if (config.plugins) {
     // @ts-expect-error
@@ -46,6 +51,7 @@ async function plugin(
 
 function enableApiUsageTracking(
   fastify: FastifyInstance,
+  amplitude: Amplitude,
   eventCreationFn: CreateApiTrackingEventFn,
 ) {
   fastify.addHook(
@@ -53,7 +59,7 @@ function enableApiUsageTracking(
     (req: FastifyRequest, res: FastifyReply, done: HookHandlerDoneFunction) => {
       const event = eventCreationFn(req, res)
       if (event) {
-        amplitudeTrack(event)
+        amplitude.track(event)
       }
       return done()
     },
@@ -114,12 +120,21 @@ export const amplitudePlugin = fp<AmplitudeConfig>(plugin, {
   name: 'amplitude-plugin',
 })
 
-/**
- * Sends the given event to Amplitude
- *
- * @param event Event to send to amplitude. Please check
- * [this](https://amplitude.github.io/Amplitude-TypeScript/interfaces/_amplitude_analytics_node.Types.BaseEvent.html)
- * to get more info about the BaseEvent type
- */
-export const amplitudeTrack = (event: BaseEvent): AmplitudeReturn<Result | null> =>
-  pluginConfig?.isEnabled ? track(event) : { promise: Promise.resolve(null) }
+export class Amplitude {
+  private readonly isEnabled: boolean
+
+  constructor(isEnabled: boolean) {
+    this.isEnabled = isEnabled
+  }
+
+  /**
+   * Sends the given event to Amplitude
+   *
+   * @param event Event to send to amplitude. Please check
+   * [this](https://amplitude.github.io/Amplitude-TypeScript/interfaces/_amplitude_analytics_node.Types.BaseEvent.html)
+   * to get more info about the BaseEvent type
+   */
+  public track(event: BaseEvent): AmplitudeReturn<Result | null> {
+    return this.isEnabled ? track(event) : { promise: Promise.resolve(null) }
+  }
+}

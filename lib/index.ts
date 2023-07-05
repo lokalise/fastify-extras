@@ -31,7 +31,7 @@ export type { PublicHealthcheckPluginOptions, HealthCheck } from './plugins/publ
 
 export {
   amplitudePlugin,
-  amplitudeTrack,
+  Amplitude,
   type AmplitudeConfig,
   type CreateApiTrackingEventFn,
 } from './plugins/amplitudePlugin'
