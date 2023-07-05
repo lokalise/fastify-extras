@@ -159,5 +159,5 @@ While `apiUsageTracking` can be configured for automatic tracking of API usage, 
 
 > 📘 To ensure optimal functionality with this plugin, you may need to incorporate Amplitude types into your development dependencies.
 > ```
-> "@amplitude/analytics-types": "^2.1.1"
+> "@amplitude/analytics-types": "*"
 > ```
