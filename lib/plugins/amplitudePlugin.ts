@@ -46,7 +46,7 @@ async function plugin(
 
 function enableApiUsageTracking(
   fastify: FastifyInstance,
-  eventCreationFn: createApiTrackingEventFn,
+  eventCreationFn: CreateApiTrackingEventFn,
 ) {
   fastify.addHook(
     'onResponse',
@@ -64,7 +64,7 @@ function enableApiUsageTracking(
  * Callback used to create the events that will be used to automatically
  * track the API usage
  */
-export type createApiTrackingEventFn = (req: FastifyRequest, res: FastifyReply) => BaseEvent | null
+export type CreateApiTrackingEventFn = (req: FastifyRequest, res: FastifyReply) => BaseEvent | null
 
 /**
  * Configuration to set up the Amplitude Plugin.
@@ -78,7 +78,7 @@ export type createApiTrackingEventFn = (req: FastifyRequest, res: FastifyReply) 
  * [this](https://amplitude.github.io/Amplitude-TypeScript/modules/_amplitude_analytics_node.Types.html#NodeOptions)
  * to learn more.
  *
- * @property {createApiTrackingEventFn} apiUsageTracking Callback used to create
+ * @property {CreateApiTrackingEventFn} apiUsageTracking Callback used to create
  * the event that will be sent automatically to track the API usage. If not
  * specified the API usage track will be disabled.
  *
@@ -91,7 +91,7 @@ export interface AmplitudeConfig {
   isEnabled: boolean
   apiKey?: string
   options?: NodeOptions
-  apiUsageTracking?: createApiTrackingEventFn
+  apiUsageTracking?: CreateApiTrackingEventFn
   plugins?: Plugin[]
 }
 
