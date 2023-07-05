@@ -143,3 +143,21 @@ The plugin decorates your Fastify instance with a `NewRelicTransactionManager`, 
 * `start()`, which takes a `jobName`, and starts a background transaction with the provided name;
 * `stop()`, which takes a `jobId`, and ends the background transaction referenced by the ID;
 * `addCustomAttribute()`, which takes `attrName` and `attrValue` and records the custom attribute as such defined. `attrValue` can be a string, a number, or a boolean.
+
+### Amplitude Plugin
+
+This plugin facilitates the transmission of events to Amplitude.
+
+To add this plugin to your Fastify instance, register it with the following configurations:
+* `isEnabled`: A flag utilized to activate or de-activate the plugin.
+* `apiKey` (optional): This refers to the Amplitude API key which can be procured from your respective Amplitude project.
+* `options` (optional): To configure Amplitude, please refer to [this documentation](https://amplitude.github.io/Amplitude-TypeScript/modules/_amplitude_analytics_node.Types.html#NodeOptions).
+* `apiUsageTracking` (optional): You can use this callback to generate an event that will automatically be sent for tracking API usage. Non-specification of this feature will lead to disabling of API tracking.
+* `plugins` (optional): This feature allows you to expand the plugin's functionality, from altering event properties to relaying to third-party APIs. To learn more, visit [this link](https://www.docs.developers.amplitude.com/data/sdks/typescript-node/#plugins).
+
+While `apiUsageTracking` can be configured for automatic tracking of API usage, the `amplitudeTrack` method allows you to send events to Amplitude whenever necessary.
+
+> 📘 To ensure optimal functionality with this plugin, you may need to incorporate Amplitude types into your development dependencies.
+> ```
+> "@amplitude/analytics-types": "^2.1.1"
+> ```
