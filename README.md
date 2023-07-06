@@ -155,7 +155,7 @@ To add this plugin to your Fastify instance, register it with the following conf
 * `apiUsageTracking` (optional): You can use this callback to generate an event that will automatically be sent for tracking API usage. Non-specification of this feature will lead to disabling of API tracking.
 * `plugins` (optional): This feature allows you to expand the plugin's functionality, from altering event properties to relaying to third-party APIs. To learn more, visit [this link](https://www.docs.developers.amplitude.com/data/sdks/typescript-node/#plugins).
 
-While `apiUsageTracking` can be configured for automatic tracking of API usage, the `amplitudeTrack` method allows you to send events to Amplitude whenever necessary.
+The plugin decorates your Fastify instance with a `Amplitude`, which you can inject and use the `track` method on it to send events whenever you need
 
 > 📘 To ensure optimal functionality with this plugin, you may need to incorporate Amplitude types into your development dependencies.
 > ```
