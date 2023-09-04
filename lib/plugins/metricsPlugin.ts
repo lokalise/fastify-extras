@@ -61,6 +61,9 @@ function plugin(app: FastifyInstance, opts: MetricsPluginOptions) {
       promServer.log.error(logObject)
       throw new Error('Critical error when trying to launch metrics server')
     })
+    .then(() => {
+      // this is to consume string which plugin does not expect
+    })
 }
 
 export const metricsPlugin = fp(plugin, {
