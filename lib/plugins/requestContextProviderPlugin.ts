@@ -52,11 +52,11 @@ function plugin(fastify: FastifyInstance, opts: unknown, done: () => void) {
     (req: FastifyRequest, res: FastifyReply, next: HookHandlerDoneFunction) => {
       req.reqContext = {
         logger: req.log,
-        reqId: req.id as string,
+        reqId: req.id,
       }
 
       // Store request_id in AsyncLocalStorage to be picked up by instrumentation tooling, such as OpenTelemetry
-      requestContext.set(REQUEST_ID_STORE_KEY, req.id as string)
+      requestContext.set(REQUEST_ID_STORE_KEY, req.id)
 
       next()
     },
