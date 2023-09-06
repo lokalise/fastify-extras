@@ -20,6 +20,13 @@ export {
 } from './plugins/splitIOFeatureManagerPlugin'
 export type { SplitIOOptions } from './plugins/splitIOFeatureManagerPlugin'
 
+export { healthcheckMetricsPlugin } from './plugins/healthcheckMetricsPlugin'
+export type {
+  PrometheusHealthCheck,
+  HealthcheckResult,
+  HealthcheckMetricsPluginOptions,
+} from './plugins/healthcheckMetricsPlugin'
+
 export { metricsPlugin } from './plugins/metricsPlugin'
 export type { ErrorObjectResolver, MetricsPluginOptions } from './plugins/metricsPlugin'
 
