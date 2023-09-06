@@ -36,10 +36,8 @@ describe('healthcheckMetricsPlugin', () => {
         // eslint-disable-next-line @typescript-eslint/require-await
         checker: async () => {
           return {
-            result: {
-              checkPassed: true,
-              checkTimeInMsecs: 345,
-            },
+            checkPassed: true,
+            checkTimeInMsecs: 345,
           }
         },
       },
@@ -60,10 +58,8 @@ describe('healthcheckMetricsPlugin', () => {
         // eslint-disable-next-line @typescript-eslint/require-await
         checker: async () => {
           return {
-            result: {
-              checkPassed: false,
-              checkTimeInMsecs: 1450,
-            },
+            checkPassed: false,
+            checkTimeInMsecs: 1450,
           }
         },
       },
@@ -84,10 +80,8 @@ describe('healthcheckMetricsPlugin', () => {
         // eslint-disable-next-line @typescript-eslint/require-await
         checker: async () => {
           return {
-            result: {
-              checkPassed: true,
-              checkTimeInMsecs: 345,
-            },
+            checkPassed: true,
+            checkTimeInMsecs: 345,
           }
         },
       },
@@ -96,10 +90,8 @@ describe('healthcheckMetricsPlugin', () => {
         // eslint-disable-next-line @typescript-eslint/require-await
         checker: async () => {
           return {
-            result: {
-              checkPassed: false,
-              checkTimeInMsecs: 1450,
-            },
+            checkPassed: false,
+            checkTimeInMsecs: 1450,
           }
         },
       },
@@ -124,10 +116,8 @@ describe('healthcheckMetricsPlugin', () => {
           // eslint-disable-next-line @typescript-eslint/require-await
           checker: async () => {
             return {
-              result: {
-                checkPassed: false,
-                checkTimeInMsecs: 1450,
-              },
+              checkPassed: false,
+              checkTimeInMsecs: 1450,
             }
           },
         },
