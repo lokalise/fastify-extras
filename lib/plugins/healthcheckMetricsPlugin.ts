@@ -1,4 +1,3 @@
-import type { Either } from '@lokalise/node-core'
 import type { FastifyInstance } from 'fastify'
 import fp from 'fastify-plugin'
 
@@ -15,7 +14,7 @@ export type HealthcheckResult = {
 
 export type PrometheusHealthCheck = {
   name: string
-  checker: (app: FastifyInstance) => Promise<Either<Error, HealthcheckResult>>
+  checker: (app: FastifyInstance) => Promise<HealthcheckResult>
 }
 
 function plugin(
@@ -48,7 +47,7 @@ function plugin(
         async collect() {
           const checkResult = await check.checker(app)
 
-          if (checkResult.result?.checkPassed) {
+          if (checkResult.checkPassed) {
             this.set(1)
           } else {
             this.set(0)
@@ -62,10 +61,10 @@ function plugin(
         async collect() {
           const checkResult = await check.checker(app)
 
-          if (checkResult.result?.checkPassed) {
-            this.set(checkResult.result.checkTimeInMsecs)
+          if (checkResult.checkPassed) {
+            this.set(checkResult.checkTimeInMsecs)
           } else {
-            this.set(checkResult.result?.checkTimeInMsecs ?? 0)
+            this.set(checkResult.checkTimeInMsecs ?? 0)
           }
         },
       })
