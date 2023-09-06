@@ -6,8 +6,11 @@ import type { PrometheusHealthCheck } from './healthcheckMetricsPlugin'
 import { healthcheckMetricsPlugin } from './healthcheckMetricsPlugin'
 import { metricsPlugin } from './metricsPlugin'
 
+let app: FastifyInstance
+
 async function initApp(healthChecks: PrometheusHealthCheck[]) {
-  const app = fastify()
+  const testApp = fastify()
+  app = testApp
   await app.register(metricsPlugin, {
     bindAddress: '0.0.0.0',
     loggerOptions: false,
@@ -22,7 +25,6 @@ async function initApp(healthChecks: PrometheusHealthCheck[]) {
 }
 
 describe('healthcheckMetricsPlugin', () => {
-  let app: FastifyInstance
   afterEach(async () => {
     await app.close()
   })
