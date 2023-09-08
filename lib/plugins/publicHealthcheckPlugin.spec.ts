@@ -27,6 +27,14 @@ describe('publicHealthcheckPlugin', () => {
   it('returns a heartbeat', async () => {
     app = await initApp({ healthChecks: [] })
 
+    const response = await app.inject().get('/health').end()
+    expect(response.statusCode).toBe(200)
+    expect(response.json()).toEqual({ heartbeat: 'HEALTHY' })
+  })
+
+  it('returns a heartbeat on a custom endpoint', async () => {
+    app = await initApp({ healthChecks: [], url: '/' })
+
     const response = await app.inject().get('/').end()
     expect(response.statusCode).toBe(200)
     expect(response.json()).toEqual({ heartbeat: 'HEALTHY' })
@@ -35,7 +43,7 @@ describe('publicHealthcheckPlugin', () => {
   it('returns custom heartbeat', async () => {
     app = await initApp({ responsePayload: { version: 1 }, healthChecks: [] })
 
-    const response = await app.inject().get('/').end()
+    const response = await app.inject().get('/health').end()
     expect(response.statusCode).toBe(200)
     expect(response.json()).toEqual({ heartbeat: 'HEALTHY', version: 1 })
   })
@@ -46,7 +54,7 @@ describe('publicHealthcheckPlugin', () => {
       healthChecks: [negativeHealthcheck, positiveHealthcheck],
     })
 
-    const response = await app.inject().get('/').end()
+    const response = await app.inject().get('/health').end()
     expect(response.statusCode).toBe(500)
     expect(response.json()).toEqual({ heartbeat: 'FAIL', version: 1 })
   })
@@ -57,7 +65,7 @@ describe('publicHealthcheckPlugin', () => {
       healthChecks: [positiveHealthcheck, positiveHealthcheck],
     })
 
-    const response = await app.inject().get('/').end()
+    const response = await app.inject().get('/health').end()
     expect(response.statusCode).toBe(200)
     expect(response.json()).toEqual({ heartbeat: 'HEALTHY', version: 1 })
   })

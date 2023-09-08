@@ -4,6 +4,8 @@ import fp from 'fastify-plugin'
 
 export interface PublicHealthcheckPluginOptions {
   responsePayload?: Record<string, unknown>
+  url?: string
+  logLevel?: 'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace' | 'silent'
   healthChecks: readonly HealthCheck[]
 }
 
@@ -12,9 +14,9 @@ export type HealthCheck = (app: FastifyInstance) => Promise<Either<Error, true>>
 function plugin(app: FastifyInstance, opts: PublicHealthcheckPluginOptions, done: () => void) {
   const responsePayload = opts.responsePayload ?? {}
   app.route({
-    url: '/',
+    url: opts.url ?? '/health',
     method: 'GET',
-    logLevel: 'debug',
+    logLevel: opts.logLevel ?? 'info',
     schema: {
       // hide route from swagger plugins
       // @ts-expect-error
