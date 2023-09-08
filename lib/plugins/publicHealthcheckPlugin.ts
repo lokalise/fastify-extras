@@ -28,7 +28,7 @@ function plugin(app: FastifyInstance, opts: PublicHealthcheckPluginOptions, done
       hide: true,
     },
     handler: async (_, reply) => {
-      let isHealthy = true
+      let isFullyHealthy = true
       let isPartiallyHealthy = false
       if (opts.healthChecks.length) {
         const results = await Promise.all(
@@ -40,20 +40,20 @@ function plugin(app: FastifyInstance, opts: PublicHealthcheckPluginOptions, done
         for (let i = 0; i < results.length; i++) {
           const entry = results[i]
           if (entry.error && opts.healthChecks[i].isMandatory) {
-            isHealthy = false
+            isFullyHealthy = false
             isPartiallyHealthy = false
             break
           }
           if (entry.error && !opts.healthChecks[i].isMandatory) {
-            isHealthy = false
+            isFullyHealthy = false
             isPartiallyHealthy = true
           }
         }
       }
 
-      return reply.status(isHealthy || isPartiallyHealthy ? 200 : 500).send({
+      return reply.status(isFullyHealthy || isPartiallyHealthy ? 200 : 500).send({
         ...responsePayload,
-        heartbeat: isHealthy ? 'HEALTHY' : isPartiallyHealthy ? 'PARTIALLY_HEALTHY' : 'FAIL',
+        heartbeat: isFullyHealthy ? 'HEALTHY' : isPartiallyHealthy ? 'PARTIALLY_HEALTHY' : 'FAIL',
       })
     },
   })
