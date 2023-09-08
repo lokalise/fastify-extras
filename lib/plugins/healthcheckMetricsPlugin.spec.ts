@@ -45,7 +45,6 @@ describe('healthcheckMetricsPlugin', () => {
 
     const response = await sendGet(buildClient('http://127.0.0.1:9080'), '/metrics')
 
-    console.log(response.result.body)
     expect(response.result.statusCode).toBe(200)
     expect(response.result.body).toContain('test_healthcheck_availability 1')
     expect(response.result.body).toContain('test_healthcheck_latency_msecs 345')
@@ -67,7 +66,6 @@ describe('healthcheckMetricsPlugin', () => {
 
     const response = await sendGet(buildClient('http://127.0.0.1:9080'), '/metrics')
 
-    console.log(response.result.body)
     expect(response.result.statusCode).toBe(200)
     expect(response.result.body).toContain('test_healthcheck_availability 0')
     expect(response.result.body).toContain('test_healthcheck_latency_msecs 1450')
@@ -99,7 +97,6 @@ describe('healthcheckMetricsPlugin', () => {
 
     const response = await sendGet(buildClient('http://127.0.0.1:9080'), '/metrics')
 
-    console.log(response.result.body)
     expect(response.result.statusCode).toBe(200)
     expect(response.result.body).toContain('test_healthcheck_1_availability 1')
     expect(response.result.body).toContain('test_healthcheck_1_latency_msecs 345')
