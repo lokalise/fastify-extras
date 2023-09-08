@@ -36,20 +36,15 @@ function plugin(app: FastifyInstance, opts: PublicHealthcheckPluginOptions, done
             return healthcheck.checker(app)
           }),
         )
-        if (
-          results.find((entry, index) => {
-            return entry.error && opts.healthChecks[index].isMandatory
-          })
-        ) {
-          isHealthy = false
-        }
 
-        if (isHealthy) {
-          if (
-            results.find((entry, index) => {
-              return entry.error && !opts.healthChecks[index].isMandatory
-            })
-          ) {
+        for (let i = 0; i < results.length; i++) {
+          const entry = results[i]
+          if (entry.error && opts.healthChecks[i].isMandatory) {
+            isHealthy = false
+            isPartiallyHealthy = false
+            break
+          }
+          if (entry.error && !opts.healthChecks[i].isMandatory) {
             isHealthy = false
             isPartiallyHealthy = true
           }
