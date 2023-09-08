@@ -4,42 +4,56 @@ import fp from 'fastify-plugin'
 
 export interface PublicHealthcheckPluginOptions {
   responsePayload?: Record<string, unknown>
+  url?: string
+  logLevel?: 'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace' | 'silent'
   healthChecks: readonly HealthCheck[]
 }
 
-export type HealthCheck = (app: FastifyInstance) => Promise<Either<Error, true>>
+export type HealthChecker = (app: FastifyInstance) => Promise<Either<Error, true>>
+
+export type HealthCheck = {
+  isMandatory: boolean
+  checker: HealthChecker
+}
 
 function plugin(app: FastifyInstance, opts: PublicHealthcheckPluginOptions, done: () => void) {
   const responsePayload = opts.responsePayload ?? {}
   app.route({
-    url: '/',
+    url: opts.url ?? '/health',
     method: 'GET',
-    logLevel: 'debug',
+    logLevel: opts.logLevel ?? 'info',
     schema: {
       // hide route from swagger plugins
       // @ts-expect-error
       hide: true,
     },
     handler: async (_, reply) => {
-      let isHealthy = true
+      let isFullyHealthy = true
+      let isPartiallyHealthy = false
       if (opts.healthChecks.length) {
         const results = await Promise.all(
           opts.healthChecks.map((healthcheck) => {
-            return healthcheck(app)
+            return healthcheck.checker(app)
           }),
         )
-        if (
-          results.find((entry) => {
-            return !!entry.error
-          })
-        ) {
-          isHealthy = false
+
+        for (let i = 0; i < results.length; i++) {
+          const entry = results[i]
+          if (entry.error && opts.healthChecks[i].isMandatory) {
+            isFullyHealthy = false
+            isPartiallyHealthy = false
+            break
+          }
+          if (entry.error && !opts.healthChecks[i].isMandatory) {
+            isFullyHealthy = false
+            isPartiallyHealthy = true
+          }
         }
       }
 
-      return reply.status(isHealthy ? 200 : 500).send({
+      return reply.status(isFullyHealthy || isPartiallyHealthy ? 200 : 500).send({
         ...responsePayload,
-        heartbeat: isHealthy ? 'HEALTHY' : 'FAIL',
+        heartbeat: isFullyHealthy ? 'HEALTHY' : isPartiallyHealthy ? 'PARTIALLY_HEALTHY' : 'FAIL',
       })
     },
   })
