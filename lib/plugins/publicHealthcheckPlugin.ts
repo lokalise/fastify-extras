@@ -64,7 +64,7 @@ function plugin(app: FastifyInstance, opts: PublicHealthcheckPluginOptions, done
 
       return reply.status(isFullyHealthy || isPartiallyHealthy ? 200 : 500).send({
         ...responsePayload,
-        ...healthChecks,
+        checks: healthChecks,
         heartbeat: isFullyHealthy ? 'HEALTHY' : isPartiallyHealthy ? 'PARTIALLY_HEALTHY' : 'FAIL',
       })
     },
