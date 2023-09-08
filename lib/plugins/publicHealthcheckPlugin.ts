@@ -12,6 +12,7 @@ export interface PublicHealthcheckPluginOptions {
 export type HealthChecker = (app: FastifyInstance) => Promise<Either<Error, true>>
 
 export type HealthCheck = {
+  name: string
   isMandatory: boolean
   checker: HealthChecker
 }
@@ -30,21 +31,31 @@ function plugin(app: FastifyInstance, opts: PublicHealthcheckPluginOptions, done
     handler: async (_, reply) => {
       let isFullyHealthy = true
       let isPartiallyHealthy = false
+      const healthChecks: Record<string, unknown> = {}
+
       if (opts.healthChecks.length) {
         const results = await Promise.all(
           opts.healthChecks.map((healthcheck) => {
-            return healthcheck.checker(app)
+            return healthcheck.checker(app).then((result) => {
+              return {
+                name: healthcheck.name,
+                result,
+                isMandatory: healthcheck.isMandatory,
+              }
+            })
           }),
         )
 
         for (let i = 0; i < results.length; i++) {
           const entry = results[i]
-          if (entry.error && opts.healthChecks[i].isMandatory) {
+          healthChecks[entry.name] = entry.result.error ? 'FAIL' : 'HEALTHY'
+          if (entry.result.error && opts.healthChecks[i].isMandatory) {
             isFullyHealthy = false
             isPartiallyHealthy = false
-            break
           }
-          if (entry.error && !opts.healthChecks[i].isMandatory) {
+
+          // Check if we are only partially healthy (only optional dependencies are failing)
+          if (isFullyHealthy && entry.result.error && !opts.healthChecks[i].isMandatory) {
             isFullyHealthy = false
             isPartiallyHealthy = true
           }
@@ -53,6 +64,7 @@ function plugin(app: FastifyInstance, opts: PublicHealthcheckPluginOptions, done
 
       return reply.status(isFullyHealthy || isPartiallyHealthy ? 200 : 500).send({
         ...responsePayload,
+        ...healthChecks,
         heartbeat: isFullyHealthy ? 'HEALTHY' : isPartiallyHealthy ? 'PARTIALLY_HEALTHY' : 'FAIL',
       })
     },

@@ -53,10 +53,12 @@ describe('publicHealthcheckPlugin', () => {
       responsePayload: { version: 1 },
       healthChecks: [
         {
+          name: 'check1',
           isMandatory: true,
           checker: negativeHealthcheckChecker,
         },
         {
+          name: 'check2',
           isMandatory: true,
           checker: positiveHealthcheckChecker,
         },
@@ -65,7 +67,12 @@ describe('publicHealthcheckPlugin', () => {
 
     const response = await app.inject().get('/health').end()
     expect(response.statusCode).toBe(500)
-    expect(response.json()).toEqual({ heartbeat: 'FAIL', version: 1 })
+    expect(response.json()).toEqual({
+      heartbeat: 'FAIL',
+      version: 1,
+      check1: 'FAIL',
+      check2: 'HEALTHY',
+    })
   })
 
   it('returns partial if optional healthcheck fails', async () => {
@@ -73,10 +80,12 @@ describe('publicHealthcheckPlugin', () => {
       responsePayload: { version: 1 },
       healthChecks: [
         {
+          name: 'check1',
           isMandatory: false,
           checker: negativeHealthcheckChecker,
         },
         {
+          name: 'check2',
           isMandatory: true,
           checker: positiveHealthcheckChecker,
         },
@@ -85,7 +94,12 @@ describe('publicHealthcheckPlugin', () => {
 
     const response = await app.inject().get('/health').end()
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual({ heartbeat: 'PARTIALLY_HEALTHY', version: 1 })
+    expect(response.json()).toEqual({
+      heartbeat: 'PARTIALLY_HEALTHY',
+      version: 1,
+      check1: 'FAIL',
+      check2: 'HEALTHY',
+    })
   })
 
   it('returns true if all healthchecks pass', async () => {
@@ -93,10 +107,12 @@ describe('publicHealthcheckPlugin', () => {
       responsePayload: { version: 1 },
       healthChecks: [
         {
+          name: 'check1',
           isMandatory: true,
           checker: positiveHealthcheckChecker,
         },
         {
+          name: 'check2',
           isMandatory: true,
           checker: positiveHealthcheckChecker,
         },
@@ -105,6 +121,11 @@ describe('publicHealthcheckPlugin', () => {
 
     const response = await app.inject().get('/health').end()
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual({ heartbeat: 'HEALTHY', version: 1 })
+    expect(response.json()).toEqual({
+      heartbeat: 'HEALTHY',
+      version: 1,
+      check1: 'HEALTHY',
+      check2: 'HEALTHY',
+    })
   })
 })
