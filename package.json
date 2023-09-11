@@ -81,7 +81,7 @@
     "eslint-plugin-prettier": "^5.0.0",
     "fastify": "^4.22.2",
     "jest": "^29.6.4",
-    "newrelic": "11.0.0",
+    "newrelic": "11.1.0",
     "pino": "^8.15.0",
     "prettier": "^3.0.3",
     "shx": "^0.3.4",
