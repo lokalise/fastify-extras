@@ -46,3 +46,5 @@ export {
   type AmplitudeConfig,
   type CreateApiTrackingEventFn,
 } from './plugins/amplitudePlugin'
+
+export type { FastifyReplyWithPayload } from './types'
