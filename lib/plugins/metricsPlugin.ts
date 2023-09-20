@@ -52,11 +52,17 @@ function plugin(app: FastifyInstance, opts: MetricsPluginOptions) {
     .listen({
       port: METRICS_PORT,
       host: opts.bindAddress,
+      listenTextResolver: (address) => {
+        return `Prometheus metrics server listening at ${address}`
+      },
     })
     .catch((err) => {
       const logObject = opts.errorObjectResolver(err)
       promServer.log.error(logObject)
       throw new Error('Critical error when trying to launch metrics server')
+    })
+    .then(() => {
+      // this is to consume string which plugin does not expect
     })
 }
 

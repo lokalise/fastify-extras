@@ -20,6 +20,13 @@ export {
 } from './plugins/splitIOFeatureManagerPlugin'
 export type { SplitIOOptions } from './plugins/splitIOFeatureManagerPlugin'
 
+export { healthcheckMetricsPlugin } from './plugins/healthcheckMetricsPlugin'
+export type {
+  PrometheusHealthCheck,
+  HealthcheckResult,
+  HealthcheckMetricsPluginOptions,
+} from './plugins/healthcheckMetricsPlugin'
+
 export { metricsPlugin } from './plugins/metricsPlugin'
 export type { ErrorObjectResolver, MetricsPluginOptions } from './plugins/metricsPlugin'
 
@@ -27,6 +34,17 @@ export { prismaOtelTracingPlugin } from './plugins/opentelemetry/prismaOtelTraci
 export type { PrismaOtelTracingPluginConfig } from './plugins/opentelemetry/prismaOtelTracingPlugin'
 
 export { publicHealthcheckPlugin } from './plugins/publicHealthcheckPlugin'
-export type { PublicHealthcheckPluginOptions } from './plugins/publicHealthcheckPlugin'
+export type {
+  PublicHealthcheckPluginOptions,
+  HealthCheck,
+  HealthChecker,
+} from './plugins/publicHealthcheckPlugin'
+
+export {
+  amplitudePlugin,
+  Amplitude,
+  type AmplitudeConfig,
+  type CreateApiTrackingEventFn,
+} from './plugins/amplitudePlugin'
 
 export type { FastifyReplyWithPayload } from './types'
