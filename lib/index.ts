@@ -28,3 +28,5 @@ export type { PrismaOtelTracingPluginConfig } from './plugins/opentelemetry/pris
 
 export { publicHealthcheckPlugin } from './plugins/publicHealthcheckPlugin'
 export type { PublicHealthcheckPluginOptions } from './plugins/publicHealthcheckPlugin'
+
+export type { FastifyReplyWithPayload } from './types'
