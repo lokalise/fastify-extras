@@ -1,6 +1,8 @@
 import type { FastifyInstance } from 'fastify'
 import fp from 'fastify-plugin'
 
+import type { HealthChecker } from './healthcheckCommons'
+
 const VALID_PROMETHEUS_NAME_REGEX = /[a-zA-Z_:][a-zA-Z0-9_:]*/
 
 export interface HealthcheckMetricsPluginOptions {
@@ -15,6 +17,28 @@ export type HealthcheckResult = {
 export type PrometheusHealthCheck = {
   name: string
   checker: (app: FastifyInstance) => Promise<HealthcheckResult>
+}
+
+/**
+ * Execute healthcheck and calculate the check time
+ */
+export const wrapHealthCheckForPrometheus = (
+  healthCheck: HealthChecker,
+  healthcheckName: string,
+): PrometheusHealthCheck => {
+  return {
+    name: healthcheckName,
+    checker: async (app: FastifyInstance): Promise<HealthcheckResult> => {
+      const startTime = Date.now()
+      const response = await healthCheck(app)
+      const checkTimeInMsecs = Date.now() - startTime
+
+      return {
+        checkPassed: !!response.result,
+        checkTimeInMsecs,
+      }
+    },
+  }
 }
 
 function plugin(

@@ -1,10 +1,12 @@
+import type { Either } from '@lokalise/node-core'
 import { buildClient, sendGet } from '@lokalise/node-core'
 import type { FastifyInstance } from 'fastify'
 import fastify from 'fastify'
 
+import { metricsPlugin } from '../metricsPlugin'
+
 import type { PrometheusHealthCheck } from './healthcheckMetricsPlugin'
-import { healthcheckMetricsPlugin } from './healthcheckMetricsPlugin'
-import { metricsPlugin } from './metricsPlugin'
+import { healthcheckMetricsPlugin, wrapHealthCheckForPrometheus } from './healthcheckMetricsPlugin'
 
 let app: FastifyInstance
 
@@ -120,5 +122,21 @@ describe('healthcheckMetricsPlugin', () => {
         },
       ]),
     ).rejects.toThrow(/Invalid metric name/)
+  })
+
+  it('wrapped healthcheck returns positive healthcheck results', async () => {
+    app = await initApp([
+      wrapHealthCheckForPrometheus((): Promise<Either<Error, true>> => {
+        return Promise.resolve({
+          result: true,
+        })
+      }, 'test_healthcheck'),
+    ])
+
+    const response = await sendGet(buildClient('http://127.0.0.1:9080'), '/metrics')
+
+    expect(response.result.statusCode).toBe(200)
+    expect(response.result.body).toContain('test_healthcheck_availability 1')
+    expect(response.result.body).toContain('test_healthcheck_latency_msecs')
   })
 })
