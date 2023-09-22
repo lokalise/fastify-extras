@@ -1,6 +1,7 @@
-import type { Either } from '@lokalise/node-core'
 import type { FastifyInstance } from 'fastify'
 import fp from 'fastify-plugin'
+
+import type { HealthChecker } from './healthcheckCommons'
 
 export interface PublicHealthcheckPluginOptions {
   responsePayload?: Record<string, unknown>
@@ -8,8 +9,6 @@ export interface PublicHealthcheckPluginOptions {
   logLevel?: 'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace' | 'silent'
   healthChecks: readonly HealthCheck[]
 }
-
-export type HealthChecker = (app: FastifyInstance) => Promise<Either<Error, true>>
 
 export type HealthCheck = {
   name: string

@@ -1,7 +1,8 @@
 import type { FastifyInstance } from 'fastify'
 import fastify from 'fastify'
 
-import type { HealthChecker, PublicHealthcheckPluginOptions } from './publicHealthcheckPlugin'
+import type { HealthChecker } from './healthcheckCommons'
+import type { PublicHealthcheckPluginOptions } from './publicHealthcheckPlugin'
 import { publicHealthcheckPlugin } from './publicHealthcheckPlugin'
 
 const positiveHealthcheckChecker: HealthChecker = () => {
