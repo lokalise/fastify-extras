@@ -13,13 +13,13 @@ describe('amplitudePlugin', () => {
   })
 
   afterEach(async () => {
-    jest.clearAllMocks()
+    vitest.clearAllMocks()
     await app.close()
   })
 
   it('skips initialization if isEnabled is false', async () => {
     // Given
-    const initSpy = jest.spyOn(amplitude, 'init')
+    const initSpy = vitest.spyOn(amplitude, 'init')
 
     // When
     await app.register(amplitudePlugin, {
@@ -32,7 +32,7 @@ describe('amplitudePlugin', () => {
 
   it('throws error if is enabled and api key is not defined', async () => {
     // Given
-    const initSpy = jest.spyOn(amplitude, 'init')
+    const initSpy = vitest.spyOn(amplitude, 'init')
 
     // When
     let error = null
@@ -51,7 +51,7 @@ describe('amplitudePlugin', () => {
 
   it('amplitudeTrack avoids track if plugin is not enabled', async () => {
     // Given
-    const trackSpy = jest.spyOn(amplitude, 'track')
+    const trackSpy = vitest.spyOn(amplitude, 'track')
     await app.register(amplitudePlugin, {
       isEnabled: false,
     })
@@ -71,7 +71,7 @@ describe('amplitudePlugin', () => {
       code: 1,
       message: 'message',
     }
-    const trackSpy = jest.spyOn(amplitude, 'track').mockImplementation(() => ({
+    const trackSpy = vitest.spyOn(amplitude, 'track').mockImplementation(() => ({
       promise: Promise.resolve(trackResponse),
     }))
     await app.register(amplitudePlugin, {
@@ -90,7 +90,7 @@ describe('amplitudePlugin', () => {
 
   it('tracks api usage if apiUsageTracking callback returns an event', async () => {
     // Given
-    const trackSpy = jest.spyOn(amplitude, 'track').mockImplementation(() => ({
+    const trackSpy = vitest.spyOn(amplitude, 'track').mockImplementation(() => ({
       promise: Promise.resolve<Result>({
         event: { event_type: 'test' },
         code: 1,
@@ -126,7 +126,7 @@ describe('amplitudePlugin', () => {
 
   it('does not track api usage if apiUsageTracking returns null', async () => {
     // Given
-    const trackSpy = jest.spyOn(amplitude, 'track')
+    const trackSpy = vitest.spyOn(amplitude, 'track')
     await app.register(amplitudePlugin, {
       isEnabled: true,
       apiKey: 'This is an api key',
@@ -155,9 +155,9 @@ describe('amplitudePlugin', () => {
 
   it('defined amplitude plugins are set up', async () => {
     // Given
-    const addSpy = jest.spyOn(amplitude, 'add')
+    const addSpy = vitest.spyOn(amplitude, 'add')
     const plugin = new FakePlugin()
-    const pluginSetUpSpy = jest.spyOn(plugin, 'setup')
+    const pluginSetUpSpy = vitest.spyOn(plugin, 'setup')
 
     // When
     await app.register(amplitudePlugin, {

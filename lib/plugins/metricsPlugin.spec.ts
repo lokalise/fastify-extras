@@ -41,7 +41,6 @@ describe('metricsPlugin', () => {
         return err
       })
     } catch (err) {
-      // eslint-disable-next-line jest/no-conditional-expect
       expect(err).toMatchObject({
         message: 'Critical error when trying to launch metrics server',
       })
