@@ -11,6 +11,7 @@ Reusable plugins for Fastify.
   * [BugSnag Plugin](#bugsnag-plugin)
   * [Metrics Plugin](#metrics-plugin)
   * [NewRelic Transaction Manager Plugin](#newrelic-transaction-manager-plugin)
+  * [UnhandledException Plugin](#unhandledexception-plugin)
 
 ## Dependency Management
 
@@ -161,3 +162,78 @@ The plugin decorates your Fastify instance with a `Amplitude`, which you can inj
 > ```
 > "@amplitude/analytics-types": "*"
 > ```
+
+### UnhandledException Plugin
+
+This plugin provides a mechanism for handling uncaught exceptions within your Fastify application, ensuring that such exceptions are logged and reported. It's especially useful for capturing unforeseen exceptions and provides a controlled shutdown of the Fastify server, thereby ensuring no potential data corruption.
+
+#### Setup & Configuration
+
+To integrate this plugin into your Fastify instance, follow these steps:
+
+1. First, import the necessary types and the plugin:
+
+```typescript
+import { FastifyInstance } from 'fastify';
+import { unhandledExceptionPlugin, ErrorObjectResolver } from '@lokalise/fastify-extras';
+```
+
+2. Configure the plugin:
+
+Define your own `ErrorObjectResolver` to dictate how the uncaught exceptions will be structured for logging. Here's an example:
+
+```typescript
+const myErrorResolver: ErrorObjectResolver = (err, correlationID) => {
+  return {
+    error: err,
+    id: correlationID
+  };
+};
+```
+
+You'll also need to provide an `ErrorReporter` instance. This instance should have a `report` method to handle the error reporting logic. For example:
+
+```typescript
+import { ErrorReporter } from "@lokalise/node-core";
+
+const myErrorReporter = new ErrorReporter(/* initialization params */);
+```
+
+3. Register the plugin with your Fastify instance:
+
+```typescript
+const fastify = Fastify();
+
+fastify.register(unhandledExceptionPlugin, {
+  errorObjectResolver: myErrorResolver,
+  errorReporter: myErrorReporter
+});
+```
+
+#### Options
+
+The plugin accepts the following options:
+
+- `errorObjectResolver` (required): This function determines the structure of the error object which will be logged in case of an uncaught exception.
+
+- `errorReporter` (required): An instance of the ErrorReporter which will handle reporting of the uncaught exceptions.
+
+#### Working Principle
+
+When an uncaught exception occurs, the plugin:
+
+- Logs the exception using the provided `errorObjectResolver`.
+
+- Reports the exception using the `ErrorReporter`.
+
+- Shuts down the Fastify server gracefully.
+
+- Exits the process with exit code `1`.
+
+#### Dependencies
+
+- `@lokalise/node-core`: For error reporting.
+
+- `fastify`: The framework this plugin is designed for.
+
+> 🚨 It's critical to note that this plugin listens to the process's 'uncaughtException' event. Multiple listeners on this event can introduce unpredictable behavior in your application. Ensure that this is the sole listener for this event or handle interactions between multiple listeners carefully. 
