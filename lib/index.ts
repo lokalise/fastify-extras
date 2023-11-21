@@ -53,3 +53,6 @@ export {
 } from './plugins/amplitudePlugin'
 
 export type { FastifyReplyWithPayload } from './types'
+
+export { unhandledExceptionPlugin } from './plugins/unhandledExceptionPlugin'
+export type { UnhandledExceptionPluginOptions } from './plugins/unhandledExceptionPlugin'
