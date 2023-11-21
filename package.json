@@ -66,7 +66,7 @@
   },
   "devDependencies": {
     "@fastify/request-context": "^5.0.0",
-    "@lokalise/node-core": "^6.2.0",
+    "@lokalise/node-core": "^8.0.0",
     "@types/newrelic": "^9.14.0",
     "@types/node": "^18.16.19",
     "@amplitude/analytics-types": "^2.1.1",
@@ -80,7 +80,7 @@
     "eslint-plugin-vitest": "^0.3.2",
     "eslint-plugin-prettier": "^5.0.0",
     "fastify": "^4.22.2",
-    "newrelic": "11.4.0",
+    "newrelic": "11.5.0",
     "pino": "^8.15.6",
     "prettier": "^3.0.3",
     "shx": "^0.3.4",
