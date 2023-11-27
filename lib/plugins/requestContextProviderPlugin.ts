@@ -49,7 +49,11 @@ export function getRequestIdFastifyAppConfig(): Pick<
 function plugin(fastify: FastifyInstance, opts: unknown, done: () => void) {
   fastify.addHook(
     'onRequest',
-    (req: FastifyRequest, res: FastifyReply, next: HookHandlerDoneFunction) => {
+    function onRequestContextProvider(
+      req: FastifyRequest,
+      res: FastifyReply,
+      next: HookHandlerDoneFunction,
+    ) {
       req.reqContext = {
         logger: req.log,
         reqId: req.id,
