@@ -56,7 +56,7 @@ function plugin(fastify: FastifyInstance, opts: unknown, done: () => void) {
     ) {
       req.reqContext = {
         logger: req.log.child({
-          requestId: req.id,
+          'x-request-id': req.id,
         }),
         reqId: req.id,
       }
