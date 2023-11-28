@@ -55,7 +55,9 @@ function plugin(fastify: FastifyInstance, opts: unknown, done: () => void) {
       next: HookHandlerDoneFunction,
     ) {
       req.reqContext = {
-        logger: req.log,
+        logger: req.log.child({
+          requestId: req.id,
+        }),
         reqId: req.id,
       }
 
