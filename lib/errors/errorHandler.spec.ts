@@ -98,7 +98,7 @@ describe('errorHandler', () => {
   })
 
   it('can override logged object resolution', async () => {
-    let logSpy: SpyInstance
+    let logSpy: SpyInstance | undefined
     app = await initApp(
       (req) => {
         logSpy = vitest.spyOn(req.log, 'error')
@@ -119,8 +119,8 @@ describe('errorHandler', () => {
     const response = await app.inject().get('/').end()
 
     expect(response.statusCode).toBe(500)
-    expect(logSpy.mock.calls).toHaveLength(1)
-    expect(logSpy.mock.calls[0]).toEqual([
+    expect(logSpy!.mock.calls).toHaveLength(1)
+    expect(logSpy!.mock.calls[0]).toEqual([
       {
         message: 'Internal error22',
       },
