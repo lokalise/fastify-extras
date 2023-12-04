@@ -34,9 +34,9 @@ export interface BugsnagPluginConfig {
   isEnabled: boolean
 }
 
-export const bugsnagErrorReporter = {
+export const bugsnagErrorReporter: ErrorReporter = {
   report: (report) => reportErrorToBugsnag(report),
-} satisfies ErrorReporter
+}
 
 function plugin(app: FastifyInstance, opts: BugsnagPluginConfig, done: () => void) {
   if (opts.isEnabled) {
