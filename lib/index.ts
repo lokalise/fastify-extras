@@ -56,3 +56,6 @@ export type { FastifyReplyWithPayload } from './types'
 
 export { unhandledExceptionPlugin } from './plugins/unhandledExceptionPlugin'
 export type { UnhandledExceptionPluginOptions } from './plugins/unhandledExceptionPlugin'
+
+export { createErrorHandler } from './errors/errorHandler'
+export type { ErrorHandlerParams, FreeformRecord } from './errors/errorHandler'
