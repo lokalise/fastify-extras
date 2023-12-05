@@ -18,13 +18,17 @@ const knownAuthErrors = new Set([
   'FST_JWT_AUTHORIZATION_TOKEN_INVALID',
 ])
 
-type ResponseObject = {
+type ErrorResponseObject = {
   statusCode: number
   payload: {
     message: string
     errorCode: string
     details?: FreeformRecord
   }
+}
+
+function isZodError(value: unknown): value is ZodError {
+  return (value as ZodError).name === 'ZodError'
 }
 
 function resolveLogObject(error: unknown): FreeformRecord {
@@ -48,7 +52,7 @@ function resolveLogObject(error: unknown): FreeformRecord {
   }
 }
 
-function resolveResponseObject(error: FreeformRecord): ResponseObject {
+function resolveResponseObject(error: FreeformRecord): ErrorResponseObject {
   if (isPublicNonRecoverableError(error)) {
     return {
       statusCode: error.httpStatusCode ?? 500,
@@ -60,7 +64,7 @@ function resolveResponseObject(error: FreeformRecord): ResponseObject {
     }
   }
 
-  if (error instanceof ZodError) {
+  if (isZodError(error)) {
     return {
       statusCode: 400,
       payload: {
@@ -101,7 +105,7 @@ function resolveResponseObject(error: FreeformRecord): ResponseObject {
 
 export type ErrorHandlerParams = {
   errorReporter: ErrorReporter
-  resolveResponseObject?: (error: FreeformRecord) => ResponseObject | undefined
+  resolveResponseObject?: (error: FreeformRecord) => ErrorResponseObject | undefined
   resolveLogObject?: (error: unknown) => FreeformRecord | undefined
 }
 
