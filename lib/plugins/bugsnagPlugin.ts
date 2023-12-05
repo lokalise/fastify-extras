@@ -1,6 +1,7 @@
 import type { Event, NotifiableError } from '@bugsnag/js'
 import Bugsnag from '@bugsnag/js'
 import type { NodeConfig } from '@bugsnag/node'
+import type { ErrorReporter } from '@lokalise/node-core'
 import type { FastifyInstance } from 'fastify'
 import fp from 'fastify-plugin'
 
@@ -31,6 +32,10 @@ export const reportErrorToBugsnag = ({
 export interface BugsnagPluginConfig {
   bugsnag: NodeConfig
   isEnabled: boolean
+}
+
+export const bugsnagErrorReporter: ErrorReporter = {
+  report: (report) => reportErrorToBugsnag(report),
 }
 
 function plugin(app: FastifyInstance, opts: BugsnagPluginConfig, done: () => void) {
