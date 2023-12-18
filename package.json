@@ -81,7 +81,7 @@
     "eslint-plugin-vitest": "^0.3.10",
     "eslint-plugin-prettier": "^5.0.0",
     "fastify": "^4.24.3",
-    "newrelic": "11.6.1",
+    "newrelic": "11.7.0",
     "pino": "^8.16.2",
     "pino-pretty": "^10.2.3",
     "prettier": "^3.1.0",
