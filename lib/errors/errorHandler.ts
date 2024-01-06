@@ -7,7 +7,7 @@ import {
 } from '@lokalise/node-core'
 import type { FastifyRequest, FastifyReply, FastifyInstance } from 'fastify'
 import pino from 'pino'
-import { ZodError } from 'zod'
+import type { ZodError } from 'zod'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type FreeformRecord = Record<string, any>

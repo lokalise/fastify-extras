@@ -135,4 +135,45 @@ describe('publicHealthcheckPlugin', () => {
       },
     })
   })
+
+  it('returns extra info if data provider is set', async () => {
+    app = await initApp({
+      responsePayload: { version: 1 },
+      healthChecks: [
+        {
+          name: 'check1',
+          isMandatory: true,
+          checker: positiveHealthcheckChecker,
+        },
+      ],
+      infoProviders: [
+        {
+          name: 'provider1',
+          dataResolver: () => {
+            return {
+              someData: 1,
+            }
+          },
+        },
+      ],
+    })
+
+    const response = await app.inject().get('/health').end()
+    expect(response.statusCode).toBe(200)
+    expect(response.json()).toEqual({
+      heartbeat: 'HEALTHY',
+      version: 1,
+      checks: {
+        check1: 'HEALTHY',
+      },
+      extraInfo: [
+        {
+          name: 'provider1',
+          value: {
+            someData: 1,
+          },
+        },
+      ],
+    })
+  })
 })
