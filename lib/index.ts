@@ -40,6 +40,7 @@ export { publicHealthcheckPlugin } from './plugins/healthcheck/publicHealthcheck
 export type {
   PublicHealthcheckPluginOptions,
   HealthCheck,
+  InfoProvider,
 } from './plugins/healthcheck/publicHealthcheckPlugin'
 
 export { wrapHealthCheck } from './plugins/healthcheck/healthcheckCommons'

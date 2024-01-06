@@ -8,6 +8,12 @@ export interface PublicHealthcheckPluginOptions {
   url?: string
   logLevel?: 'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace' | 'silent'
   healthChecks: readonly HealthCheck[]
+  infoProviders?: readonly InfoProvider[]
+}
+
+export type InfoProvider = {
+  name: string
+  dataResolver: () => Record<string, unknown>
 }
 
 export type HealthCheck = {
@@ -61,9 +67,19 @@ function plugin(app: FastifyInstance, opts: PublicHealthcheckPluginOptions, done
         }
       }
 
+      const extraInfo = opts.infoProviders
+        ? opts.infoProviders.map((infoProvider) => {
+            return {
+              name: infoProvider.name,
+              value: infoProvider.dataResolver(),
+            }
+          })
+        : undefined
+
       return reply.status(isFullyHealthy || isPartiallyHealthy ? 200 : 500).send({
         ...responsePayload,
         checks: healthChecks,
+        ...(extraInfo && { extraInfo }),
         heartbeat: isFullyHealthy ? 'HEALTHY' : isPartiallyHealthy ? 'PARTIALLY_HEALTHY' : 'FAIL',
       })
     },
