@@ -20,11 +20,7 @@ declare module 'fastify' {
   }
 }
 
-async function plugin(
-  fastify: FastifyInstance,
-  config: AmplitudeConfig,
-  next: (err?: Error) => void,
-) {
+function plugin(fastify: FastifyInstance, config: AmplitudeConfig, next: (err?: Error) => void) {
   const amplitudeInstance = new Amplitude(config.isEnabled)
   fastify.decorate('amplitude', amplitudeInstance)
 
@@ -36,17 +32,21 @@ async function plugin(
     return next(Error('Amplitude key not defined'))
   }
 
-  await init(config.apiKey, config.options).promise
+  init(config.apiKey, config.options)
+    .promise.then(() => {
+      if (config.apiUsageTracking) {
+        enableApiUsageTracking(fastify, amplitudeInstance, config.apiUsageTracking)
+      }
+      if (config.plugins) {
+        // @ts-expect-error
+        config.plugins.forEach((e) => add(e))
+      }
 
-  if (config.apiUsageTracking) {
-    enableApiUsageTracking(fastify, amplitudeInstance, config.apiUsageTracking)
-  }
-  if (config.plugins) {
-    // @ts-expect-error
-    config.plugins.forEach((e) => add(e))
-  }
-
-  return next()
+      next()
+    })
+    .catch((err) => {
+      next(err as Error)
+    })
 }
 
 function enableApiUsageTracking(
