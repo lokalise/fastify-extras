@@ -7,17 +7,13 @@ export default defineConfig({
     poolOptions: {
       threads: {
         singleThread: true,
-      }
+      },
     },
     environment: 'node',
     reporters: ['verbose'],
     coverage: {
       include: ['lib/**/*.ts'],
-      exclude: [
-        'lib/**/*.spec.ts',
-        'lib/types.ts',
-        'lib/index.ts'
-      ],
+      exclude: ['lib/**/*.spec.ts', 'lib/types.ts', 'lib/index.ts'],
       reporter: ['text'],
       all: true,
       thresholds: {
@@ -25,7 +21,7 @@ export default defineConfig({
         functions: 80,
         branches: 85,
         statements: 65,
-      }
+      },
     },
   },
 })
