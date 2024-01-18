@@ -4,7 +4,11 @@ export default defineConfig({
   test: {
     globals: true,
     watch: false,
-    threads: false,
+    poolOptions: {
+      threads: {
+        singleThread: true,
+      }
+    },
     environment: 'node',
     reporters: ['verbose'],
     coverage: {
@@ -16,10 +20,12 @@ export default defineConfig({
       ],
       reporter: ['text'],
       all: true,
-      lines: 65,
-      functions: 80,
-      branches: 85,
-      statements: 65,
+      thresholds: {
+        lines: 65,
+        functions: 80,
+        branches: 85,
+        statements: 65,
+      }
     },
   },
 })

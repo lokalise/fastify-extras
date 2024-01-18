@@ -4,12 +4,12 @@
     "plugin:@typescript-eslint/recommended",
     "plugin:@typescript-eslint/recommended-requiring-type-checking",
     "plugin:@typescript-eslint/strict",
-    "plugin:prettier/recommended",
     "plugin:vitest/recommended",
     "plugin:import/recommended",
-    "plugin:import/typescript"
+    "plugin:import/typescript",
+    "prettier"
   ],
-  "plugins": ["@typescript-eslint", "prettier", "vitest", "import"],
+  "plugins": ["@typescript-eslint", "vitest", "import"],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "ecmaVersion": 2022,
@@ -18,7 +18,6 @@
     "project": ["./tsconfig.json"]
   },
   "rules": {
-    "prettier/prettier": "error",
     "@typescript-eslint/consistent-type-definitions": "off",
     "@typescript-eslint/no-empty-interface": "off",
     "@typescript-eslint/ban-ts-comment": "off",
