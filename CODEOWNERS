@@ -1,2 +1,4 @@
-*.ts         @kibertoad @rupert-mckay @lokankr @drdaemos
-package.json @kibertoad @rupert-mckay @lokankr @drdaemos
+*.yml        @kibertoad @lokalise/dx-guild @CarlosGamero @drdaemos
+*.md         @kibertoad @lokalise/dx-guild @CarlosGamero @drdaemos
+*.ts         @kibertoad @lokalise/dx-guild @CarlosGamero @drdaemos
+package.json @kibertoad @lokalise/dx-guild @CarlosGamero @drdaemos
