@@ -61,4 +61,4 @@ export type { UnhandledExceptionPluginOptions } from './plugins/unhandledExcepti
 export { createErrorHandler } from './errors/errorHandler'
 export type { ErrorHandlerParams, FreeformRecord } from './errors/errorHandler'
 
-export { generateJwtToken } from './jwt-utils/tokenUtils'
+export { generateJwtToken, decodeJwtToken } from './jwt-utils/tokenUtils'

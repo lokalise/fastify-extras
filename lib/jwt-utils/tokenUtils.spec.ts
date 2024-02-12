@@ -61,5 +61,31 @@ describe('tokenUtils', () => {
       await app.close()
       await app2.close()
     })
+    it('x decrypt jwt token', async () => {
+      const app = fastify()
+      void app.register(fastifyJWT, {
+        secret: 'secret',
+      })
+      await app.ready()
+
+      const app2 = fastify()
+      void app2.register(fastifyJWT, {
+        secret: 'secret2',
+      })
+      await app2.ready()
+
+      const payload = {
+        userId: 1,
+      }
+
+      const token = await generateJwtToken(app.jwt, payload, ACCESS_TOKEN_TTL_IN_SECONDS)
+
+      await expect(() => {
+        return decodeJwtToken(app2.jwt, token)
+      }).rejects.toThrow('Auth error')
+
+      await app.close()
+      await app2.close()
+    })
   })
 })
