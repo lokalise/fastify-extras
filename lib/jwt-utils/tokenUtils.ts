@@ -10,9 +10,11 @@ export function generateJwtToken(
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     jwt.sign(payload, { expiresIn: ttlInSeconds }, (err, encoded) => {
+      /* v8 ignore next 3 */
       if (err) {
         return reject(err)
       }
+      /* v8 ignore next 3 */
       if (!encoded) {
         throw new EmptyTokenError()
       }
@@ -29,9 +31,11 @@ export function decodeJwtToken(jwt: JWT, encodedToken: string): Promise<any> {
   return new Promise((resolve, reject) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     jwt.verify(encodedToken, (err: Error | null, decoded: any) => {
+      /* v8 ignore next 3 */
       if (err) {
         return reject(err)
       }
+      /* v8 ignore next 3 */
       if (!decoded) {
         throw new EmptyTokenError()
       }
