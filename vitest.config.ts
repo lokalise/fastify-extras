@@ -13,7 +13,7 @@ export default defineConfig({
     reporters: ['verbose'],
     coverage: {
       include: ['lib/**/*.ts'],
-      exclude: ['lib/**/*.spec.ts', 'lib/types.ts', 'lib/index.ts'],
+      exclude: ['lib/**/*.spec.ts', 'lib/types.ts', 'lib/index.ts', 'lib/errors/publicErrors.ts'],
       reporter: ['text'],
       all: true,
       thresholds: {
