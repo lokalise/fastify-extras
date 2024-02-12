@@ -61,5 +61,18 @@ describe('tokenUtils', () => {
       await app.close()
       await app2.close()
     })
+    it('throws error on empty token', async () => {
+      const app = fastify()
+      void app.register(fastifyJWT, {
+        secret: 'secret',
+      })
+      await app.ready()
+
+      await expect(() => {
+        return decodeJwtToken(app.jwt, '')
+      }).rejects.toThrow('missing token')
+
+      await app.close()
+    })
   })
 })
