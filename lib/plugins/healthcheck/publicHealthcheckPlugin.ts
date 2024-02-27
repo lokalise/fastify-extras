@@ -42,6 +42,9 @@ function plugin(app: FastifyInstance, opts: PublicHealthcheckPluginOptions, done
         const results = await Promise.all(
           opts.healthChecks.map((healthcheck) => {
             return healthcheck.checker(app).then((result) => {
+              if (result.error) {
+                app.log.error(result.error, `${healthcheck.name} healthcheck has failed`)
+              }
               return {
                 name: healthcheck.name,
                 result,
