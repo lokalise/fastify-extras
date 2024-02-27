@@ -27,7 +27,7 @@ type ErrorResponseObject = {
   }
 }
 
-function isZodError(value: unknown): value is ZodError {
+export function isZodError(value: unknown): value is ZodError {
   return (value as ZodError).name === 'ZodError'
 }
 
