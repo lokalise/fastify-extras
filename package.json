@@ -1,6 +1,6 @@
 {
   "name": "@lokalise/fastify-extras",
-  "version": "17.0.0",
+  "version": "17.0.1",
   "description": "Opinionated set of fastify plugins, commonly used in Lokalise",
   "author": {
     "name": "Lokalise",
@@ -43,6 +43,7 @@
   },
   "dependencies": {
     "@bugsnag/js": "^7.22.4",
+    "@lokalise/error-utils": "^1.0.1",
     "@opentelemetry/api": "1.8.0",
     "@opentelemetry/exporter-trace-otlp-grpc": "~0.49.1",
     "@opentelemetry/instrumentation": "~0.49.1",
