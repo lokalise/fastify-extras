@@ -15,7 +15,7 @@ export interface MetricsPluginOptions {
   errorObjectResolver: ErrorObjectResolver
 }
 
-function plugin(app: FastifyInstance, opts: MetricsPluginOptions) {
+function plugin(app: FastifyInstance, opts: MetricsPluginOptions, done: (err?: Error) => void) {
   void app.register(fastifyMetrics, {
     defaultMetrics: { enabled: true },
     endpoint: null,
@@ -23,47 +23,50 @@ function plugin(app: FastifyInstance, opts: MetricsPluginOptions) {
     name: 'metrics',
     routeMetrics: { enabled: true },
   })
+  try {
+    const promServer = fastify({
+      logger: opts.loggerOptions,
+      disableRequestLogging: opts.disablePrometheusRequestLogging ?? true,
+    })
 
-  const promServer = fastify({
-    logger: opts.loggerOptions,
-    disableRequestLogging: opts.disablePrometheusRequestLogging ?? true,
-  })
-
-  promServer.route({
-    url: '/metrics',
-    method: 'GET',
-    logLevel: 'info',
-    schema: {
-      // hide route from swagger plugins
-      // @ts-expect-error
-      hide: true,
-    },
-    handler: async (_, reply) => {
-      const metrics = await app.metrics.client.register.metrics()
-      return reply.type('text/plain').send(metrics)
-    },
-  })
-
-  app.addHook('onClose', async () => {
-    await promServer.close()
-  })
-
-  return promServer
-    .listen({
-      port: METRICS_PORT,
-      host: opts.bindAddress,
-      listenTextResolver: (address) => {
-        return `Prometheus metrics server listening at ${address}`
+    promServer.route({
+      url: '/metrics',
+      method: 'GET',
+      logLevel: 'info',
+      schema: {
+        // hide route from swagger plugins
+        // @ts-expect-error
+        hide: true,
+      },
+      handler: async (_, reply) => {
+        const metrics = await app.metrics.client.register.metrics()
+        return reply.type('text/plain').send(metrics)
       },
     })
-    .catch((err) => {
-      const logObject = opts.errorObjectResolver(err)
-      promServer.log.error(logObject)
-      throw new Error('Critical error when trying to launch metrics server')
+
+    app.addHook('onClose', async () => {
+      await promServer.close()
     })
-    .then(() => {
-      // this is to consume string which plugin does not expect
-    })
+
+    promServer
+      .listen({
+        port: METRICS_PORT,
+        host: opts.bindAddress,
+        listenTextResolver: (address) => {
+          return `Prometheus metrics server listening at ${address}`
+        },
+      })
+      .then(() => {
+        done()
+      })
+      .catch((err) => {
+        const logObject = opts.errorObjectResolver(err)
+        promServer.log.error(logObject)
+        done(new Error('Critical error when trying to launch metrics server'))
+      })
+  } catch (err) {
+    done(err as Error)
+  }
 }
 
 export const metricsPlugin = fp(plugin, {
