@@ -1,10 +1,8 @@
-import { add, init, track } from '@amplitude/analytics-node'
+import { add, init } from '@amplitude/analytics-node'
 import type {
-  AmplitudeReturn,
   BaseEvent,
   NodeOptions,
   Plugin,
-  Result,
 } from '@amplitude/analytics-types'
 import type {
   FastifyInstance,
@@ -13,6 +11,8 @@ import type {
   HookHandlerDoneFunction,
 } from 'fastify'
 import fp from 'fastify-plugin'
+
+import { Amplitude } from "./Amplitude";
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -34,16 +34,16 @@ function plugin(fastify: FastifyInstance, config: AmplitudeConfig, next: (err?: 
 
   init(config.apiKey, config.options)
     .promise.then(() => {
-      if (config.apiUsageTracking) {
-        enableApiUsageTracking(fastify, amplitudeInstance, config.apiUsageTracking)
-      }
-      if (config.plugins) {
-        // @ts-expect-error
-        config.plugins.forEach((e) => add(e))
-      }
+    if (config.apiUsageTracking) {
+      enableApiUsageTracking(fastify, amplitudeInstance, config.apiUsageTracking)
+    }
+    if (config.plugins) {
+      // @ts-expect-error
+      config.plugins.forEach((e) => add(e))
+    }
 
-      next()
-    })
+    next()
+  })
     .catch((err) => {
       next(err as Error)
     })
@@ -119,22 +119,3 @@ export const amplitudePlugin = fp<AmplitudeConfig>(plugin, {
   fastify: '4.x',
   name: 'amplitude-plugin',
 })
-
-export class Amplitude {
-  private readonly isEnabled: boolean
-
-  constructor(isEnabled: boolean) {
-    this.isEnabled = isEnabled
-  }
-
-  /**
-   * Sends the given event to Amplitude
-   *
-   * @param event Event to send to amplitude. Please check
-   * [this](https://amplitude.github.io/Amplitude-TypeScript/interfaces/_amplitude_analytics_node.Types.BaseEvent.html)
-   * to get more info about the BaseEvent type
-   */
-  public track(event: BaseEvent): AmplitudeReturn<Result | null> {
-    return this.isEnabled ? track(event) : { promise: Promise.resolve(null) }
-  }
-}
