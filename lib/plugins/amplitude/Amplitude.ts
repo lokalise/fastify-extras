@@ -1,6 +1,5 @@
 import { track } from '@amplitude/analytics-node'
-import type { AmplitudeReturn, BaseEvent, Result } from "@amplitude/analytics-types";
-
+import type { AmplitudeReturn, BaseEvent, Result } from '@amplitude/analytics-types'
 
 export class Amplitude {
   private readonly isEnabled: boolean
@@ -20,4 +19,3 @@ export class Amplitude {
     return this.isEnabled ? track(event) : { promise: Promise.resolve(null) }
   }
 }
-

@@ -1,9 +1,5 @@
 import { add, init } from '@amplitude/analytics-node'
-import type {
-  BaseEvent,
-  NodeOptions,
-  Plugin,
-} from '@amplitude/analytics-types'
+import type { BaseEvent, NodeOptions, Plugin } from '@amplitude/analytics-types'
 import type {
   FastifyInstance,
   FastifyReply,
@@ -12,7 +8,7 @@ import type {
 } from 'fastify'
 import fp from 'fastify-plugin'
 
-import { Amplitude } from "./Amplitude";
+import { Amplitude } from './Amplitude'
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -34,16 +30,16 @@ function plugin(fastify: FastifyInstance, config: AmplitudeConfig, next: (err?: 
 
   init(config.apiKey, config.options)
     .promise.then(() => {
-    if (config.apiUsageTracking) {
-      enableApiUsageTracking(fastify, amplitudeInstance, config.apiUsageTracking)
-    }
-    if (config.plugins) {
-      // @ts-expect-error
-      config.plugins.forEach((e) => add(e))
-    }
+      if (config.apiUsageTracking) {
+        enableApiUsageTracking(fastify, amplitudeInstance, config.apiUsageTracking)
+      }
+      if (config.plugins) {
+        // @ts-expect-error
+        config.plugins.forEach((e) => add(e))
+      }
 
-    next()
-  })
+      next()
+    })
     .catch((err) => {
       next(err as Error)
     })
