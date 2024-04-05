@@ -176,6 +176,10 @@ The plugin decorates your Fastify instance with a `Amplitude`, which you can inj
 > "@amplitude/analytics-types": "*"
 > ```
 
+Additionally, you have the option to enhance the safety and accuracy of your events and properties by wrapping your `Amplitude` instance with `AmplitudeAdapter`.
+
+> 📘Check [`AmplitudeAdapter.spec.ts](./lib/plugins/amplitude/amplitudePlugin.spec.ts) for a practical example
+
 ### UnhandledException Plugin
 
 This plugin provides a mechanism for handling uncaught exceptions within your Fastify application, ensuring that such exceptions are logged and reported. It's especially useful for capturing unforeseen exceptions and provides a controlled shutdown of the Fastify server, thereby ensuring no potential data corruption.

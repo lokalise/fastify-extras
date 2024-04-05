@@ -48,10 +48,16 @@ export type { HealthChecker } from './plugins/healthcheck/healthcheckCommons'
 
 export {
   amplitudePlugin,
-  Amplitude,
   type AmplitudeConfig,
   type CreateApiTrackingEventFn,
-} from './plugins/amplitudePlugin'
+} from './plugins/amplitude/amplitudePlugin'
+export { Amplitude } from './plugins/amplitude/Amplitude'
+export {
+  AmplitudeAdapter,
+  AMPLITUDE_BASE_MESSAGE_SCHEMA,
+  type AmplitudeMessage,
+  type AmplitudeAdapterDependencies,
+} from './plugins/amplitude/AmplitudeAdapter'
 
 export type { FastifyReplyWithPayload } from './types'
 

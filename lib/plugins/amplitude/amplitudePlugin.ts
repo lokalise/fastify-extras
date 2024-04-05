@@ -1,11 +1,5 @@
-import { add, init, track } from '@amplitude/analytics-node'
-import type {
-  AmplitudeReturn,
-  BaseEvent,
-  NodeOptions,
-  Plugin,
-  Result,
-} from '@amplitude/analytics-types'
+import { add, init } from '@amplitude/analytics-node'
+import type { BaseEvent, NodeOptions, Plugin } from '@amplitude/analytics-types'
 import type {
   FastifyInstance,
   FastifyReply,
@@ -13,6 +7,8 @@ import type {
   HookHandlerDoneFunction,
 } from 'fastify'
 import fp from 'fastify-plugin'
+
+import { Amplitude } from './Amplitude'
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -119,22 +115,3 @@ export const amplitudePlugin = fp<AmplitudeConfig>(plugin, {
   fastify: '4.x',
   name: 'amplitude-plugin',
 })
-
-export class Amplitude {
-  private readonly isEnabled: boolean
-
-  constructor(isEnabled: boolean) {
-    this.isEnabled = isEnabled
-  }
-
-  /**
-   * Sends the given event to Amplitude
-   *
-   * @param event Event to send to amplitude. Please check
-   * [this](https://amplitude.github.io/Amplitude-TypeScript/interfaces/_amplitude_analytics_node.Types.BaseEvent.html)
-   * to get more info about the BaseEvent type
-   */
-  public track(event: BaseEvent): AmplitudeReturn<Result | null> {
-    return this.isEnabled ? track(event) : { promise: Promise.resolve(null) }
-  }
-}

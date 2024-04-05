@@ -1,0 +1,64 @@
+import { randomUUID } from 'crypto'
+
+import type { MockInstance } from 'vitest'
+import { expect, beforeAll } from 'vitest'
+import { z } from 'zod'
+
+import { Amplitude } from './Amplitude'
+import { AMPLITUDE_BASE_MESSAGE_SCHEMA, AmplitudeAdapter } from './AmplitudeAdapter'
+import type { AmplitudeMessage } from './AmplitudeAdapter'
+
+const testMessages: Record<string, AmplitudeMessage> = {
+  myEvent: {
+    schema: AMPLITUDE_BASE_MESSAGE_SCHEMA.extend({
+      event_type: z.literal('my event'),
+      event_properties: z.object({
+        number: z.number(),
+      }),
+    }),
+  },
+}
+const testMessagesValues = Object.values(testMessages)
+type SupportedMessages = typeof testMessagesValues
+
+describe('Amplitude adapter', () => {
+  let amplitudeAdapter: AmplitudeAdapter<SupportedMessages>
+  let amplitudeTrackSpy: MockInstance
+
+  beforeAll(() => {
+    const amplitude = new Amplitude(true)
+    amplitudeTrackSpy = vi
+      .spyOn(amplitude, 'track')
+      .mockImplementation(() => ({ promise: Promise.resolve(null) }))
+    amplitudeAdapter = new AmplitudeAdapter({ amplitude })
+  })
+
+  it('works', () => {
+    const user_id = randomUUID()
+    amplitudeAdapter.track(testMessages.myEvent, {
+      user_id,
+      event_properties: { number: 42 },
+    })
+
+    expect(amplitudeTrackSpy).toHaveBeenCalledWith({
+      event_type: 'my event',
+      user_id,
+      event_properties: { number: 42 },
+    })
+  })
+
+  it('wrong type', () => {
+    let error: unknown
+    try {
+      amplitudeAdapter.track(testMessages.myEvent, {
+        user_id: randomUUID(),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        event_properties: { number: 'bad' as any },
+      })
+    } catch (e) {
+      error = e
+    }
+
+    expect(error).toBeInstanceOf(z.ZodError)
+  })
+})
