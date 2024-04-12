@@ -1,4 +1,9 @@
-export { bugsnagPlugin, reportErrorToBugsnag, bugsnagErrorReporter } from './plugins/bugsnagPlugin'
+export {
+  bugsnagPlugin,
+  reportErrorToBugsnag,
+  bugsnagErrorReporter,
+  addFeatureFlag,
+} from './plugins/bugsnagPlugin'
 export type { ErrorReport } from './plugins/bugsnagPlugin'
 
 export {
