@@ -68,7 +68,7 @@
   },
   "devDependencies": {
     "@fastify/request-context": "^5.0.0",
-    "@lokalise/node-core": "^9.6.1",
+    "@lokalise/node-core": "^9.13.0",
     "@types/newrelic": "^9.14.3",
     "@types/node": "^20.11.5",
     "@amplitude/analytics-types": "^2.3.1",
