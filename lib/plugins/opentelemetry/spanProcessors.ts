@@ -14,18 +14,14 @@ import { REQUEST_ID_STORE_KEY } from '../requestContextProviderPlugin'
  */
 export class LokaliseSimpleSpanProcessor extends SimpleSpanProcessor {
   onStart(span: Span) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const requestId = requestContext.get(REQUEST_ID_STORE_KEY)
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     span.setAttribute(REQUEST_ID_STORE_KEY, requestId)
   }
 }
 
 export class LokaliseBatchSpanProcessor extends BatchSpanProcessor {
   onStart(span: Span) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const requestId = requestContext.get(REQUEST_ID_STORE_KEY)
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     span.setAttribute(REQUEST_ID_STORE_KEY, requestId)
   }
 }
