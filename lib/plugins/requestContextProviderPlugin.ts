@@ -1,13 +1,13 @@
-import { randomUUID } from 'crypto'
+import { randomUUID } from 'node:crypto'
 
 import { requestContext } from '@fastify/request-context'
+import type { CommonLogger } from '@lokalise/node-core'
 import type {
   FastifyReply,
   FastifyRequest,
   FastifyInstance,
   HookHandlerDoneFunction,
   FastifyServerOptions,
-  FastifyBaseLogger,
 } from 'fastify'
 import fp from 'fastify-plugin'
 
@@ -21,7 +21,7 @@ declare module 'fastify' {
 }
 
 export interface BaseRequestContext {
-  logger: FastifyBaseLogger
+  logger: CommonLogger
   reqId: string
 }
 

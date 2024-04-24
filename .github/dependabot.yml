@@ -18,5 +18,6 @@ updates:
       - dependency-name: '@typescript-eslint/parser'
       - dependency-name: '@types/node'
       - dependency-name: '@opentelemetry/*'
+      - dependency-name: '@prisma/instrumentation'
     labels:
       - 'skip-release'
