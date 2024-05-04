@@ -49,12 +49,17 @@ export class NewRelicTransactionManager {
     newrelic.addCustomAttribute(attrName, attrValue)
   }
 
-  public start(jobName: string, uniqueTransactionKey: string): void {
+  /**
+   *
+   * @param transactionName - used for grouping similar transactions together
+   * @param uniqueTransactionKey - used for identifying specific ongoing transaction. Must be reasonably unique to reduce possibility of collisions
+   */
+  public start(transactionName: string, uniqueTransactionKey: string): void {
     if (!this.isEnabled) {
       return
     }
 
-    newrelic.startBackgroundTransaction(jobName, () => {
+    newrelic.startBackgroundTransaction(transactionName, () => {
       this.transactionMap.set(uniqueTransactionKey, newrelic.getTransaction())
     })
   }
