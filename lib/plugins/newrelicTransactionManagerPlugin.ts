@@ -6,6 +6,7 @@ import type {
   shutdown as Shutdown,
   getTransaction as GetTransaction,
 } from 'newrelic'
+import { FifoMap } from 'toad-cache'
 
 interface Newrelic {
   startBackgroundTransaction: typeof startBackgroundTransactionType
@@ -28,7 +29,7 @@ export interface NewRelicTransactionManagerOptions {
 
 export class NewRelicTransactionManager {
   private readonly isEnabled: boolean
-  private readonly transactionMap: Map<string, TransactionHandle>
+  private readonly transactionMap: FifoMap<TransactionHandle>
 
   constructor(isNewRelicEnabled: boolean) {
     if (isNewRelicEnabled) {
@@ -37,7 +38,7 @@ export class NewRelicTransactionManager {
     }
 
     this.isEnabled = isNewRelicEnabled
-    this.transactionMap = new Map()
+    this.transactionMap = new FifoMap(2000)
   }
 
   public addCustomAttribute(attrName: string, attrValue: string | number | boolean) {
@@ -48,23 +49,23 @@ export class NewRelicTransactionManager {
     newrelic.addCustomAttribute(attrName, attrValue)
   }
 
-  public start(jobName: string): void {
+  public start(jobName: string, uniqueTransactionKey?: string): void {
     if (!this.isEnabled) {
       return
     }
 
     newrelic.startBackgroundTransaction(jobName, () => {
-      this.transactionMap.set(jobName, newrelic.getTransaction())
+      this.transactionMap.set(uniqueTransactionKey ?? jobName, newrelic.getTransaction())
     })
   }
 
-  public stop(jobId: string): void {
+  public stop(jobId: string, uniqueTransactionKey?: string): void {
     if (!this.isEnabled) {
       return
     }
 
-    const transaction = this.transactionMap.get(jobId) ?? null
-    if (null === transaction) {
+    const transaction = this.transactionMap.get(uniqueTransactionKey ?? jobId) ?? null
+    if (!transaction) {
       return
     }
     transaction.end()
