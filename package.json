@@ -1,6 +1,6 @@
 {
   "name": "@lokalise/fastify-extras",
-  "version": "18.0.0",
+  "version": "19.0.0",
   "description": "Opinionated set of fastify plugins, commonly used in Lokalise",
   "author": {
     "name": "Lokalise",
@@ -37,8 +37,8 @@
     "test": "vitest",
     "test:coverage": "vitest --coverage",
     "test:ci": "npm run lint && npm run test:coverage",
-    "lint": "eslint . --ext .ts && prettier --check --log-level warn \"**/*.{json,md,ts}\"",
-    "lint:fix": "eslint . --fix && prettier --write --log-level warn \"**/*.{json,md,ts}\"",
+    "lint": "eslint . --ext .ts && prettier --check --log-level warn \"**/*.{json,md,ts}\" !CHANGELOG.md",
+    "lint:fix": "eslint . --fix && prettier --write --log-level warn \"**/*.{json,md,ts}\" !CHANGELOG.md",
     "version": "auto-changelog -p && git add CHANGELOG.md"
   },
   "dependencies": {
