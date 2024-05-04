@@ -49,27 +49,27 @@ export class NewRelicTransactionManager {
     newrelic.addCustomAttribute(attrName, attrValue)
   }
 
-  public start(jobName: string, uniqueTransactionKey?: string): void {
+  public start(jobName: string, uniqueTransactionKey: string): void {
     if (!this.isEnabled) {
       return
     }
 
     newrelic.startBackgroundTransaction(jobName, () => {
-      this.transactionMap.set(uniqueTransactionKey ?? jobName, newrelic.getTransaction())
+      this.transactionMap.set(uniqueTransactionKey, newrelic.getTransaction())
     })
   }
 
-  public stop(jobId: string, uniqueTransactionKey?: string): void {
+  public stop(uniqueTransactionKey: string): void {
     if (!this.isEnabled) {
       return
     }
 
-    const transaction = this.transactionMap.get(uniqueTransactionKey ?? jobId) ?? null
+    const transaction = this.transactionMap.get(uniqueTransactionKey) ?? null
     if (!transaction) {
       return
     }
     transaction.end()
-    this.transactionMap.delete(jobId)
+    this.transactionMap.delete(uniqueTransactionKey)
   }
 }
 
