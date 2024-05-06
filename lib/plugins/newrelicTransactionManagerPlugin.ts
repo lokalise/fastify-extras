@@ -1,3 +1,4 @@
+import type { TransactionObservabilityManager } from '@lokalise/node-core'
 import type { FastifyInstance } from 'fastify'
 import fp from 'fastify-plugin'
 import type {
@@ -27,7 +28,7 @@ export interface NewRelicTransactionManagerOptions {
   isEnabled: boolean
 }
 
-export class NewRelicTransactionManager {
+export class NewRelicTransactionManager implements TransactionObservabilityManager {
   private readonly isEnabled: boolean
   private readonly transactionMap: FifoMap<TransactionHandle>
 
@@ -50,7 +51,6 @@ export class NewRelicTransactionManager {
   }
 
   /**
-   *
    * @param transactionName - used for grouping similar transactions together
    * @param uniqueTransactionKey - used for identifying specific ongoing transaction. Must be reasonably unique to reduce possibility of collisions
    */
@@ -60,6 +60,25 @@ export class NewRelicTransactionManager {
     }
 
     newrelic.startBackgroundTransaction(transactionName, () => {
+      this.transactionMap.set(uniqueTransactionKey, newrelic.getTransaction())
+    })
+  }
+
+  /**
+   * @param transactionName - used for grouping similar transactions together
+   * @param uniqueTransactionKey - used for identifying specific ongoing transaction. Must be reasonably unique to reduce possibility of collisions   *
+   * @param transactionGroup - group is used for grouping related transactions with different names
+   */
+  public startWithGroup(
+    transactionName: string,
+    uniqueTransactionKey: string,
+    transactionGroup: string,
+  ): void {
+    if (!this.isEnabled) {
+      return
+    }
+
+    newrelic.startBackgroundTransaction(transactionName, transactionGroup, () => {
       this.transactionMap.set(uniqueTransactionKey, newrelic.getTransaction())
     })
   }
