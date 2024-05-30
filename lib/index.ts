@@ -66,7 +66,10 @@ export {
 
 export type { FastifyReplyWithPayload } from './types'
 
-export { unhandledExceptionPlugin } from './plugins/unhandledExceptionPlugin'
+export {
+  unhandledExceptionPlugin,
+  commonErrorObjectResolver,
+} from './plugins/unhandledExceptionPlugin'
 export type { UnhandledExceptionPluginOptions } from './plugins/unhandledExceptionPlugin'
 
 export { createErrorHandler, isZodError } from './errors/errorHandler'

@@ -3,7 +3,7 @@ import { registerInstrumentations } from '@opentelemetry/instrumentation'
 import { Resource } from '@opentelemetry/resources'
 import { TraceIdRatioBasedSampler } from '@opentelemetry/sdk-trace-base'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
+import { SEMRESATTRS_SERVICE_NAME } from '@opentelemetry/semantic-conventions'
 import { PrismaInstrumentation } from '@prisma/instrumentation'
 import type { FastifyInstance } from 'fastify'
 import fp from 'fastify-plugin'
@@ -22,7 +22,7 @@ function plugin(app: FastifyInstance, opts: PrismaOtelTracingPluginConfig, done:
     const provider = new NodeTracerProvider({
       sampler: new TraceIdRatioBasedSampler(opts.samplingRatio),
       resource: new Resource({
-        [SemanticResourceAttributes.SERVICE_NAME]: opts.serviceName,
+        [SEMRESATTRS_SERVICE_NAME]: opts.serviceName,
       }),
     })
 

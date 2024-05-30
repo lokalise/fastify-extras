@@ -6,7 +6,7 @@ test/
 .nyc_output/
 coverage/
 lib/
-vitest.config.ts
+vitest.config.mts
 package-lock.json
 tsconfig.json
 .eslintrc.json
