@@ -119,7 +119,12 @@ export function createErrorHandler(params: ErrorHandlerParams) {
     const logObject = params.resolveLogObject?.(error) ?? resolveLogObject(error)
 
     if (isInternalError(error)) {
-      params.errorReporter.report({ error })
+      params.errorReporter.report({
+        error,
+        context: {
+          'x-request-id': request.id,
+        },
+      })
     }
 
     const responseObject = params.resolveResponseObject?.(error) ?? resolveResponseObject(error)

@@ -60,5 +60,5 @@
       }
     }
   ],
-  "ignorePatterns": ["node_modules", "vitest.config.ts"]
+  "ignorePatterns": ["node_modules", "vitest.config.mts"]
 }
