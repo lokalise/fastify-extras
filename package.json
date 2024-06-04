@@ -16,7 +16,6 @@
     "newrelic",
     "bugsnag",
     "request-context",
-    "als",
     "request-id",
     "split-io"
   ],
@@ -44,14 +43,6 @@
   "dependencies": {
     "@bugsnag/js": "^7.22.7",
     "@lokalise/error-utils": "^1.2.2",
-    "@opentelemetry/api": "1.8.0",
-    "@opentelemetry/exporter-trace-otlp-grpc": "0.50.0",
-    "@opentelemetry/instrumentation": "0.50.0",
-    "@opentelemetry/resources": "1.23.0",
-    "@opentelemetry/sdk-trace-base": "1.23.0",
-    "@opentelemetry/sdk-trace-node": "1.23.0",
-    "@opentelemetry/semantic-conventions": "1.23.0",
-    "@prisma/instrumentation": "^5.13.0",
     "@splitsoftware/splitio": "^10.25.2",
     "@amplitude/analytics-node": "^1.3.5",
     "fastify-metrics": "^11.0.0",
@@ -60,7 +51,6 @@
     "tslib": "^2.6.2"
   },
   "peerDependencies": {
-    "@fastify/request-context": "^5.1.0",
     "fastify": "^4.24.3",
     "@fastify/jwt": "^8.0.1",
     "newrelic": "^11.13.0",
@@ -68,7 +58,6 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@fastify/request-context": "^5.1.0",
     "@lokalise/node-core": "^9.20.0",
     "@types/newrelic": "^9.14.3",
     "@types/node": "^20.12.13",

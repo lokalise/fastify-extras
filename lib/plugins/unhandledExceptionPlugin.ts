@@ -1,11 +1,8 @@
-import { requestContext } from '@fastify/request-context'
 import type { ErrorReporter } from '@lokalise/node-core'
 import { InternalError, isError } from '@lokalise/node-core'
 import type { FastifyInstance } from 'fastify'
 import fp from 'fastify-plugin'
 import { stdSerializers } from 'pino'
-
-import { REQUEST_ID_STORE_KEY } from './requestContextProviderPlugin'
 
 export const commonErrorObjectResolver: ErrorObjectResolver = (
   err: unknown,
@@ -26,14 +23,10 @@ export interface UnhandledExceptionPluginOptions {
 }
 
 function handler(app: FastifyInstance, opts: UnhandledExceptionPluginOptions, err: Error): void {
-  const reqId = requestContext.get(REQUEST_ID_STORE_KEY)
-  const logObject = opts.errorObjectResolver(err, reqId)
+  const logObject = opts.errorObjectResolver(err)
   app.log.fatal(logObject, 'uncaught exception detected')
   opts.errorReporter.report({
     error: err,
-    context: {
-      'x-request-id': reqId,
-    },
   })
 
   if (opts.shutdownAfterHandling) {
