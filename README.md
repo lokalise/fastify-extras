@@ -23,14 +23,6 @@ The following needs to be taken into consideration when adding new runtime depen
 ### Dependencies
 
 - `@bugsnag/js`;
-- `@opentelemetry/api`;
-- `@opentelemetry/exporter-trace-otlp-grpc`;
-- `@opentelemetry/instrumentation`;
-- `@opentelemetry/resources`;
-- `@opentelemetry/sdk-trace-base`;
-- `@opentelemetry/sdk-trace-node`;
-- `@opentelemetry/semantic-conventions`;
-- `@prisma/instrumentation`;
 - `@splitsoftware/splitio`;
 - `fastify-metrics`;
 - `fastify-plugin`;
@@ -38,7 +30,6 @@ The following needs to be taken into consideration when adding new runtime depen
 
 ### Peer Dependencies
 
-- `@fastify/request-context`;
 - `@fastify/jwt`;
 - `fastify`;
 - `newrelic`;
@@ -51,9 +42,8 @@ The following needs to be taken into consideration when adding new runtime depen
 Plugin to:
 
 - extend existing `FastifyRequest` with request context by setting the following:
-  - `logger`, an instance of `FastifyBaseLogger`;
+  - `logger`, a child logger of app.log, with prepopulated header `x-request-id`;
   - `reqId`, the request-id;
-- store the request-id in Asynchronous Local Storage to be picked up by instrumentation tooling (e. g. OpenTelemetry).
 
 No options are required to register the plugin.
 

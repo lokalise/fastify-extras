@@ -1,6 +1,5 @@
 import { randomUUID } from 'node:crypto'
 
-import { requestContext } from '@fastify/request-context'
 import type { CommonLogger } from '@lokalise/node-core'
 import type {
   FastifyReply,
@@ -10,8 +9,6 @@ import type {
   FastifyServerOptions,
 } from 'fastify'
 import fp from 'fastify-plugin'
-
-export const REQUEST_ID_STORE_KEY = 'request_id'
 
 // Augment existing FastifyRequest interface with new fields
 declare module 'fastify' {
@@ -28,12 +25,6 @@ export interface BaseRequestContext {
 // Add new interface to the fastify module
 declare module 'fastify' {
   interface RequestContext extends BaseRequestContext {}
-}
-
-declare module '@fastify/request-context' {
-  interface RequestContextData {
-    [REQUEST_ID_STORE_KEY]: string
-  }
 }
 
 export function getRequestIdFastifyAppConfig(): Pick<
@@ -60,9 +51,6 @@ function plugin(fastify: FastifyInstance, opts: unknown, done: () => void) {
         }),
         reqId: req.id,
       }
-
-      // Store request_id in AsyncLocalStorage to be picked up by instrumentation tooling, such as OpenTelemetry
-      requestContext.set(REQUEST_ID_STORE_KEY, req.id)
 
       next()
     },
