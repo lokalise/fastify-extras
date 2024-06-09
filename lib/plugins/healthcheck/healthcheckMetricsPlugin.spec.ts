@@ -1,5 +1,5 @@
+import { buildClient, sendGet, UNKNOWN_RESPONSE_SCHEMA } from '@lokalise/backend-http-client'
 import type { Either } from '@lokalise/node-core'
-import { buildClient, sendGet } from '@lokalise/node-core'
 import type { FastifyInstance } from 'fastify'
 import fastify from 'fastify'
 
@@ -9,6 +9,11 @@ import type { PrometheusHealthCheck } from './healthcheckMetricsPlugin'
 import { healthcheckMetricsPlugin, wrapHealthCheckForPrometheus } from './healthcheckMetricsPlugin'
 
 let app: FastifyInstance
+
+const TEST_REQUEST_OPTIONS = {
+  requestLabel: 'test',
+  responseSchema: UNKNOWN_RESPONSE_SCHEMA,
+}
 
 async function initApp(healthChecks: PrometheusHealthCheck[]) {
   const testApp = fastify()
@@ -45,7 +50,11 @@ describe('healthcheckMetricsPlugin', () => {
       },
     ])
 
-    const response = await sendGet(buildClient('http://127.0.0.1:9080'), '/metrics')
+    const response = await sendGet(
+      buildClient('http://127.0.0.1:9080'),
+      '/metrics',
+      TEST_REQUEST_OPTIONS,
+    )
 
     expect(response.result.statusCode).toBe(200)
     expect(response.result.body).toContain('test_healthcheck_availability 1')
@@ -66,7 +75,11 @@ describe('healthcheckMetricsPlugin', () => {
       },
     ])
 
-    const response = await sendGet(buildClient('http://127.0.0.1:9080'), '/metrics')
+    const response = await sendGet(
+      buildClient('http://127.0.0.1:9080'),
+      '/metrics',
+      TEST_REQUEST_OPTIONS,
+    )
 
     expect(response.result.statusCode).toBe(200)
     expect(response.result.body).toContain('test_healthcheck_availability 0')
@@ -97,7 +110,11 @@ describe('healthcheckMetricsPlugin', () => {
       },
     ])
 
-    const response = await sendGet(buildClient('http://127.0.0.1:9080'), '/metrics')
+    const response = await sendGet(
+      buildClient('http://127.0.0.1:9080'),
+      '/metrics',
+      TEST_REQUEST_OPTIONS,
+    )
 
     expect(response.result.statusCode).toBe(200)
     expect(response.result.body).toContain('test_healthcheck_1_availability 1')
@@ -133,7 +150,11 @@ describe('healthcheckMetricsPlugin', () => {
       }, 'test_healthcheck'),
     ])
 
-    const response = await sendGet(buildClient('http://127.0.0.1:9080'), '/metrics')
+    const response = await sendGet(
+      buildClient('http://127.0.0.1:9080'),
+      '/metrics',
+      TEST_REQUEST_OPTIONS,
+    )
 
     expect(response.result.statusCode).toBe(200)
     expect(response.result.body).toContain('test_healthcheck_availability 1')
