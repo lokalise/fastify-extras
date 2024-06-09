@@ -19,5 +19,7 @@ updates:
       - dependency-name: '@types/node'
       - dependency-name: '@opentelemetry/*'
       - dependency-name: '@prisma/instrumentation'
+      - dependency-name: 'eslint'
+      - dependency-name: 'eslint-plugin-vitest'
     labels:
       - 'skip-release'
