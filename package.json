@@ -58,7 +58,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@lokalise/node-core": "^9.22.0",
+    "@lokalise/node-core": "^10.0.0",
     "@lokalise/backend-http-client": "^1.0.0",
     "@types/newrelic": "^9.14.3",
     "@types/node": "^20.12.13",
