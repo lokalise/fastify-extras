@@ -47,18 +47,38 @@ describe('Amplitude adapter', () => {
     })
   })
 
+  it('works with user_id SYSTEM', () => {
+    const user_id = 'SYSTEM'
+    amplitudeAdapter.track(testMessages.myEvent, {
+      user_id,
+      event_properties: { number: 42 },
+    })
+
+    expect(amplitudeTrackSpy).toHaveBeenCalledWith({
+      event_type: 'my event',
+      user_id,
+      event_properties: { number: 42 },
+    })
+  })
+
   it('wrong type', () => {
-    let error: unknown
-    try {
+    expect(() =>
       amplitudeAdapter.track(testMessages.myEvent, {
         user_id: randomUUID(),
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         event_properties: { number: 'bad' as any },
-      })
-    } catch (e) {
-      error = e
-    }
+      }),
+    ).toThrow(z.ZodError)
+  })
 
-    expect(error).toBeInstanceOf(z.ZodError)
+  it('wrong user id', () => {
+    expect(() =>
+      amplitudeAdapter.track(testMessages.myEvent, {
+        user_id: 'wrong',
+        event_properties: {
+          number: 1,
+        },
+      }),
+    ).toThrow(z.ZodError)
   })
 })
