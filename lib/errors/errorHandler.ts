@@ -34,7 +34,7 @@ export function isZodError(value: unknown): value is ZodError {
 function resolveLogObject(error: unknown): FreeformRecord {
   if (isInternalError(error)) {
     return {
-      message: error.message,
+      msg: error.message,
       code: error.errorCode,
       details: error.details ? JSON.stringify(error.details) : undefined,
       error: pino.stdSerializers.err({
@@ -129,7 +129,13 @@ export function createErrorHandler(params: ErrorHandlerParams) {
 
     const responseObject = params.resolveResponseObject?.(error) ?? resolveResponseObject(error)
     if (responseObject.statusCode >= 500) {
-      request.log.error(logObject)
+      // Potentially request can break before we resolved the context
+      if (request.reqContext) {
+        // this preserves correct request id field
+        request.reqContext.logger.error(logObject)
+      } else {
+        request.log.error(logObject)
+      }
     }
 
     void reply.status(responseObject.statusCode).send(responseObject.payload)
