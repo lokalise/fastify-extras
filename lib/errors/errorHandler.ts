@@ -1,5 +1,6 @@
 import type { ErrorReporter } from '@lokalise/node-core'
 import {
+  isError,
   isInternalError,
   isObject,
   isPublicNonRecoverableError,
@@ -118,17 +119,18 @@ export function createErrorHandler(params: ErrorHandlerParams) {
   ): void {
     const logObject = params.resolveLogObject?.(error) ?? resolveLogObject(error)
 
-    if (isInternalError(error)) {
-      params.errorReporter.report({
-        error,
-        context: {
-          'x-request-id': request.id,
-        },
-      })
-    }
-
     const responseObject = params.resolveResponseObject?.(error) ?? resolveResponseObject(error)
     if (responseObject.statusCode >= 500) {
+      params.errorReporter.report({
+        error: isError(error) ? error : new Error('Unhandled error'),
+        context: {
+          'x-request-id': request.id,
+          // If error is not an instance of Error, include its properties in the context for additional information.
+          // Error details are included in the 'error' property above, so duplicating them in the context is unnecessary.
+          ...(!isError(error) ? error : {}),
+        },
+      })
+
       // Potentially request can break before we resolved the context
       if (request.reqContext) {
         // this preserves correct request id field

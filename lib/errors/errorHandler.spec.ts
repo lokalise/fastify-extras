@@ -127,7 +127,7 @@ describe('errorHandler', () => {
     ])
   })
 
-  it('sends error to the reporter', async () => {
+  it('sends InternalError to the reporter', async () => {
     const logs: ErrorReport[] = []
 
     app = await initApp(
@@ -153,6 +153,60 @@ describe('errorHandler', () => {
     expect(logs[0].error).toMatchObject({
       message: 'Internal error',
       errorCode: 'INTERNAL',
+    })
+  })
+  it('sends generic error to the reporter', async () => {
+    const logs: ErrorReport[] = []
+
+    app = await initApp(
+      () => {
+        throw new Error('Something generic happened')
+      },
+      {
+        errorReporter: {
+          report: (err) => {
+            logs.push(err)
+          },
+        },
+      },
+    )
+
+    const response = await app.inject().get('/').end()
+
+    expect(response.statusCode).toBe(500)
+    expect(logs).toHaveLength(1)
+    expect(logs[0].error).toMatchObject({
+      message: 'Something generic happened',
+      stack: expect.stringContaining('Something generic happened'),
+    })
+  })
+  it('sends throwable to the reporter', async () => {
+    const logs: ErrorReport[] = []
+
+    app = await initApp(
+      () => {
+        throw {
+          foo: 'Something happened',
+        }
+      },
+      {
+        errorReporter: {
+          report: (err) => {
+            logs.push(err)
+          },
+        },
+      },
+    )
+
+    const response = await app.inject().get('/').end()
+
+    expect(response.statusCode).toBe(500)
+    expect(logs).toHaveLength(1)
+    expect(logs[0].error).toMatchObject({
+      message: 'Unhandled error',
+    })
+    expect(logs[0].context).toMatchObject({
+      foo: 'Something happened',
     })
   })
 
