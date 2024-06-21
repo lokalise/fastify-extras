@@ -4,7 +4,7 @@ import type { FastifyInstance } from 'fastify'
 import fastify from 'fastify'
 import type { RouteHandlerMethod } from 'fastify/types/route'
 import type { SpyInstance } from 'vitest'
-import { expect, vitest } from 'vitest'
+import { vitest } from 'vitest'
 import { z } from 'zod'
 
 import type { ErrorHandlerParams, FreeformRecord } from './errorHandler'
