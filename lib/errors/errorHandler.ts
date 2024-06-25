@@ -48,8 +48,7 @@ function resolveLogObject(error: unknown): FreeformRecord {
 
   return {
     message: isObject(error) ? error.message : JSON.stringify(error),
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    error: error instanceof Error ? pino.stdSerializers.err(error) : error,
+    error: isError(error) ? pino.stdSerializers.err(error) : error,
   }
 }
 
