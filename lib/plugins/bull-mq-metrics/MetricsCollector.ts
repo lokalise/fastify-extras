@@ -5,6 +5,7 @@ import type { Redis } from 'ioredis'
 import * as prometheus from 'prom-client'
 
 import type { BullMqMetricsPluginOptions } from '../bullMqMetricsPlugin'
+
 import { BackgroundJobsBasedQueueDiscoverer } from './queueDiscoverers'
 
 type Metrics = {
@@ -98,14 +99,15 @@ export class MetricsCollector {
     { metricsPrefix, histogramBuckets }: MetricCollectorOptions,
   ): Metrics {
     const metrics = getMetrics(metricsPrefix, histogramBuckets)
+    const metricNames = Object.keys(metrics)
 
     // If metrics are already registered, just return them to avoid triggering a Prometheus error
-    if (registry.getSingleMetric(Object.keys(metrics).pop()!)) {
+    if (metricNames.length > 0 && registry.getSingleMetric(metricNames[0])) {
       const retrievedMetrics = registry.getMetricsAsArray()
       const returnValue: Record<string, prometheus.MetricObject> = {}
 
       for (const metric of retrievedMetrics) {
-        if (Object.keys(metrics).includes(metric.name)) {
+        if (metricNames.includes(metric.name)) {
           returnValue[metric.name as keyof Metrics] = metric
         }
       }
