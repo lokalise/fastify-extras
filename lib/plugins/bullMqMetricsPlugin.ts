@@ -4,11 +4,13 @@ import fp from 'fastify-plugin'
 import type { Redis } from 'ioredis'
 
 import { MetricsCollector } from './bull-mq-metrics/MetricsCollector'
+import { QueueDiscoverer } from './bull-mq-metrics/queueDiscoverers'
 
 export type BullMqMetricsPluginOptions = {
   redisClient: Redis
   bullMqPrefix?: string
   metricsPrefix?: string
+  queueDiscoverer?: QueueDiscoverer
   excludedQueues?: string[]
   collectionIntervalInMs?: number
   histogramBuckets?: number[]

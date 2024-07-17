@@ -1,8 +1,11 @@
+import { setTimeout } from 'node:timers/promises'
+
 import { Queue, QueueEvents } from 'bullmq'
 import type { Redis } from 'ioredis'
 import * as prometheus from 'prom-client'
 
 import type { BullMqMetricsPluginOptions } from '../bullMqMetricsPlugin'
+import { BackgroundJobsBasedQueueDiscoverer } from './queueDiscoverers'
 
 type Metrics = {
   completedGauge: prometheus.Gauge<never>
@@ -15,6 +18,46 @@ type Metrics = {
 }
 
 type MetricCollectorOptions = Required<Omit<BullMqMetricsPluginOptions, 'redisClient'>>
+
+const getMetrics = (prefix: string, histogramBuckets: number[]): Metrics => ({
+  completedGauge: new prometheus.Gauge({
+    name: `${prefix}_jobs_completed`,
+    help: 'Total number of completed jobs',
+    labelNames: ['queue'],
+  }),
+  activeGauge: new prometheus.Gauge({
+    name: `${prefix}_jobs_active`,
+    help: 'Total number of active jobs (currently being processed)',
+    labelNames: ['queue'],
+  }),
+  failedGauge: new prometheus.Gauge({
+    name: `${prefix}_jobs_failed`,
+    help: 'Total number of failed jobs',
+    labelNames: ['queue'],
+  }),
+  delayedGauge: new prometheus.Gauge({
+    name: `${prefix}_jobs_delayed`,
+    help: 'Total number of jobs that will run in the future',
+    labelNames: ['queue'],
+  }),
+  waitingGauge: new prometheus.Gauge({
+    name: `${prefix}_jobs_waiting`,
+    help: 'Total number of jobs waiting to be processed',
+    labelNames: ['queue'],
+  }),
+  processedDuration: new prometheus.Histogram({
+    name: `${prefix}_jobs_processed_duration`,
+    help: 'Processing time for completed jobs (processing until completed)',
+    buckets: histogramBuckets,
+    labelNames: ['queue'],
+  }),
+  completedDuration: new prometheus.Histogram({
+    name: `${prefix}_jobs_completed_duration`,
+    help: 'Completion time for jobs (created until completed)',
+    buckets: histogramBuckets,
+    labelNames: ['queue'],
+  }),
+})
 
 export class MetricsCollector {
   private readonly options: MetricCollectorOptions
@@ -32,6 +75,7 @@ export class MetricsCollector {
       excludedQueues: [],
       collectionIntervalInMs: 5000,
       histogramBuckets: [20, 50, 150, 400, 1000, 3000, 8000, 22000, 60000, 150000],
+      queueDiscoverer: new BackgroundJobsBasedQueueDiscoverer(this.redis),
       ...options,
     }
 
@@ -39,7 +83,7 @@ export class MetricsCollector {
   }
 
   async start() {
-    const queueNames = await this.findQueues(this.redis, this.options)
+    const queueNames = await this.options.queueDiscoverer.discoverQueues()
     await Promise.all(
       queueNames.map((name) => this.observeQueue(name, this.redis, this.metrics, this.options)),
     )
@@ -53,44 +97,20 @@ export class MetricsCollector {
     registry: prometheus.Registry,
     { metricsPrefix, histogramBuckets }: MetricCollectorOptions,
   ): Metrics {
-    const metrics: Metrics = {
-      completedGauge: new prometheus.Gauge({
-        name: `${metricsPrefix}_jobs_completed`,
-        help: 'Total number of completed jobs',
-        labelNames: ['queue'],
-      }),
-      activeGauge: new prometheus.Gauge({
-        name: `${metricsPrefix}_jobs_active`,
-        help: 'Total number of active jobs (currently being processed)',
-        labelNames: ['queue'],
-      }),
-      failedGauge: new prometheus.Gauge({
-        name: `${metricsPrefix}_jobs_failed`,
-        help: 'Total number of failed jobs',
-        labelNames: ['queue'],
-      }),
-      delayedGauge: new prometheus.Gauge({
-        name: `${metricsPrefix}_jobs_delayed`,
-        help: 'Total number of jobs that will run in the future',
-        labelNames: ['queue'],
-      }),
-      waitingGauge: new prometheus.Gauge({
-        name: `${metricsPrefix}_jobs_waiting`,
-        help: 'Total number of jobs waiting to be processed',
-        labelNames: ['queue'],
-      }),
-      processedDuration: new prometheus.Histogram({
-        name: `${metricsPrefix}_jobs_processed_duration`,
-        help: 'Processing time for completed jobs (processing until completed)',
-        buckets: histogramBuckets,
-        labelNames: ['queue'],
-      }),
-      completedDuration: new prometheus.Histogram({
-        name: `${metricsPrefix}_jobs_completed_duration`,
-        help: 'Completion time for jobs (created until completed)',
-        buckets: histogramBuckets,
-        labelNames: ['queue'],
-      }),
+    const metrics = getMetrics(metricsPrefix, histogramBuckets)
+
+    // If metrics are already registered, just return them to avoid triggering a Prometheus error
+    if (registry.getSingleMetric(Object.keys(metrics).pop()!)) {
+      const retrievedMetrics = registry.getMetricsAsArray()
+      const returnValue: Record<string, prometheus.MetricObject> = {}
+
+      for (const metric of retrievedMetrics) {
+        if (Object.keys(metrics).includes(metric.name)) {
+          returnValue[metric.name as keyof Metrics] = metric
+        }
+      }
+
+      return returnValue as unknown as Metrics
     }
 
     for (const metric of Object.values(metrics)) {
@@ -98,25 +118,6 @@ export class MetricsCollector {
     }
 
     return metrics
-  }
-
-  private async findQueues(
-    redis: Redis,
-    { bullMqPrefix }: MetricCollectorOptions,
-  ): Promise<string[]> {
-    const scanStream = redis.scanStream({
-      match: `${bullMqPrefix}:*:meta`,
-    })
-
-    const queues = new Set<string>()
-    for await (const chunk of scanStream) {
-      ;(chunk as string[])
-        .map((key) => key.split(':')[1])
-        .filter((value) => !!value)
-        .forEach((queue) => queues.add(queue))
-    }
-
-    return Array.from(queues)
   }
 
   private async observeQueue(
@@ -155,7 +156,7 @@ export class MetricsCollector {
       metrics.failedGauge.labels({ queue: name }).set(failed)
       metrics.waitingGauge.labels({ queue: name }).set(waiting)
 
-      await new Promise((resolve) => setTimeout(resolve, collectionIntervalInMs))
+      await setTimeout(collectionIntervalInMs)
     }
 
     await events.close()
