@@ -1,15 +1,17 @@
 import type { FastifyInstance } from 'fastify'
 import 'fastify-metrics'
 import fp from 'fastify-plugin'
+import type { Redis } from 'ioredis'
 
 import { MetricsCollector } from './bull-mq-metrics/MetricsCollector'
 
 export type BullMqMetricsPluginOptions = {
-  bullMqPrefix: string
-  metricsPrefix: string
-  excludedQueues: string[]
-  collectionIntervalInMs: number
-  histogramBuckets: number[]
+  redisClient: Redis
+  bullMqPrefix?: string
+  metricsPrefix?: string
+  excludedQueues?: string[]
+  collectionIntervalInMs?: number
+  histogramBuckets?: number[]
 }
 
 function plugin(
@@ -20,11 +22,15 @@ function plugin(
   try {
     const promClient = fastify.metrics.client
     if (!promClient) {
-      return next(new Error('Prometheus client is not registered'))
+      return next(
+        new Error(
+          'No Prometheus Client found, BullMQ metrics plugin requires `fastify-metrics` plugin to be registered',
+        ),
+      )
     }
 
     const collector = new MetricsCollector(
-      fastify.diContainer.cradle.redis,
+      pluginOptions.redisClient,
       promClient.register,
       pluginOptions,
     )

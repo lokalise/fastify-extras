@@ -1,5 +1,5 @@
 import { Queue, QueueEvents } from 'bullmq'
-import type Redis from 'ioredis'
+import type { Redis } from 'ioredis'
 import * as prometheus from 'prom-client'
 
 import type { BullMqMetricsPluginOptions } from '../bullMqMetricsPlugin'
@@ -14,15 +14,17 @@ type Metrics = {
   processedDuration: prometheus.Histogram<never>
 }
 
+type MetricCollectorOptions = Required<Omit<BullMqMetricsPluginOptions, 'redisClient'>>
+
 export class MetricsCollector {
-  private readonly options: BullMqMetricsPluginOptions
+  private readonly options: MetricCollectorOptions
   private readonly metrics: Metrics
   private active = true
 
   constructor(
     private readonly redis: Redis,
     private readonly registry: prometheus.Registry,
-    options: Partial<BullMqMetricsPluginOptions>,
+    options: Partial<MetricCollectorOptions>,
   ) {
     this.options = {
       bullMqPrefix: 'bull',
@@ -49,7 +51,7 @@ export class MetricsCollector {
 
   private registerMetrics(
     registry: prometheus.Registry,
-    { metricsPrefix, histogramBuckets }: BullMqMetricsPluginOptions,
+    { metricsPrefix, histogramBuckets }: MetricCollectorOptions,
   ): Metrics {
     const metrics: Metrics = {
       completedGauge: new prometheus.Gauge({
@@ -100,7 +102,7 @@ export class MetricsCollector {
 
   private async findQueues(
     redis: Redis,
-    { bullMqPrefix }: BullMqMetricsPluginOptions,
+    { bullMqPrefix }: MetricCollectorOptions,
   ): Promise<string[]> {
     const scanStream = redis.scanStream({
       match: `${bullMqPrefix}:*:meta`,
@@ -108,7 +110,7 @@ export class MetricsCollector {
 
     const queues = new Set<string>()
     for await (const chunk of scanStream) {
-      (chunk as string[])
+      ;(chunk as string[])
         .map((key) => key.split(':')[1])
         .filter((value) => !!value)
         .forEach((queue) => queues.add(queue))
@@ -121,7 +123,7 @@ export class MetricsCollector {
     name: string,
     redis: Redis,
     metrics: Metrics,
-    { collectionIntervalInMs }: BullMqMetricsPluginOptions,
+    { collectionIntervalInMs }: MetricCollectorOptions,
   ) {
     const queue = new Queue(name, { connection: redis })
     const events = new QueueEvents(name, { connection: redis })
