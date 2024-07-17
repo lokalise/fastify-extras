@@ -18,7 +18,7 @@ export class RedisBasedQueueDiscoverer implements QueueDiscoverer {
 
     const queues = new Set<string>()
     for await (const chunk of scanStream) {
-      ;(chunk as string[])
+      (chunk as string[])
         .map((key) => key.split(':')[1])
         .filter((value) => !!value)
         .forEach((queue) => queues.add(queue))
