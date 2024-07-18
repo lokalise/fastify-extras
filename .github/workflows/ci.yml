@@ -23,6 +23,9 @@ jobs:
         run: |
           npm install
 
+      - name: Start Docker
+        run: npm run docker:start
+
       - name: Build TS
         run: |
           npm run build
@@ -30,6 +33,9 @@ jobs:
       - name: Run Tests
         run: |
           npm run test:ci
+
+      - name: Stop Docker
+        run: npm run docker:stop
 
   automerge:
     needs: build
