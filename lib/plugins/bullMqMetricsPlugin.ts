@@ -34,6 +34,7 @@ function plugin(
     const collector = new MetricsCollector(
       pluginOptions.redisClient,
       promClient.register,
+      fastify.log,
       pluginOptions,
     )
 

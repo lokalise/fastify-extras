@@ -1,6 +1,7 @@
 import { setTimeout } from 'node:timers/promises'
 
 import { Queue, QueueEvents } from 'bullmq'
+import type { FastifyBaseLogger } from 'fastify'
 import type { Redis } from 'ioredis'
 import * as prometheus from 'prom-client'
 
@@ -68,6 +69,7 @@ export class MetricsCollector {
   constructor(
     private readonly redis: Redis,
     private readonly registry: prometheus.Registry,
+    private readonly logger: FastifyBaseLogger,
     options: Partial<MetricCollectorOptions>,
   ) {
     this.options = {
@@ -131,22 +133,29 @@ export class MetricsCollector {
     const queue = new Queue(name, { connection: redis })
     const events = new QueueEvents(name, { connection: redis })
 
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    events.on('completed', async (completedJob: { jobId: string }) => {
-      const job = await queue.getJob(completedJob.jobId)
-      if (!job) {
-        return
-      }
+    events.on('completed', (completedJob: { jobId: string }) => {
+      queue
+        .getJob(completedJob.jobId)
+        .then((job) => {
+          if (!job) {
+            return
+          }
 
-      if (job.finishedOn) {
-        metrics.completedDuration.labels({ queue: name }).observe(job.finishedOn - job.timestamp)
+          if (job.finishedOn) {
+            metrics.completedDuration
+              .labels({ queue: name })
+              .observe(job.finishedOn - job.timestamp)
 
-        if (job.processedOn) {
-          metrics.processedDuration
-            .labels({ queue: name })
-            .observe(job.finishedOn - job.processedOn)
-        }
-      }
+            if (job.processedOn) {
+              metrics.processedDuration
+                .labels({ queue: name })
+                .observe(job.finishedOn - job.processedOn)
+            }
+          }
+        })
+        .catch((err) => {
+          this.logger.warn(err)
+        })
     })
 
     while (this.active) {
