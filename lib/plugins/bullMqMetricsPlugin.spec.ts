@@ -39,7 +39,10 @@ export async function initAppWithBullMqMetrics(
 
   await app.register(bullMqMetricsPlugin, {
     queueDiscoverer: new RedisBasedQueueDiscoverer(pluginOptions.redisClient, 'bull'),
-    collectionIntervalInMs: 100,
+    collectionOptions: {
+      type: 'interval',
+      intervalInMs: 50,
+    },
     ...pluginOptions,
   })
 
@@ -49,6 +52,13 @@ export async function initAppWithBullMqMetrics(
 
 type JobReturn = {
   result: 'done'
+}
+
+async function getMetrics() {
+  return await sendGet(buildClient('http://127.0.0.1:9080'), '/metrics', {
+    requestLabel: 'test',
+    responseSchema: UNKNOWN_RESPONSE_SCHEMA,
+  })
 }
 
 describe('bullMqMetricsPlugin', () => {
@@ -91,10 +101,7 @@ describe('bullMqMetricsPlugin', () => {
 
     await setTimeout(100)
 
-    const response = await sendGet(buildClient('http://127.0.0.1:9080'), '/metrics', {
-      requestLabel: 'test',
-      responseSchema: UNKNOWN_RESPONSE_SCHEMA,
-    })
+    const response = await getMetrics()
 
     expect(response.result.statusCode).toBe(200)
     expect(response.result.body).toContain('bullmq_jobs_completed{queue="test_job"} 1')
@@ -113,5 +120,30 @@ describe('bullMqMetricsPlugin', () => {
     }).rejects.toThrowError(
       'No Prometheus Client found, BullMQ metrics plugin requires `fastify-metrics` plugin to be registered',
     )
+  })
+
+  it('exposes metrics collect() function', async () => {
+    app = await initAppWithBullMqMetrics({
+      redisClient: redis,
+      collectionOptions: {
+        type: 'manual'
+      }
+    })
+
+    await processor.schedule({
+      metadata: {
+        correlationId: 'test',
+      },
+    })
+
+    await setTimeout(100)
+
+    const responseBefore = await getMetrics()
+    expect(responseBefore.result.body).not.toContain('bullmq_jobs_completed{queue="test_job"} 1')
+
+    await app.bullMqMetrics.collect()
+
+    const responseAfter = await getMetrics()
+    expect(responseAfter.result.body).toContain('bullmq_jobs_completed{queue="test_job"} 1')
   })
 })

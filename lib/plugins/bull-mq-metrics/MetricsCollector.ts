@@ -1,15 +1,11 @@
-import { setTimeout } from 'node:timers/promises'
-
-import { Queue, QueueEvents } from 'bullmq'
 import type { FastifyBaseLogger } from 'fastify'
 import type { Redis } from 'ioredis'
 import * as prometheus from 'prom-client'
 
-import type { BullMqMetricsPluginOptions } from '../bullMqMetricsPlugin'
+import { ObservableQueue } from './ObservableQueue'
+import type { QueueDiscoverer } from './queueDiscoverers'
 
-import { BackgroundJobsBasedQueueDiscoverer } from './queueDiscoverers'
-
-type Metrics = {
+export type Metrics = {
   completedGauge: prometheus.Gauge<never>
   activeGauge: prometheus.Gauge<never>
   delayedGauge: prometheus.Gauge<never>
@@ -19,7 +15,14 @@ type Metrics = {
   processedDuration: prometheus.Histogram<never>
 }
 
-type MetricCollectorOptions = Required<Omit<BullMqMetricsPluginOptions, 'redisClient'>>
+export type MetricCollectorOptions = {
+  redisClient: Redis
+  bullMqPrefix: string
+  metricsPrefix: string
+  queueDiscoverer: QueueDiscoverer
+  excludedQueues: string[]
+  histogramBuckets: number[]
+}
 
 const getMetrics = (prefix: string, histogramBuckets: number[]): Metrics => ({
   completedGauge: new prometheus.Gauge({
@@ -62,40 +65,39 @@ const getMetrics = (prefix: string, histogramBuckets: number[]): Metrics => ({
 })
 
 export class MetricsCollector {
-  private readonly options: MetricCollectorOptions
+  private readonly redis: Redis
   private readonly metrics: Metrics
-  private active = true
+  private observedQueues: ObservableQueue[] | undefined
 
   constructor(
-    private readonly redis: Redis,
+    private readonly options: MetricCollectorOptions,
     private readonly registry: prometheus.Registry,
     private readonly logger: FastifyBaseLogger,
-    options: Partial<MetricCollectorOptions>,
   ) {
-    this.options = {
-      bullMqPrefix: 'bull',
-      metricsPrefix: 'bullmq',
-      excludedQueues: [],
-      collectionIntervalInMs: 5000,
-      histogramBuckets: [20, 50, 150, 400, 1000, 3000, 8000, 22000, 60000, 150000],
-      queueDiscoverer: new BackgroundJobsBasedQueueDiscoverer(this.redis),
-      ...options,
-    }
-
+    this.redis = options.redisClient
     this.metrics = this.registerMetrics(this.registry, this.options)
   }
 
-  async start() {
-    const queueNames = await this.options.queueDiscoverer.discoverQueues()
+  /**
+   * Updates metrics for all discovered queues
+   */
+  async collect() {
+    if (!this.observedQueues) {
+      this.observedQueues = (await this.options.queueDiscoverer.discoverQueues())
+        .filter((name) => !this.options.excludedQueues.includes(name))
+        .map((name) => new ObservableQueue(name, this.redis, this.metrics, this.logger))
+    }
 
-    // `void` is used to run the `observeQueue` function without waiting for it to finish
-    void Promise.all(
-      queueNames.map((name) => this.observeQueue(name, this.redis, this.metrics, this.options)),
-    )
+    await Promise.all(this.observedQueues.map((queue) => queue.collect()))
   }
 
-  stop() {
-    this.active = false
+  /**
+   * Stops the metrics collection and cleans up resources
+   */
+  async dispose() {
+    for (const queue of this.observedQueues ?? []) {
+      await queue.dispose()
+    }
   }
 
   private registerMetrics(
@@ -124,55 +126,5 @@ export class MetricsCollector {
     }
 
     return metrics
-  }
-
-  private async observeQueue(
-    name: string,
-    redis: Redis,
-    metrics: Metrics,
-    { collectionIntervalInMs }: MetricCollectorOptions,
-  ) {
-    const queue = new Queue(name, { connection: redis })
-    const events = new QueueEvents(name, { connection: redis })
-
-    events.on('completed', (completedJob: { jobId: string }) => {
-      queue
-        .getJob(completedJob.jobId)
-        .then((job) => {
-          if (!job) {
-            return
-          }
-
-          if (job.finishedOn) {
-            metrics.completedDuration
-              .labels({ queue: name })
-              .observe(job.finishedOn - job.timestamp)
-
-            if (job.processedOn) {
-              metrics.processedDuration
-                .labels({ queue: name })
-                .observe(job.finishedOn - job.processedOn)
-            }
-          }
-        })
-        .catch((err) => {
-          this.logger.warn(err)
-        })
-    })
-
-    while (this.active) {
-      const { completed, active, delayed, failed, waiting } = await queue.getJobCounts()
-
-      metrics.activeGauge.labels({ queue: name }).set(active)
-      metrics.completedGauge.labels({ queue: name }).set(completed)
-      metrics.delayedGauge.labels({ queue: name }).set(delayed)
-      metrics.failedGauge.labels({ queue: name }).set(failed)
-      metrics.waitingGauge.labels({ queue: name }).set(waiting)
-
-      await setTimeout(collectionIntervalInMs)
-    }
-
-    await events.close()
-    await queue.close()
   }
 }
