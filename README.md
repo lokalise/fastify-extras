@@ -152,12 +152,12 @@ Add the plugin to your Fastify instance by registering it with the following pos
 - `excludedQueues` (optional, default: `[]`). An array of queue names to exclude from metrics collection;
 - `histogramBuckets` (optional, default: `[20, 50, 150, 400, 1000, 3000, 8000, 22000, 60000, 150000]`). Buckets for the histogram metrics (such as job completion or overall processing time).
 - `collectionOptions` (optional, default: `{ type: 'interval', intervalInMs: 5000 }`). Allows to configure how metrics are collected. Supports the following properties:
-  - `type`. Can be either `interval` or `manual`. 
+  - `type`. Can be either `interval` or `manual`.
     - With `interval` type, plugin automatically loops and updates metrics at the specified interval.
     - With `manual` type, you need to call `app.bullMqMetrics.collect()` to update the metrics; that allows you to build your own logic for scheduling the updates.
   - `intervalInMs` (only for `type: 'interval'`). The interval in milliseconds at which the metrics are collected;
 
-This plugin exposes `bullMqMetrics.collect()` method on the Fastify instance to manually trigger the metrics collection. 
+This plugin exposes `bullMqMetrics.collect()` method on the Fastify instance to manually trigger the metrics collection.
 
 If something goes wrong while starting the BullMQ metrics plugin, an `Error` is thrown.
 
