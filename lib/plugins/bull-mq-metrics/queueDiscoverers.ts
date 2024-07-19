@@ -18,6 +18,7 @@ export class RedisBasedQueueDiscoverer implements QueueDiscoverer {
 
     const queues = new Set<string>()
     for await (const chunk of scanStream) {
+      // ESLint doesn't want a `;` here but Prettier does
       // eslint-disable-next-line no-extra-semi
       ;(chunk as string[])
         .map((key) => key.split(':')[1])

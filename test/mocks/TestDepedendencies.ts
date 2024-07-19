@@ -8,11 +8,11 @@ const testLogger = globalLogger
 export let lastInfoSpy: MockInstance
 export let lastErrorSpy: MockInstance
 
-export class DependencyMocks {
+export class TestDepedendencies {
   private client?: Redis
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  create(): BackgroundJobProcessorDependencies<any, any> {
+  createMocksForBackgroundJobProcessor(): BackgroundJobProcessorDependencies<any, any> {
     const originalChildFn = testLogger.child.bind(testLogger)
 
     const originalMethodSpy = vitest.spyOn(testLogger, 'child')
@@ -52,7 +52,6 @@ export class DependencyMocks {
     const commandTimeout = process.env.REDIS_COMMAND_TIMEOUT
       ? Number.parseInt(process.env.REDIS_COMMAND_TIMEOUT, 10)
       : undefined
-    // const keyPrefix = process.env.REDIS_KEY_PREFIX
     this.client = new Redis({
       host,
       db,

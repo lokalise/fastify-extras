@@ -87,7 +87,9 @@ export class MetricsCollector {
 
   async start() {
     const queueNames = await this.options.queueDiscoverer.discoverQueues()
-    await Promise.all(
+
+    // `void` is used to run the `observeQueue` function without waiting for it to finish
+    void Promise.all(
       queueNames.map((name) => this.observeQueue(name, this.redis, this.metrics, this.options)),
     )
   }

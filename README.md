@@ -10,6 +10,7 @@ Reusable plugins for Fastify.
   - [Split IO Plugin](#split-io-plugin)
   - [BugSnag Plugin](#bugsnag-plugin)
   - [Metrics Plugin](#metrics-plugin)
+  - [Bull MQ Metrics Plugin](#bullmq-metrics-plugin)
   - [NewRelic Transaction Manager Plugin](#newrelic-transaction-manager-plugin)
   - [UnhandledException Plugin](#unhandledexception-plugin)
 
@@ -133,7 +134,7 @@ Add the plugin to your Fastify instance by registering it with the following opt
 
 The plugin exposes a `GET /metrics` route in your Fastify app to retrieve Prometheus metrics. If something goes wrong while starting the Prometheus metrics server, an `Error` is thrown. Otherwise, a success message is displayed when the plugin has been loaded.
 
-### BullMQ Netrics Plugin
+### BullMQ Metrics Plugin
 
 Plugin to auto-discover BullMQ queues which regularly collects metrics for them and exposes them via `fastify-metrics` global Prometheus registry. If used together with `metricsPlugin`, it will show these metrics on `GET /metrics` route.
 

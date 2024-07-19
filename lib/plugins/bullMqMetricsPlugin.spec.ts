@@ -1,3 +1,5 @@
+import { setTimeout } from 'node:timers/promises'
+
 import { buildClient, sendGet, UNKNOWN_RESPONSE_SCHEMA } from '@lokalise/backend-http-client'
 import type {
   AbstractBackgroundJobProcessor,
@@ -8,24 +10,35 @@ import fastify from 'fastify'
 import type { Redis } from 'ioredis'
 
 import { TestBackgroundJobProcessor } from '../../test/mocks/TestBackgroundJobProcessor'
-import { DependencyMocks } from '../../test/mocks/dependencyMocks'
+import { TestDepedendencies } from '../../test/mocks/TestDepedendencies'
 
 import { RedisBasedQueueDiscoverer } from './bull-mq-metrics/queueDiscoverers'
+import type { BullMqMetricsPluginOptions } from './bullMqMetricsPlugin';
 import { bullMqMetricsPlugin } from './bullMqMetricsPlugin'
 import { metricsPlugin } from './metricsPlugin'
 
-async function initApp(redis: Redis, errorObjectResolver = (err: unknown) => err) {
+type TestOptions = {
+  enableMetricsPlugin: boolean
+}
+
+const DEFAULT_TEST_OPTIONS = { enableMetricsPlugin: true }
+
+export async function initAppWithBullMqMetrics(pluginOptions: BullMqMetricsPluginOptions, { enableMetricsPlugin }: TestOptions = DEFAULT_TEST_OPTIONS) {
+
   const app = fastify()
-  await app.register(metricsPlugin, {
-    bindAddress: '0.0.0.0',
-    loggerOptions: false,
-    errorObjectResolver,
-  })
+
+  if (enableMetricsPlugin) {
+    await app.register(metricsPlugin, {
+      bindAddress: '0.0.0.0',
+      loggerOptions: false,
+      errorObjectResolver: (err: unknown) => err,
+    })
+  }
 
   await app.register(bullMqMetricsPlugin, {
-    redisClient: redis,
-    queueDiscoverer: new RedisBasedQueueDiscoverer(redis, 'bull'),
+    queueDiscoverer: new RedisBasedQueueDiscoverer(pluginOptions.redisClient, 'bull'),
     collectionIntervalInMs: 100,
+    ...pluginOptions,
   })
 
   await app.ready()
@@ -38,39 +51,43 @@ type JobReturn = {
 
 describe('bullMqMetricsPlugin', () => {
   let app: FastifyInstance
-  let mocks: DependencyMocks
+  let dependencies: TestDepedendencies
   let processor: AbstractBackgroundJobProcessor<BaseJobPayload, JobReturn>
   let redis: Redis
 
   beforeEach(async () => {
-    mocks = new DependencyMocks()
-    redis = mocks.startRedis()
+    dependencies = new TestDepedendencies()
+    redis = dependencies.startRedis()
     await redis?.flushall('SYNC')
 
-    mocks.create()
-
     processor = new TestBackgroundJobProcessor<BaseJobPayload, JobReturn>(
-      mocks.create(),
+      dependencies.createMocksForBackgroundJobProcessor(),
       { result: 'done' },
       'test_job',
     )
     await processor.start()
-
-    app = await initApp(redis)
   })
 
   afterEach(async () => {
-    await app.close()
-    await mocks.dispose()
+    if (app) {
+      await app.close()
+    }
+    await dependencies.dispose()
     await processor.dispose()
   })
 
   it('adds BullMQ metrics to Prometheus metrics endpoint', async () => {
+    app = await initAppWithBullMqMetrics({
+      redisClient: redis,
+    })
+
     await processor.schedule({
       metadata: {
         correlationId: 'test',
       },
     })
+
+    await setTimeout(100)
 
     const response = await sendGet(buildClient('http://127.0.0.1:9080'), '/metrics', {
       requestLabel: 'test',
@@ -78,6 +95,16 @@ describe('bullMqMetricsPlugin', () => {
     })
 
     expect(response.result.statusCode).toBe(200)
-    expect(response.result.body).toContain('bullmq_jobs_completed{queue="test_job"}')
+    expect(response.result.body).toContain('bullmq_jobs_completed{queue="test_job"} 1')
+  })
+
+  it('throws if fastify-metrics was not initialized', async () => {
+    await expect(() => {
+      return initAppWithBullMqMetrics({
+        redisClient: redis,
+      }, {
+        enableMetricsPlugin: false
+      })
+    }).rejects.toThrowError('No Prometheus Client found, BullMQ metrics plugin requires `fastify-metrics` plugin to be registered')
   })
 })

@@ -16,42 +16,32 @@ export type BullMqMetricsPluginOptions = {
   histogramBuckets?: number[]
 }
 
-function plugin(
+async function plugin(
   fastify: FastifyInstance,
   pluginOptions: BullMqMetricsPluginOptions,
-  next: (err?: Error) => void,
 ) {
-  try {
-    const promClient = fastify.metrics.client
-    if (!promClient) {
-      return next(
-        new Error(
-          'No Prometheus Client found, BullMQ metrics plugin requires `fastify-metrics` plugin to be registered',
-        ),
-      )
-    }
+  if (!fastify.metrics) {
+    throw new Error('No Prometheus Client found, BullMQ metrics plugin requires `fastify-metrics` plugin to be registered')
+  }
 
+  try {
     const collector = new MetricsCollector(
       pluginOptions.redisClient,
-      promClient.register,
+      fastify.metrics.client.register,
       fastify.log,
       pluginOptions,
     )
 
-    void collector.start()
-
     fastify.addHook('onClose', () => {
       collector.stop()
     })
-  } catch (err: unknown) {
-    return next(
-      err instanceof Error
-        ? err
-        : new Error('Unknown error in bull-mq-metrics-plugin', { cause: err }),
-    )
-  }
 
-  next()
+    await collector.start()
+  } catch (err: unknown) {
+    throw err instanceof Error
+        ? err
+        : new Error('Unknown error in bull-mq-metrics-plugin', { cause: err })
+  }
 }
 
 export const bullMqMetricsPlugin = fp<BullMqMetricsPluginOptions>(plugin, {
