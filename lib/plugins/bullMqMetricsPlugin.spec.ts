@@ -126,8 +126,8 @@ describe('bullMqMetricsPlugin', () => {
     app = await initAppWithBullMqMetrics({
       redisClient: redis,
       collectionOptions: {
-        type: 'manual'
-      }
+        type: 'manual',
+      },
     })
 
     await processor.schedule({

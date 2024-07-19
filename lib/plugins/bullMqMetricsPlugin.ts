@@ -3,7 +3,7 @@ import 'fastify-metrics'
 import fp from 'fastify-plugin'
 import type { Redis } from 'ioredis'
 
-import type { CollectionScheduler} from './bull-mq-metrics/CollectionScheduler';
+import type { CollectionScheduler } from './bull-mq-metrics/CollectionScheduler'
 import { PromiseBasedCollectionScheduler } from './bull-mq-metrics/CollectionScheduler'
 import type { MetricCollectorOptions } from './bull-mq-metrics/MetricsCollector'
 import { MetricsCollector } from './bull-mq-metrics/MetricsCollector'
