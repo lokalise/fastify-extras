@@ -9,7 +9,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x, 20.x, 22.x]
+        node-version: [18.x, 20.x, 22.4]
 
     steps:
       - uses: actions/checkout@v4
@@ -21,7 +21,10 @@ jobs:
 
       - name: Install
         run: |
-          npm install
+          npm install --loglevel verbose
+
+      - name: echo log
+        run: cat `find /home/runner/.npm/_logs/ -type f -exec ls -t1 {} + | head -1`
 
       - name: Start Docker
         run: npm run docker:start
