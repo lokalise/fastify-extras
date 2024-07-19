@@ -1,6 +1,9 @@
 import { buildClient, sendGet, UNKNOWN_RESPONSE_SCHEMA } from '@lokalise/backend-http-client'
-import type { AbstractBackgroundJobProcessor, BaseJobPayload } from '@lokalise/background-jobs-common'
-import type { FastifyInstance } from 'fastify';
+import type {
+  AbstractBackgroundJobProcessor,
+  BaseJobPayload,
+} from '@lokalise/background-jobs-common'
+import type { FastifyInstance } from 'fastify'
 import fastify from 'fastify'
 import type { Redis } from 'ioredis'
 
@@ -22,7 +25,7 @@ async function initApp(redis: Redis, errorObjectResolver = (err: unknown) => err
   await app.register(bullMqMetricsPlugin, {
     redisClient: redis,
     queueDiscoverer: new RedisBasedQueueDiscoverer(redis, 'bull'),
-    collectionIntervalInMs: 100
+    collectionIntervalInMs: 100,
   })
 
   await app.ready()
@@ -46,7 +49,11 @@ describe('bullMqMetricsPlugin', () => {
 
     mocks.create()
 
-    processor = new TestBackgroundJobProcessor<BaseJobPayload, JobReturn>(mocks.create(), { result: 'done' }, 'test_job')
+    processor = new TestBackgroundJobProcessor<BaseJobPayload, JobReturn>(
+      mocks.create(),
+      { result: 'done' },
+      'test_job',
+    )
     await processor.start()
 
     app = await initApp(redis)
@@ -61,8 +68,8 @@ describe('bullMqMetricsPlugin', () => {
   it('adds BullMQ metrics to Prometheus metrics endpoint', async () => {
     await processor.schedule({
       metadata: {
-        correlationId: 'test'
-      }
+        correlationId: 'test',
+      },
     })
 
     const response = await sendGet(buildClient('http://127.0.0.1:9080'), '/metrics', {

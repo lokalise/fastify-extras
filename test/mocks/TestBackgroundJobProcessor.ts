@@ -1,11 +1,9 @@
 import type {
   BackgroundJobProcessorDependencies,
-  BaseJobPayload} from '@lokalise/background-jobs-common';
-import {
-  AbstractBackgroundJobProcessor
+  BaseJobPayload,
 } from '@lokalise/background-jobs-common'
+import { AbstractBackgroundJobProcessor } from '@lokalise/background-jobs-common'
 import { generateMonotonicUuid } from '@lokalise/id-utils'
-
 
 import { getTestRedisConfig } from '../setup'
 
