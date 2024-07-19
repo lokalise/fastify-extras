@@ -136,22 +136,28 @@ The plugin exposes a `GET /metrics` route in your Fastify app to retrieve Promet
 
 ### BullMQ Metrics Plugin
 
-Plugin to auto-discover BullMQ queues which regularly collects metrics for them and exposes them via `fastify-metrics` global Prometheus registry. If used together with `metricsPlugin`, it will show these metrics on `GET /metrics` route.
+Plugin to auto-discover BullMQ queues which can regularly collect metrics for them and expose via `fastify-metrics` global Prometheus registry. If used together with `metricsPlugin`, it will show these metrics on `GET /metrics` route.
 
 This plugin depends on the following peer-installed packages:
 
 - `bullmq`
 - `ioredis`
 
-Add the plugin to your Fastify instance by registering it with the following options:
+Add the plugin to your Fastify instance by registering it with the following possible options:
 
 - `redisClient`, a Redis client instance which is used by the BullMQ: plugin uses it to discover the queues;
 - `bullMqPrefix` (optional, default: `bull`). The prefix used by BullMQ to store the queues in Redis;
 - `metricsPrefix` (optional, default: `bullmq`). The prefix for the metrics in Prometheus;
 - `queueDiscoverer` (optional, default: `BackgroundJobsBasedQueueDiscoverer`). The queue discoverer to use. The default one relies on the logic implemented by `@lokalise/background-jobs-common` where queue names are registered by the background job processors; If you are not using `@lokalise/background-jobs-common`, you can use your own queue discoverer by instantiating a `RedisBasedQueueDiscoverer` or implementing a `QueueDiscoverer` interface;
 - `excludedQueues` (optional, default: `[]`). An array of queue names to exclude from metrics collection;
-- `collectionIntervalInMs` (optional, default: `5000`). The interval in milliseconds at which the metrics are collected;
 - `histogramBuckets` (optional, default: `[20, 50, 150, 400, 1000, 3000, 8000, 22000, 60000, 150000]`). Buckets for the histogram metrics (such as job completion or overall processing time).
+- `collectionOptions` (optional, default: `{ type: 'interval', intervalInMs: 5000 }`). Allows to configure how metrics are collected. Supports the following properties:
+  - `type`. Can be either `interval` or `manual`. 
+    - With `interval` type, plugin automatically loops and updates metrics at the specified interval.
+    - With `manual` type, you need to call `app.bullMqMetrics.collect()` to update the metrics; that allows you to build your own logic for scheduling the updates.
+  - `intervalInMs` (only for `type: 'interval'`). The interval in milliseconds at which the metrics are collected;
+
+This plugin exposes `bullMqMetrics.collect()` method on the Fastify instance to manually trigger the metrics collection. 
 
 If something goes wrong while starting the BullMQ metrics plugin, an `Error` is thrown.
 
