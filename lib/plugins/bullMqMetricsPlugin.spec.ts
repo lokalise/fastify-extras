@@ -13,7 +13,7 @@ import { TestBackgroundJobProcessor } from '../../test/mocks/TestBackgroundJobPr
 import { TestDepedendencies } from '../../test/mocks/TestDepedendencies'
 
 import { RedisBasedQueueDiscoverer } from './bull-mq-metrics/queueDiscoverers'
-import type { BullMqMetricsPluginOptions } from './bullMqMetricsPlugin';
+import type { BullMqMetricsPluginOptions } from './bullMqMetricsPlugin'
 import { bullMqMetricsPlugin } from './bullMqMetricsPlugin'
 import { metricsPlugin } from './metricsPlugin'
 
@@ -23,8 +23,10 @@ type TestOptions = {
 
 const DEFAULT_TEST_OPTIONS = { enableMetricsPlugin: true }
 
-export async function initAppWithBullMqMetrics(pluginOptions: BullMqMetricsPluginOptions, { enableMetricsPlugin }: TestOptions = DEFAULT_TEST_OPTIONS) {
-
+export async function initAppWithBullMqMetrics(
+  pluginOptions: BullMqMetricsPluginOptions,
+  { enableMetricsPlugin }: TestOptions = DEFAULT_TEST_OPTIONS,
+) {
   const app = fastify()
 
   if (enableMetricsPlugin) {
@@ -100,11 +102,16 @@ describe('bullMqMetricsPlugin', () => {
 
   it('throws if fastify-metrics was not initialized', async () => {
     await expect(() => {
-      return initAppWithBullMqMetrics({
-        redisClient: redis,
-      }, {
-        enableMetricsPlugin: false
-      })
-    }).rejects.toThrowError('No Prometheus Client found, BullMQ metrics plugin requires `fastify-metrics` plugin to be registered')
+      return initAppWithBullMqMetrics(
+        {
+          redisClient: redis,
+        },
+        {
+          enableMetricsPlugin: false,
+        },
+      )
+    }).rejects.toThrowError(
+      'No Prometheus Client found, BullMQ metrics plugin requires `fastify-metrics` plugin to be registered',
+    )
   })
 })
