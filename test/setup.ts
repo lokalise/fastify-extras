@@ -1,6 +1,6 @@
 import type { RedisConfig } from '@lokalise/node-core'
 
-process.loadEnvFile('./.env.test')
+process.loadEnvFile('../.env.test')
 
 export const getTestRedisConfig = (): RedisConfig => {
   return {

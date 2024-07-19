@@ -21,10 +21,7 @@ jobs:
 
       - name: Install
         run: |
-          npm install --loglevel verbose
-
-      - name: echo log
-        run: cat `find /home/runner/.npm/_logs/ -type f -exec ls -t1 {} + | head -1`
+          npm install
 
       - name: Start Docker
         run: npm run docker:start
