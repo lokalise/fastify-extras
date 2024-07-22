@@ -89,8 +89,8 @@ export class MetricsCollector {
         .map((name) => new ObservableQueue(name, this.redis, this.metrics, this.logger))
     }
 
-    await PromisePool.for(this.observedQueues).process(async (queue) => {
-      await queue.collect()
+    await PromisePool.for(this.observedQueues).process((queue) => {
+      void queue.collect()
     })
   }
 
