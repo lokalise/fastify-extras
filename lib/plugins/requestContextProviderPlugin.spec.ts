@@ -2,16 +2,22 @@ import type { FastifyInstance } from 'fastify'
 import fastify from 'fastify'
 import type { RouteHandlerMethod } from 'fastify/types/route'
 
+import type { RequireContextOptions } from './requestContextProviderPlugin'
 import {
   getRequestIdFastifyAppConfig,
   requestContextProviderPlugin,
 } from './requestContextProviderPlugin'
 
-async function initApp(routeHandler: RouteHandlerMethod) {
+async function initApp(
+  routeHandler: RouteHandlerMethod,
+  pluginOptions?: RequireContextOptions,
+  loggerEnabled: boolean = false,
+) {
   const app = fastify({
     ...getRequestIdFastifyAppConfig(),
+    logger: loggerEnabled,
   })
-  await app.register(requestContextProviderPlugin)
+  await app.register(requestContextProviderPlugin, pluginOptions)
 
   app.route({
     method: 'GET',
@@ -51,6 +57,26 @@ describe('requestContextProviderPlugin', () => {
       req.reqContext.logger.info('Dummy log message')
       return res.status(204).send()
     })
+
+    const response = await app.inject().get('/').end()
+    expect(response.statusCode).toBe(204)
+  })
+
+  it('redacts sensitive data from logs', async () => {
+    app = await initApp(
+      (req, res) => {
+        req.reqContext.logger.info({ password: 'sensitive' }, 'Dummy log message')
+        return res.status(204).send()
+      },
+      {
+        loggerOptions: {
+          redact: {
+            paths: ['password'],
+          },
+        },
+      },
+      true,
+    )
 
     const response = await app.inject().get('/').end()
     expect(response.statusCode).toBe(204)

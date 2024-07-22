@@ -47,7 +47,7 @@ Plugin to:
   - `logger`, a child logger of app.log, with prepopulated header `x-request-id`;
   - `reqId`, the request-id;
 
-No options are required to register the plugin.
+Optionally you can provide child logger options to customize the logger.
 
 The `getRequestIdFastifyAppConfig()` method is exported and returns:
 

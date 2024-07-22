@@ -9,6 +9,7 @@ import type {
   FastifyServerOptions,
 } from 'fastify'
 import fp from 'fastify-plugin'
+import type { ChildLoggerOptions } from 'pino'
 
 // Augment existing FastifyRequest interface with new fields
 declare module 'fastify' {
@@ -37,7 +38,11 @@ export function getRequestIdFastifyAppConfig(): Pick<
   }
 }
 
-function plugin(fastify: FastifyInstance, opts: unknown, done: () => void) {
+export type RequireContextOptions = {
+  loggerOptions?: ChildLoggerOptions
+}
+
+function plugin(fastify: FastifyInstance, opts: RequireContextOptions, done: () => void) {
   fastify.addHook(
     'onRequest',
     function onRequestContextProvider(
@@ -46,9 +51,12 @@ function plugin(fastify: FastifyInstance, opts: unknown, done: () => void) {
       next: HookHandlerDoneFunction,
     ) {
       req.reqContext = {
-        logger: (req.log as CommonLogger).child({
-          'x-request-id': req.id,
-        }),
+        logger: (req.log as CommonLogger).child(
+          {
+            'x-request-id': req.id,
+          },
+          opts?.loggerOptions,
+        ),
         reqId: req.id,
       }
 
