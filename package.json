@@ -65,7 +65,7 @@
   },
   "devDependencies": {
     "@lokalise/node-core": "^11.1.0",
-    "@lokalise/backend-http-client": "^1.0.0",
+    "@lokalise/backend-http-client": "^2.0.1",
     "@types/newrelic": "^9.14.3",
     "@types/node": "^20.12.13",
     "@amplitude/analytics-types": "^2.5.0",
