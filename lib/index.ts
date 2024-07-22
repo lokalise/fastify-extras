@@ -34,6 +34,14 @@ export type {
   HealthcheckMetricsPluginOptions,
 } from './plugins/healthcheck/healthcheckMetricsPlugin'
 
+export { bullMqMetricsPlugin } from './plugins/bullMqMetricsPlugin'
+export type { BullMqMetricsPluginOptions } from './plugins/bullMqMetricsPlugin'
+export {
+  RedisBasedQueueDiscoverer,
+  BackgroundJobsBasedQueueDiscoverer,
+} from './plugins/bull-mq-metrics/queueDiscoverers'
+export type { QueueDiscoverer } from './plugins/bull-mq-metrics/queueDiscoverers'
+
 export { metricsPlugin } from './plugins/metricsPlugin'
 export type { ErrorObjectResolver, MetricsPluginOptions } from './plugins/metricsPlugin'
 
