@@ -1,3 +1,4 @@
+import { PromisePool } from '@supercharge/promise-pool'
 import type { FastifyBaseLogger } from 'fastify'
 import type { Redis } from 'ioredis'
 import * as prometheus from 'prom-client'
@@ -88,7 +89,9 @@ export class MetricsCollector {
         .map((name) => new ObservableQueue(name, this.redis, this.metrics, this.logger))
     }
 
-    await Promise.all(this.observedQueues.map((queue) => queue.collect()))
+    await PromisePool.for(this.observedQueues).process(async (queue) => {
+      await queue.collect()
+    })
   }
 
   /**
