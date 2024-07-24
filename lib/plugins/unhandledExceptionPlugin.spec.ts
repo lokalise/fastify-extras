@@ -1,7 +1,7 @@
 import type { ErrorReport } from '@lokalise/error-utils'
 import fastify from 'fastify'
 import type { RouteHandlerMethod } from 'fastify/types/route'
-import { beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it, vitest } from 'vitest'
 
 import {
   getRequestIdFastifyAppConfig,
@@ -47,7 +47,7 @@ describe.skip('unhandledExceptionPlugin', () => {
   })
 
   it('handled unhandled rejection', async () => {
-    const app = await initApp((req, res) => {
+    const app = await initApp((_req, res) => {
       void new Promise(() => {
         throw new Error('new unhandled error')
       })

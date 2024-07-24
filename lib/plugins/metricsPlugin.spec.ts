@@ -1,6 +1,7 @@
-import { buildClient, sendGet, UNKNOWN_RESPONSE_SCHEMA } from '@lokalise/backend-http-client'
+import { TEST_OPTIONS, buildClient, sendGet } from '@lokalise/backend-http-client'
 import type { FastifyInstance } from 'fastify'
 import fastify from 'fastify'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { metricsPlugin } from './metricsPlugin'
 
@@ -26,10 +27,7 @@ describe('metricsPlugin', () => {
   })
 
   it('returns Prometheus metrics', async () => {
-    const response = await sendGet(buildClient('http://127.0.0.1:9080'), '/metrics', {
-      requestLabel: 'test',
-      responseSchema: UNKNOWN_RESPONSE_SCHEMA,
-    })
+    const response = await sendGet(buildClient('http://127.0.0.1:9080'), '/metrics', TEST_OPTIONS)
 
     expect(response.result.statusCode).toBe(200)
     expect(response.result.body).toEqual(expect.any(String))
@@ -37,7 +35,7 @@ describe('metricsPlugin', () => {
 
   it('handles an error', async () => {
     expect.assertions(2)
-    let handledError
+    let handledError: unknown | undefined
     try {
       await initApp((err) => {
         handledError = err

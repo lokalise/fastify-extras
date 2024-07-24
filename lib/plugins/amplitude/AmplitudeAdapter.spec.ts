@@ -1,7 +1,7 @@
-import { randomUUID } from 'crypto'
+import { randomUUID } from 'node:crypto'
 
 import type { MockInstance } from 'vitest'
-import { expect, beforeAll } from 'vitest'
+import { beforeAll, describe, expect, it, vi } from 'vitest'
 import { z } from 'zod'
 
 import { Amplitude } from './Amplitude'

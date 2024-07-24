@@ -3,6 +3,7 @@ import { CommonBullmqFactory } from '@lokalise/background-jobs-common'
 import { globalLogger } from '@lokalise/node-core'
 import { Redis } from 'ioredis'
 import type { MockInstance } from 'vitest'
+import { vi, vitest } from 'vitest'
 
 const testLogger = globalLogger
 export let lastInfoSpy: MockInstance

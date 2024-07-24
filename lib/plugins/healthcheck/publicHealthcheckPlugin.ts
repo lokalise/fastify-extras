@@ -33,6 +33,8 @@ function plugin(app: FastifyInstance, opts: PublicHealthcheckPluginOptions, done
       // @ts-expect-error
       hide: true,
     },
+
+    // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: <explanation>
     handler: async (_, reply) => {
       let isFullyHealthy = true
       let isPartiallyHealthy = false
