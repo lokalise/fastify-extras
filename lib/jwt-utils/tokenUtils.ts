@@ -26,10 +26,10 @@ export function generateJwtToken(
 const hasCode = (error: unknown): error is { code: unknown } =>
   typeof error === 'object' && error !== null && 'code' in error
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 export function decodeJwtToken(jwt: JWT, encodedToken: string): Promise<any> {
   return new Promise((resolve, reject) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     jwt.verify(encodedToken, (err: Error | null, decoded: any) => {
       /* v8 ignore next 3 */
       if (err) {

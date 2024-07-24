@@ -43,7 +43,10 @@ export {
 export type { QueueDiscoverer } from './plugins/bull-mq-metrics/queueDiscoverers'
 
 export { metricsPlugin } from './plugins/metricsPlugin'
-export type { ErrorObjectResolver, MetricsPluginOptions } from './plugins/metricsPlugin'
+export type {
+  ErrorObjectResolver,
+  MetricsPluginOptions,
+} from './plugins/metricsPlugin'
 
 export { publicHealthcheckPlugin } from './plugins/healthcheck/publicHealthcheckPlugin'
 export type {

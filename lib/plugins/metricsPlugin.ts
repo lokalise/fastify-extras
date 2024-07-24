@@ -1,8 +1,8 @@
 import type { FastifyInstance } from 'fastify'
 import fastify from 'fastify'
-import type { PinoLoggerOptions } from 'fastify/types/logger'
 import fastifyMetrics from 'fastify-metrics'
 import fp from 'fastify-plugin'
+import type { PinoLoggerOptions } from 'fastify/types/logger'
 
 const METRICS_PORT = 9080
 

@@ -1,12 +1,15 @@
-import { buildClient, sendGet, UNKNOWN_RESPONSE_SCHEMA } from '@lokalise/backend-http-client'
+import { buildClient, sendGet } from '@lokalise/backend-http-client'
 import type { Either } from '@lokalise/node-core'
 import type { FastifyInstance } from 'fastify'
 import fastify from 'fastify'
-
+import { afterEach, describe, expect, it } from 'vitest'
 import { metricsPlugin } from '../metricsPlugin'
 
+import { z } from 'zod'
 import type { PrometheusHealthCheck } from './healthcheckMetricsPlugin'
 import { healthcheckMetricsPlugin, wrapHealthCheckForPrometheus } from './healthcheckMetricsPlugin'
+
+const UNKNOWN_RESPONSE_SCHEMA = z.unknown()
 
 let app: FastifyInstance
 
@@ -41,11 +44,11 @@ describe('healthcheckMetricsPlugin', () => {
       {
         name: 'test_healthcheck',
         // eslint-disable-next-line @typescript-eslint/require-await
-        checker: async () => {
-          return {
+        checker: () => {
+          return Promise.resolve({
             checkPassed: true,
             checkTimeInMsecs: 345,
-          }
+          })
         },
       },
     ])
@@ -66,11 +69,11 @@ describe('healthcheckMetricsPlugin', () => {
       {
         name: 'test_healthcheck',
         // eslint-disable-next-line @typescript-eslint/require-await
-        checker: async () => {
-          return {
+        checker: () => {
+          return Promise.resolve({
             checkPassed: false,
             checkTimeInMsecs: 1450,
-          }
+          })
         },
       },
     ])
@@ -91,21 +94,21 @@ describe('healthcheckMetricsPlugin', () => {
       {
         name: 'test_healthcheck_1',
         // eslint-disable-next-line @typescript-eslint/require-await
-        checker: async () => {
-          return {
+        checker: () => {
+          return Promise.resolve({
             checkPassed: true,
             checkTimeInMsecs: 345,
-          }
+          })
         },
       },
       {
         name: 'test_healthcheck_2',
         // eslint-disable-next-line @typescript-eslint/require-await
-        checker: async () => {
-          return {
+        checker: () => {
+          return Promise.resolve({
             checkPassed: false,
             checkTimeInMsecs: 1450,
-          }
+          })
         },
       },
     ])
@@ -130,11 +133,11 @@ describe('healthcheckMetricsPlugin', () => {
         {
           name: 'test healthcheck',
           // eslint-disable-next-line @typescript-eslint/require-await
-          checker: async () => {
-            return {
+          checker: () => {
+            return Promise.resolve({
               checkPassed: false,
               checkTimeInMsecs: 1450,
-            }
+            })
           },
         },
       ]),

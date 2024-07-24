@@ -1,16 +1,22 @@
 import Bugsnag from '@bugsnag/js'
 import type { NodeConfig } from '@bugsnag/node'
 import {
-  bugsnagErrorReporter,
   type ErrorReport,
-  reportErrorToBugsnag,
-  addFeatureFlag,
   type Severity,
+  addFeatureFlag,
+  bugsnagErrorReporter,
+  reportErrorToBugsnag,
 } from '@lokalise/error-utils'
 import type { FastifyInstance } from 'fastify'
 import fp from 'fastify-plugin'
 
-export { reportErrorToBugsnag, addFeatureFlag, bugsnagErrorReporter, ErrorReport, Severity }
+export {
+  reportErrorToBugsnag,
+  addFeatureFlag,
+  bugsnagErrorReporter,
+  type ErrorReport,
+  type Severity,
+}
 
 export interface BugsnagPluginConfig {
   bugsnag: NodeConfig

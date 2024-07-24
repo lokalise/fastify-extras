@@ -1,7 +1,8 @@
 import * as amplitude from '@amplitude/analytics-node'
-import type { BaseEvent, EnrichmentPlugin, Result, Event } from '@amplitude/analytics-types'
+import type { BaseEvent, EnrichmentPlugin, Event, Result } from '@amplitude/analytics-types'
 import type { FastifyInstance } from 'fastify'
 import fastify from 'fastify'
+import { afterEach, beforeEach, describe, expect, it, vitest } from 'vitest'
 
 import { amplitudePlugin } from './amplitudePlugin'
 
@@ -57,7 +58,9 @@ describe('amplitudePlugin', () => {
     })
 
     // When
-    const result = await app.amplitude.track({ event_type: 'event not tracked' }).promise
+    const result = await app.amplitude.track({
+      event_type: 'event not tracked',
+    }).promise
 
     // Then
     expect(result).toBeNull()
@@ -109,7 +112,7 @@ describe('amplitudePlugin', () => {
       .route({
         url: '/test',
         method: 'GET',
-        handler: async (_, reply) => {
+        handler: (_, reply) => {
           return reply.send('Testing')
         },
       })
@@ -138,7 +141,7 @@ describe('amplitudePlugin', () => {
       .route({
         url: '/test',
         method: 'GET',
-        handler: async (_, reply) => {
+        handler: (_, reply) => {
           return reply.send('Testing')
         },
       })

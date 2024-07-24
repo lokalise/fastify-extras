@@ -3,8 +3,7 @@ import { InternalError, PublicNonRecoverableError } from '@lokalise/node-core'
 import type { FastifyInstance } from 'fastify'
 import fastify from 'fastify'
 import type { RouteHandlerMethod } from 'fastify/types/route'
-import type { SpyInstance } from 'vitest'
-import { vitest } from 'vitest'
+import { type MockInstance, afterAll, describe, expect, it, vitest } from 'vitest'
 import { z } from 'zod'
 
 import type { ErrorHandlerParams, FreeformRecord } from './errorHandler'
@@ -74,7 +73,7 @@ describe('errorHandler', () => {
           return {
             statusCode: 502,
             payload: {
-              message: error.message + '1',
+              message: `${error.message}1`,
               errorCode: 'TEST_ERR',
               details: {
                 someValues: 1,
@@ -98,7 +97,7 @@ describe('errorHandler', () => {
   })
 
   it('can override logged object resolution', async () => {
-    let logSpy: SpyInstance | undefined
+    let logSpy: MockInstance | undefined
     app = await initApp(
       (req) => {
         logSpy = vitest.spyOn(req.log, 'error')
@@ -110,7 +109,7 @@ describe('errorHandler', () => {
       {
         resolveLogObject: (error: unknown) => {
           return {
-            message: (error as Error).message + '22',
+            message: `${(error as Error).message}22`,
           }
         },
       },

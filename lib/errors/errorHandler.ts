@@ -6,11 +6,11 @@ import {
   isPublicNonRecoverableError,
   isStandardizedError,
 } from '@lokalise/node-core'
-import type { FastifyRequest, FastifyReply, FastifyInstance } from 'fastify'
+import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 import pino from 'pino'
 import type { ZodError } from 'zod'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 export type FreeformRecord = Record<string, any>
 
 const knownAuthErrors = new Set([

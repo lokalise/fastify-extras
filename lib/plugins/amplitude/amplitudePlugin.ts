@@ -34,8 +34,10 @@ function plugin(fastify: FastifyInstance, config: AmplitudeConfig, next: (err?: 
         enableApiUsageTracking(fastify, amplitudeInstance, config.apiUsageTracking)
       }
       if (config.plugins) {
-        // @ts-expect-error
-        config.plugins.forEach((e) => add(e))
+        for (const e of config.plugins) {
+          // @ts-expect-error
+          add(e)
+        }
       }
 
       next()

@@ -2,17 +2,18 @@ import { randomUUID } from 'node:crypto'
 
 import type { CommonLogger } from '@lokalise/node-core'
 import type {
+  FastifyInstance,
   FastifyReply,
   FastifyRequest,
-  FastifyInstance,
-  HookHandlerDoneFunction,
   FastifyServerOptions,
+  HookHandlerDoneFunction,
 } from 'fastify'
 import fp from 'fastify-plugin'
 
 // Augment existing FastifyRequest interface with new fields
 declare module 'fastify' {
   interface FastifyRequest {
+    // biome-ignore lint/correctness/noUndeclaredVariables: TS resolves this correctly from the fastify module
     reqContext: RequestContext
   }
 }
@@ -37,12 +38,12 @@ export function getRequestIdFastifyAppConfig(): Pick<
   }
 }
 
-function plugin(fastify: FastifyInstance, opts: unknown, done: () => void) {
+function plugin(fastify: FastifyInstance, _opts: unknown, done: () => void) {
   fastify.addHook(
     'onRequest',
     function onRequestContextProvider(
       req: FastifyRequest,
-      res: FastifyReply,
+      _res: FastifyReply,
       next: HookHandlerDoneFunction,
     ) {
       req.reqContext = {
@@ -58,7 +59,7 @@ function plugin(fastify: FastifyInstance, opts: unknown, done: () => void) {
 
   fastify.addHook(
     'onSend',
-    (req: FastifyRequest, res: FastifyReply, payload, next: HookHandlerDoneFunction) => {
+    (req: FastifyRequest, res: FastifyReply, _payload, next: HookHandlerDoneFunction) => {
       void res.header('x-request-id', req.id)
       next()
     },

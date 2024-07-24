@@ -46,7 +46,11 @@ describe('publicHealthcheckPlugin', () => {
 
     const response = await app.inject().get('/health').end()
     expect(response.statusCode).toBe(200)
-    expect(response.json()).toEqual({ heartbeat: 'HEALTHY', version: 1, checks: {} })
+    expect(response.json()).toEqual({
+      heartbeat: 'HEALTHY',
+      version: 1,
+      checks: {},
+    })
   })
 
   it('returns false if one mandatory healthcheck fails', async () => {

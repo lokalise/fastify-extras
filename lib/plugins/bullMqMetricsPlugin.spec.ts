@@ -1,6 +1,6 @@
 import { setTimeout } from 'node:timers/promises'
 
-import { buildClient, sendGet, UNKNOWN_RESPONSE_SCHEMA } from '@lokalise/backend-http-client'
+import { buildClient, sendGet } from '@lokalise/backend-http-client'
 import type {
   AbstractBackgroundJobProcessor,
   BaseJobPayload,
@@ -12,6 +12,8 @@ import type { Redis } from 'ioredis'
 import { TestBackgroundJobProcessor } from '../../test/mocks/TestBackgroundJobProcessor'
 import { TestDepedendencies } from '../../test/mocks/TestDepedendencies'
 
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { z } from 'zod'
 import { RedisBasedQueueDiscoverer } from './bull-mq-metrics/queueDiscoverers'
 import type { BullMqMetricsPluginOptions } from './bullMqMetricsPlugin'
 import { bullMqMetricsPlugin } from './bullMqMetricsPlugin'
@@ -21,9 +23,11 @@ type TestOptions = {
   enableMetricsPlugin: boolean
 }
 
+const UNKNOWN_RESPONSE_SCHEMA = z.unknown()
+
 const DEFAULT_TEST_OPTIONS = { enableMetricsPlugin: true }
 
-export async function initAppWithBullMqMetrics(
+async function initAppWithBullMqMetrics(
   pluginOptions: BullMqMetricsPluginOptions,
   { enableMetricsPlugin }: TestOptions = DEFAULT_TEST_OPTIONS,
 ) {

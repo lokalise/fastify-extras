@@ -9,4 +9,4 @@ lib/
 vitest.config.mts
 package-lock.json
 tsconfig.json
-.eslintrc.json
+biome.json

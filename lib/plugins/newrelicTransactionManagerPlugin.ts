@@ -2,10 +2,10 @@ import type { TransactionObservabilityManager } from '@lokalise/node-core'
 import type { FastifyInstance } from 'fastify'
 import fp from 'fastify-plugin'
 import type {
+  getTransaction as GetTransaction,
+  shutdown as Shutdown,
   TransactionHandle,
   startBackgroundTransaction as startBackgroundTransactionType,
-  shutdown as Shutdown,
-  getTransaction as GetTransaction,
 } from 'newrelic'
 import { FifoMap } from 'toad-cache'
 
