@@ -65,7 +65,7 @@
     "bullmq": "^5.8.4",
     "ioredis": "^5.4.1",
     "fastify": "^4.28.1",
-    "newrelic": "11.23.2",
+    "newrelic": "12.0.0",
     "pino": "^9.1.0",
     "pino-pretty": "^11.2.1",
     "shx": "^0.3.4",
