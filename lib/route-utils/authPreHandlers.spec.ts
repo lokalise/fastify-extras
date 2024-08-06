@@ -1,3 +1,4 @@
+import { globalLogger } from '@lokalise/node-core'
 import fastify, { type FastifyInstance, type FastifyReply, type FastifyRequest } from 'fastify'
 import { beforeEach, describe } from 'vitest'
 import { createErrorHandler } from '../errors/errorHandler'
@@ -14,7 +15,7 @@ describe('authPreHandlers', () => {
     app.route({
       method: 'GET',
       url: '/',
-      preHandler: createStaticTokenAuthPreHandler(SECRET_TOKEN),
+      preHandler: createStaticTokenAuthPreHandler(SECRET_TOKEN, (_req) => globalLogger),
       handler: (_req: FastifyRequest, res: FastifyReply) => {
         res.status(200).send({
           data: 'ok',
