@@ -7,13 +7,9 @@ import { ObservableQueue } from './ObservableQueue'
 import type { QueueDiscoverer } from './queueDiscoverers'
 
 export type Metrics = {
-  completedGauge: prometheus.Gauge<never>
-  activeGauge: prometheus.Gauge<never>
-  delayedGauge: prometheus.Gauge<never>
-  failedGauge: prometheus.Gauge<never>
-  waitingGauge: prometheus.Gauge<never>
-  completedDuration: prometheus.Histogram<never>
-  processedDuration: prometheus.Histogram<never>
+  countGauge: prometheus.Gauge<'status' | 'queue'>
+  processedDuration: prometheus.Histogram<'status' | 'queue'>
+  finishedDuration: prometheus.Histogram<'status' | 'queue'>
 }
 
 export type MetricCollectorOptions = {
@@ -26,42 +22,22 @@ export type MetricCollectorOptions = {
 }
 
 const getMetrics = (prefix: string, histogramBuckets: number[]): Metrics => ({
-  completedGauge: new prometheus.Gauge({
-    name: `${prefix}_jobs_completed`,
-    help: 'Total number of completed jobs',
-    labelNames: ['queue'],
-  }),
-  activeGauge: new prometheus.Gauge({
-    name: `${prefix}_jobs_active`,
-    help: 'Total number of active jobs (currently being processed)',
-    labelNames: ['queue'],
-  }),
-  failedGauge: new prometheus.Gauge({
-    name: `${prefix}_jobs_failed`,
-    help: 'Total number of failed jobs',
-    labelNames: ['queue'],
-  }),
-  delayedGauge: new prometheus.Gauge({
-    name: `${prefix}_jobs_delayed`,
-    help: 'Total number of jobs that will run in the future',
-    labelNames: ['queue'],
-  }),
-  waitingGauge: new prometheus.Gauge({
-    name: `${prefix}_jobs_waiting`,
-    help: 'Total number of jobs waiting to be processed',
-    labelNames: ['queue'],
+  countGauge: new prometheus.Gauge({
+    name: `${prefix}_jobs_count`,
+    help: 'Total number of jobs',
+    labelNames: ['status', 'queue'] as const,
   }),
   processedDuration: new prometheus.Histogram({
     name: `${prefix}_jobs_processed_duration`,
-    help: 'Processing time for completed jobs (processing until completed)',
+    help: 'Processing time of a jobs (processing until finished)',
     buckets: histogramBuckets,
-    labelNames: ['queue'],
+    labelNames: ['status', 'queue'] as const,
   }),
-  completedDuration: new prometheus.Histogram({
-    name: `${prefix}_jobs_completed_duration`,
-    help: 'Completion time for jobs (created until completed)',
+  finishedDuration: new prometheus.Histogram({
+    name: `${prefix}_jobs_finished_duration`,
+    help: 'Finish time for jobs (created until finished)',
     buckets: histogramBuckets,
-    labelNames: ['queue'],
+    labelNames: ['status', 'queue'] as const,
   }),
 })
 
@@ -90,7 +66,7 @@ export class MetricsCollector {
     }
 
     await PromisePool.for(this.observedQueues).process((queue) => {
-      void queue.collect()
+      queue.collect()
     })
   }
 

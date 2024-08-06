@@ -134,6 +134,12 @@ describe('bullMqMetricsPlugin', () => {
       },
     })
 
+    // exec collect to start listening for failed and completed events
+    await app.bullMqMetrics.collect()
+
+    const responseBefore = await getMetrics()
+    expect(responseBefore.result.body).not.toContain('bullmq_jobs_finished_duration_count{status="completed",queue="test_job"} 1')
+
     await processor.schedule({
       metadata: {
         correlationId: 'test',
@@ -142,12 +148,9 @@ describe('bullMqMetricsPlugin', () => {
 
     await setTimeout(100)
 
-    const responseBefore = await getMetrics()
-    expect(responseBefore.result.body).not.toContain('bullmq_jobs_completed{queue="test_job"} 1')
-
     await app.bullMqMetrics.collect()
 
     const responseAfter = await getMetrics()
-    expect(responseAfter.result.body).toContain('bullmq_jobs_completed{queue="test_job"} 1')
+    expect(responseAfter.result.body).toContain('bullmq_jobs_finished_duration_count{status="completed",queue="test_job"} 1')
   })
 })
