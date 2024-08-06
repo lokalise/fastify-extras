@@ -54,4 +54,17 @@ describe('authPreHandlers', () => {
       message: 'Authentication failed',
     })
   })
+
+  it('rejects with 401 if invalid token', async () => {
+    const response = await app.inject().get('/')
+      .headers({
+        authorization: 'bearer invalid_token',
+      })
+      .end()
+    expect(response.statusCode).toBe(401)
+    expect(response.json()).toEqual({
+      errorCode: 'AUTH_FAILED',
+      message: 'Authentication failed',
+    })
+  })
 })
