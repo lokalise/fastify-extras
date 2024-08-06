@@ -56,7 +56,9 @@ describe('authPreHandlers', () => {
   })
 
   it('rejects with 401 if invalid token', async () => {
-    const response = await app.inject().get('/')
+    const response = await app
+      .inject()
+      .get('/')
       .headers({
         authorization: 'bearer invalid_token',
       })
