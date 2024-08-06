@@ -1,6 +1,6 @@
 {
   "name": "@lokalise/fastify-extras",
-  "version": "21.4.1",
+  "version": "21.4.2",
   "description": "Opinionated set of fastify plugins, commonly used in Lokalise",
   "author": {
     "name": "Lokalise",
@@ -11,9 +11,20 @@
     "type": "git",
     "url": "git://github.com/lokalise/fastify-extras.git"
   },
-  "keywords": ["fastify", "newrelic", "bugsnag", "request-context", "request-id", "split-io"],
+  "keywords": [
+    "fastify",
+    "newrelic",
+    "bugsnag",
+    "request-context",
+    "request-id",
+    "split-io"
+  ],
   "homepage": "https://github.com/lokalise/fastify-extras",
-  "files": ["dist/**", "LICENSE", "README.md"],
+  "files": [
+    "dist/**",
+    "LICENSE",
+    "README.md"
+  ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "commonjs",
