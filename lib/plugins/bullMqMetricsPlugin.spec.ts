@@ -138,7 +138,9 @@ describe('bullMqMetricsPlugin', () => {
     await app.bullMqMetrics.collect()
 
     const responseBefore = await getMetrics()
-    expect(responseBefore.result.body).not.toContain('bullmq_jobs_finished_duration_count{status="completed",queue="test_job"} 1')
+    expect(responseBefore.result.body).not.toContain(
+      'bullmq_jobs_finished_duration_count{status="completed",queue="test_job"} 1',
+    )
 
     await processor.schedule({
       metadata: {
@@ -151,6 +153,8 @@ describe('bullMqMetricsPlugin', () => {
     await app.bullMqMetrics.collect()
 
     const responseAfter = await getMetrics()
-    expect(responseAfter.result.body).toContain('bullmq_jobs_finished_duration_count{status="completed",queue="test_job"} 1')
+    expect(responseAfter.result.body).toContain(
+      'bullmq_jobs_finished_duration_count{status="completed",queue="test_job"} 1',
+    )
   })
 })

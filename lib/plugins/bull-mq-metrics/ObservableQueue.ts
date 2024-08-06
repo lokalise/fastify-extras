@@ -1,5 +1,5 @@
 import { Queue, QueueEvents } from 'bullmq'
-import type { FinishedStatus } from "bullmq";
+import type { FinishedStatus } from 'bullmq'
 import type { FastifyBaseLogger } from 'fastify'
 import type { Redis } from 'ioredis'
 
@@ -18,13 +18,13 @@ export class ObservableQueue {
       }
 
       this.metrics.finishedDuration
-          .labels({ status, queue: this.name })
-          .observe(job.finishedOn - job.timestamp)
+        .labels({ status, queue: this.name })
+        .observe(job.finishedOn - job.timestamp)
 
       if (job.processedOn) {
         this.metrics.processedDuration
-            .labels({ status, queue: this.name })
-            .observe(job.finishedOn - job.processedOn)
+          .labels({ status, queue: this.name })
+          .observe(job.finishedOn - job.processedOn)
       }
     } catch (err) {
       this.logger.warn(err)
