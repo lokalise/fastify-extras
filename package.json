@@ -27,8 +27,8 @@
     "test:ci": "npm run lint && npm run test:coverage",
     "lint": "biome check . && tsc --project tsconfig.lint.json --noEmit",
     "lint:fix": "biome check --write",
-    "docker:start": "docker-compose -f docker-compose.yml up --build -d redis && docker-compose -f docker-compose.yml up --build -d wait_for_redis",
-    "docker:stop": "docker-compose -f docker-compose.yml down",
+    "docker:start": "docker compose -f docker-compose.yml up --build -d redis && docker compose -f docker-compose.yml up --build -d wait_for_redis",
+    "docker:stop": "docker compose -f docker-compose.yml down",
     "version": "auto-changelog -p && git add CHANGELOG.md"
   },
   "dependencies": {
