@@ -273,3 +273,11 @@ When an uncaught exception occurs, the plugin:
 - `fastify`: The framework this plugin is designed for.
 
 > 🚨 It's critical to note that this plugin listens to the process's 'uncaughtException' event. Multiple listeners on this event can introduce unpredictable behavior in your application. Ensure that this is the sole listener for this event or handle interactions between multiple listeners carefully.
+
+## Utilities
+
+### route-utilities
+
+#### authPreHandlers
+
+- `createStaticTokenAuthPreHandler` - creates pre handler tha expects a static token in the `Authorization` header. If value is different from the expected token, it will return a 401 response.
