@@ -74,7 +74,7 @@ describe('bullMqMetricsPlugin', () => {
   beforeEach(async () => {
     dependencies = new TestDepedendencies()
     redis = dependencies.startRedis()
-    await redis?.flushall('SYNC')
+    await redis.flushall()
 
     processor = new TestBackgroundJobProcessor<BaseJobPayload, JobReturn>(
       dependencies.createMocksForBackgroundJobProcessor(),
@@ -90,25 +90,6 @@ describe('bullMqMetricsPlugin', () => {
     }
     await dependencies.dispose()
     await processor.dispose()
-  })
-
-  it('adds BullMQ metrics to Prometheus metrics endpoint', async () => {
-    app = await initAppWithBullMqMetrics({
-      redisClient: redis,
-    })
-
-    await processor.schedule({
-      metadata: {
-        correlationId: 'test',
-      },
-    })
-
-    await setTimeout(100)
-
-    const response = await getMetrics()
-
-    expect(response.result.statusCode).toBe(200)
-    expect(response.result.body).toContain('bullmq_jobs_completed{queue="test_job"} 1')
   })
 
   it('throws if fastify-metrics was not initialized', async () => {

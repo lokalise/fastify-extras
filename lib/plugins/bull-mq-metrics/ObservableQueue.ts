@@ -9,7 +9,7 @@ export class ObservableQueue {
   private readonly queue: Queue
   private readonly events: QueueEvents
 
-  async collectDurationMetric(jobId: string, status: FinishedStatus) {
+  private async collectDurationMetric(jobId: string, status: FinishedStatus) {
     try {
       const job = await this.queue.getJob(jobId)
 
@@ -50,9 +50,9 @@ export class ObservableQueue {
   }
 
   async collect() {
-    const jobCountByStatus = await this.queue.getJobCounts('active', 'delayed', 'waiting')
+    const { active, delayed, waiting } = await this.queue.getJobCounts('active', 'delayed', 'waiting')
 
-    for (const [status, count] of Object.entries(jobCountByStatus)) {
+    for (const [status, count] of Object.entries({ active, delayed, waiting })) {
       this.metrics.countGauge.set({ status, queue: this.name }, count)
     }
   }
