@@ -1,4 +1,5 @@
 import { Queue, QueueEvents } from 'bullmq'
+import type { FinishedStatus } from 'bullmq'
 import type { FastifyBaseLogger } from 'fastify'
 import type { Redis } from 'ioredis'
 
@@ -8,6 +9,28 @@ export class ObservableQueue {
   private readonly queue: Queue
   private readonly events: QueueEvents
 
+  private async collectDurationMetric(jobId: string, status: FinishedStatus) {
+    try {
+      const job = await this.queue.getJob(jobId)
+
+      if (!job || !job.finishedOn) {
+        return
+      }
+
+      this.metrics.finishedDuration
+        .labels({ status, queue: this.name })
+        .observe(job.finishedOn - job.timestamp)
+
+      if (job.processedOn) {
+        this.metrics.processedDuration
+          .labels({ status, queue: this.name })
+          .observe(job.finishedOn - job.processedOn)
+      }
+    } catch (err) {
+      this.logger.warn(err)
+    }
+  }
+
   constructor(
     readonly name: string,
     private readonly redis: Redis,
@@ -15,42 +38,27 @@ export class ObservableQueue {
     private readonly logger: FastifyBaseLogger,
   ) {
     this.queue = new Queue(name, { connection: redis })
-    this.events = new QueueEvents(name, { connection: redis })
+    this.events = new QueueEvents(name, { connection: redis, autorun: true })
 
-    this.events.on('completed', (completedJob: { jobId: string }) => {
-      this.queue
-        .getJob(completedJob.jobId)
-        .then((job) => {
-          if (!job) {
-            return
-          }
+    this.events.on('failed', async ({ jobId }) => {
+      await this.collectDurationMetric(jobId, 'failed')
+    })
 
-          if (job.finishedOn) {
-            metrics.completedDuration
-              .labels({ queue: name })
-              .observe(job.finishedOn - job.timestamp)
-
-            if (job.processedOn) {
-              metrics.processedDuration
-                .labels({ queue: name })
-                .observe(job.finishedOn - job.processedOn)
-            }
-          }
-        })
-        .catch((err) => {
-          this.logger.warn(err)
-        })
+    this.events.on('completed', async ({ jobId }) => {
+      await this.collectDurationMetric(jobId, 'completed')
     })
   }
 
   async collect() {
-    const { completed, active, delayed, failed, waiting } = await this.queue.getJobCounts()
+    const { active, delayed, waiting } = await this.queue.getJobCounts(
+      'active',
+      'delayed',
+      'waiting',
+    )
 
-    this.metrics.activeGauge.labels({ queue: this.name }).set(active)
-    this.metrics.completedGauge.labels({ queue: this.name }).set(completed)
-    this.metrics.delayedGauge.labels({ queue: this.name }).set(delayed)
-    this.metrics.failedGauge.labels({ queue: this.name }).set(failed)
-    this.metrics.waitingGauge.labels({ queue: this.name }).set(waiting)
+    for (const [status, count] of Object.entries({ active, delayed, waiting })) {
+      this.metrics.countGauge.set({ status, queue: this.name }, count)
+    }
   }
 
   async dispose() {
