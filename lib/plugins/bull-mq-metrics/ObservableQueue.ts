@@ -50,7 +50,11 @@ export class ObservableQueue {
   }
 
   async collect() {
-    const { active, delayed, waiting } = await this.queue.getJobCounts('active', 'delayed', 'waiting')
+    const { active, delayed, waiting } = await this.queue.getJobCounts(
+      'active',
+      'delayed',
+      'waiting',
+    )
 
     for (const [status, count] of Object.entries({ active, delayed, waiting })) {
       this.metrics.countGauge.set({ status, queue: this.name }, count)
