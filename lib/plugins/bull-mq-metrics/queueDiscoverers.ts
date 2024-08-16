@@ -1,4 +1,4 @@
-import { AbstractBackgroundJobProcessor } from '@lokalise/background-jobs-common'
+import { backgroundJobProcessorGetActiveQueueIds } from '@lokalise/background-jobs-common'
 import type { Redis } from 'ioredis'
 
 export type QueueDiscoverer = {
@@ -33,6 +33,6 @@ export class BackgroundJobsBasedQueueDiscoverer implements QueueDiscoverer {
   constructor(private readonly redis: Redis) {}
 
   async discoverQueues(): Promise<string[]> {
-    return await AbstractBackgroundJobProcessor.getActiveQueueIds(this.redis)
+    return await backgroundJobProcessorGetActiveQueueIds(this.redis)
   }
 }
