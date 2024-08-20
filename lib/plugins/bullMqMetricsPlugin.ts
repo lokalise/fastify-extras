@@ -46,8 +46,8 @@ function plugin(
   const redisInstances: Redis[] = Array.isArray(pluginOptions.redisClient)
     ? pluginOptions.redisClient
     : [pluginOptions.redisClient]
-  
-    const queueDiscoverers = redisInstances.map(
+
+  const queueDiscoverers = redisInstances.map(
     (redis) => new BackgroundJobsBasedQueueDiscoverer(redis),
   )
 
