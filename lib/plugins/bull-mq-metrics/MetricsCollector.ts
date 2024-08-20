@@ -1,6 +1,5 @@
 import { PromisePool } from '@supercharge/promise-pool'
 import type { FastifyBaseLogger } from 'fastify'
-import type { Redis } from 'ioredis'
 import * as prometheus from 'prom-client'
 
 import { ObservableQueue } from './ObservableQueue'
@@ -13,10 +12,9 @@ export type Metrics = {
 }
 
 export type MetricCollectorOptions = {
-  redisClient: Redis
   bullMqPrefix: string
   metricsPrefix: string
-  queueDiscoverer: QueueDiscoverer
+  queueDiscoverers: QueueDiscoverer[]
   excludedQueues: string[]
   histogramBuckets: number[]
 }
@@ -42,7 +40,6 @@ const getMetrics = (prefix: string, histogramBuckets: number[]): Metrics => ({
 })
 
 export class MetricsCollector {
-  private readonly redis: Redis
   private readonly metrics: Metrics
   private observedQueues: ObservableQueue[] | undefined
 
@@ -51,7 +48,6 @@ export class MetricsCollector {
     private readonly registry: prometheus.Registry,
     private readonly logger: FastifyBaseLogger,
   ) {
-    this.redis = options.redisClient
     this.metrics = this.registerMetrics(this.registry, this.options)
   }
 
@@ -60,12 +56,10 @@ export class MetricsCollector {
    */
   async collect() {
     if (!this.observedQueues) {
-      this.observedQueues = (await this.options.queueDiscoverer.discoverQueues())
-        .filter((name) => !this.options.excludedQueues.includes(name))
-        .map((name) => new ObservableQueue(name, this.redis, this.metrics, this.logger))
+      this.observedQueues = await this.discoverQueues()
     }
 
-    await PromisePool.for(this.observedQueues).process((queue) => {
+    await PromisePool.for(this.observedQueues).process((queue: ObservableQueue) => {
       queue.collect()
     })
   }
@@ -77,6 +71,30 @@ export class MetricsCollector {
     for (const queue of this.observedQueues ?? []) {
       await queue.dispose()
     }
+  }
+
+  private async discoverQueues(): Promise<ObservableQueue[]> {
+    const redisInstancesWithQueues = await Promise.all(
+      this.options.queueDiscoverers.map((discoverer) => discoverer.getRedisInstanceWithQueues()),
+    )
+
+    return redisInstancesWithQueues
+      .flatMap((redisWithQueues) =>
+        redisWithQueues.queues.map((queueName) => ({
+          redis: redisWithQueues.redisInstance,
+          queueName,
+        })),
+      )
+      .filter((redisWithQueue) => !this.options.excludedQueues.includes(redisWithQueue.queueName))
+      .map(
+        (redisWithQueue) =>
+          new ObservableQueue(
+            redisWithQueue.queueName,
+            redisWithQueue.redis,
+            this.metrics,
+            this.logger,
+          ),
+      )
   }
 
   private registerMetrics(

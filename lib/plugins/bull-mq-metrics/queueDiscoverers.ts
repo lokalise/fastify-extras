@@ -2,7 +2,13 @@ import { backgroundJobProcessorGetActiveQueueIds } from '@lokalise/background-jo
 import type { Redis } from 'ioredis'
 
 export type QueueDiscoverer = {
+  getRedisInstanceWithQueues: () => Promise<RedisInstanceWithQueues>
   discoverQueues: () => Promise<string[]>
+}
+
+type RedisInstanceWithQueues = {
+  redisInstance: Redis
+  queues: string[]
 }
 
 export class RedisBasedQueueDiscoverer implements QueueDiscoverer {
@@ -10,6 +16,13 @@ export class RedisBasedQueueDiscoverer implements QueueDiscoverer {
     private readonly redis: Redis,
     private readonly queuesPrefix: string,
   ) {}
+
+  async getRedisInstanceWithQueues(): Promise<RedisInstanceWithQueues> {
+    return {
+      redisInstance: this.redis,
+      queues: await this.discoverQueues(),
+    }
+  }
 
   async discoverQueues(): Promise<string[]> {
     const scanStream = this.redis.scanStream({
@@ -31,6 +44,13 @@ export class RedisBasedQueueDiscoverer implements QueueDiscoverer {
 
 export class BackgroundJobsBasedQueueDiscoverer implements QueueDiscoverer {
   constructor(private readonly redis: Redis) {}
+
+  async getRedisInstanceWithQueues(): Promise<RedisInstanceWithQueues> {
+    return {
+      redisInstance: this.redis,
+      queues: await this.discoverQueues(),
+    }
+  }
 
   async discoverQueues(): Promise<string[]> {
     return await backgroundJobProcessorGetActiveQueueIds(this.redis)
