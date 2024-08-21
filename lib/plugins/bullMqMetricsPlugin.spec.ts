@@ -41,12 +41,8 @@ async function initAppWithBullMqMetrics(
     })
   }
 
-  const redisClients = Array.isArray(pluginOptions.redisClient)
-    ? pluginOptions.redisClient
-    : [pluginOptions.redisClient]
-
   await app.register(bullMqMetricsPlugin, {
-    queueDiscoverers: redisClients.map((redis) => new RedisBasedQueueDiscoverer(redis, 'bull')),
+    queueDiscoverer: new RedisBasedQueueDiscoverer(pluginOptions.redisClients, 'bull'),
     collectionOptions: {
       type: 'interval',
       intervalInMs: 50,
@@ -100,7 +96,7 @@ describe('bullMqMetricsPlugin', () => {
     await expect(() => {
       return initAppWithBullMqMetrics(
         {
-          redisClient: redis,
+          redisClients: [redis],
         },
         {
           enableMetricsPlugin: false,
@@ -113,7 +109,7 @@ describe('bullMqMetricsPlugin', () => {
 
   it('exposes metrics collect() function', async () => {
     app = await initAppWithBullMqMetrics({
-      redisClient: redis,
+      redisClients: [redis],
       collectionOptions: {
         type: 'manual',
       },
@@ -145,7 +141,7 @@ describe('bullMqMetricsPlugin', () => {
 
   it('works with multiple redis clients', async () => {
     app = await initAppWithBullMqMetrics({
-      redisClient: [redis, redis],
+      redisClients: [redis, redis],
       collectionOptions: {
         type: 'manual',
       },
@@ -156,7 +152,7 @@ describe('bullMqMetricsPlugin', () => {
 
     const responseBefore = await getMetrics()
     expect(responseBefore.result.body).not.toContain(
-      'bullmq_jobs_finished_duration_count{status="completed",queue="test_job"} 1',
+      'bullmq_jobs_finished_duration_count{status="completed",queue="test_job"}',
     )
 
     await processor.schedule({

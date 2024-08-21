@@ -145,10 +145,10 @@ This plugin depends on the following peer-installed packages:
 
 Add the plugin to your Fastify instance by registering it with the following possible options:
 
-- `redisClient`, a Redis client instance(s) which is used by the BullMQ: plugin uses it to discover the queues. Both single instance or array of instances can be provided;
+- `redisClients`, a Redis client instances which are used by the BullMQ: plugin uses it to discover the queues.
 - `bullMqPrefix` (optional, default: `bull`). The prefix used by BullMQ to store the queues in Redis;
 - `metricsPrefix` (optional, default: `bullmq`). The prefix for the metrics in Prometheus;
-- `queueDiscoverers` (optional, default: `BackgroundJobsBasedQueueDiscoverer` for each redis instance). The queue discoverers to use. The default one relies on the logic implemented by `@lokalise/background-jobs-common` where queue names are registered by the background job processors; If you are not using `@lokalise/background-jobs-common`, you can use your own queue discoverer by instantiating a `RedisBasedQueueDiscoverer` or implementing a `QueueDiscoverer` interface;
+- `queueDiscoverer` (optional, default: `BackgroundJobsBasedQueueDiscoverer`). The queue discoverer to use. The default one relies on the logic implemented by `@lokalise/background-jobs-common` where queue names are registered by the background job processors; If you are not using `@lokalise/background-jobs-common`, you can use your own queue discoverer by instantiating a `RedisBasedQueueDiscoverer` or implementing a `QueueDiscoverer` interface;
 - `excludedQueues` (optional, default: `[]`). An array of queue names to exclude from metrics collection;
 - `histogramBuckets` (optional, default: `[20, 50, 150, 400, 1000, 3000, 8000, 22000, 60000, 150000]`). Buckets for the histogram metrics (such as job completion or overall processing time).
 - `collectionOptions` (optional, default: `{ type: 'interval', intervalInMs: 5000 }`). Allows to configure how metrics are collected. Supports the following properties:

@@ -2,30 +2,28 @@ import { backgroundJobProcessorGetActiveQueueIds } from '@lokalise/background-jo
 import type { Redis } from 'ioredis'
 
 export type QueueDiscoverer = {
-  getRedisInstanceWithQueues: () => Promise<RedisInstanceWithQueues>
-  discoverQueues: () => Promise<string[]>
+  discoverQueues: () => Promise<RedisQueue[]>
 }
 
-type RedisInstanceWithQueues = {
+type RedisQueue = {
   redisInstance: Redis
-  queues: string[]
+  queueName: string
 }
 
 export class RedisBasedQueueDiscoverer implements QueueDiscoverer {
   constructor(
-    private readonly redis: Redis,
+    private readonly redisInstances: Redis[],
     private readonly queuesPrefix: string,
   ) {}
 
-  async getRedisInstanceWithQueues(): Promise<RedisInstanceWithQueues> {
-    return {
-      redisInstance: this.redis,
-      queues: await this.discoverQueues(),
-    }
+  async discoverQueues(): Promise<RedisQueue[]> {
+    return Promise.all(
+      this.redisInstances.map((redisInstance) => this.discoverQueuesForInstance(redisInstance)),
+    ).then((queues) => queues.flat())
   }
 
-  async discoverQueues(): Promise<string[]> {
-    const scanStream = this.redis.scanStream({
+  private async discoverQueuesForInstance(redisInstance: Redis): Promise<RedisQueue[]> {
+    const scanStream = redisInstance.scanStream({
       match: `${this.queuesPrefix}:*:meta`,
     })
 
@@ -38,21 +36,30 @@ export class RedisBasedQueueDiscoverer implements QueueDiscoverer {
         .forEach((queue) => queues.add(queue))
     }
 
-    return Array.from(queues).sort()
+    return Array.from(queues)
+      .sort()
+      .map((queueName) => ({
+        redisInstance: redisInstance,
+        queueName,
+      }))
   }
 }
 
 export class BackgroundJobsBasedQueueDiscoverer implements QueueDiscoverer {
-  constructor(private readonly redis: Redis) {}
+  constructor(private readonly redisInstances: Redis[]) {}
 
-  async getRedisInstanceWithQueues(): Promise<RedisInstanceWithQueues> {
-    return {
-      redisInstance: this.redis,
-      queues: await this.discoverQueues(),
-    }
+  async discoverQueues(): Promise<RedisQueue[]> {
+    return Promise.all(
+      this.redisInstances.map((redisInstance) => this.discoverQueuesForInstance(redisInstance)),
+    ).then((queues) => queues.flat())
   }
 
-  async discoverQueues(): Promise<string[]> {
-    return await backgroundJobProcessorGetActiveQueueIds(this.redis)
+  private async discoverQueuesForInstance(redisInstance: Redis): Promise<RedisQueue[]> {
+    return backgroundJobProcessorGetActiveQueueIds(redisInstance).then((queueNames) =>
+      queueNames.map((queueName) => ({
+        redisInstance,
+        queueName,
+      })),
+    )
   }
 }

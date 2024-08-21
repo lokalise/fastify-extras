@@ -14,7 +14,7 @@ export type Metrics = {
 export type MetricCollectorOptions = {
   bullMqPrefix: string
   metricsPrefix: string
-  queueDiscoverers: QueueDiscoverer[]
+  queueDiscoverer: QueueDiscoverer
   excludedQueues: string[]
   histogramBuckets: number[]
 }
@@ -56,7 +56,12 @@ export class MetricsCollector {
    */
   async collect() {
     if (!this.observedQueues) {
-      this.observedQueues = await this.discoverQueues()
+      this.observedQueues = (await this.options.queueDiscoverer.discoverQueues())
+        .filter((queue) => !this.options.excludedQueues.includes(queue.queueName))
+        .map(
+          (queue) =>
+            new ObservableQueue(queue.queueName, queue.redisInstance, this.metrics, this.logger),
+        )
     }
 
     await PromisePool.for(this.observedQueues).process((queue: ObservableQueue) => {
@@ -71,30 +76,6 @@ export class MetricsCollector {
     for (const queue of this.observedQueues ?? []) {
       await queue.dispose()
     }
-  }
-
-  private async discoverQueues(): Promise<ObservableQueue[]> {
-    const redisInstancesWithQueues = await Promise.all(
-      this.options.queueDiscoverers.map((discoverer) => discoverer.getRedisInstanceWithQueues()),
-    )
-
-    return redisInstancesWithQueues
-      .flatMap((redisWithQueues) =>
-        redisWithQueues.queues.map((queueName) => ({
-          redis: redisWithQueues.redisInstance,
-          queueName,
-        })),
-      )
-      .filter((redisWithQueue) => !this.options.excludedQueues.includes(redisWithQueue.queueName))
-      .map(
-        (redisWithQueue) =>
-          new ObservableQueue(
-            redisWithQueue.queueName,
-            redisWithQueue.redis,
-            this.metrics,
-            this.logger,
-          ),
-      )
   }
 
   private registerMetrics(
