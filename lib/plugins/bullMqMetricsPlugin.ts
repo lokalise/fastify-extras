@@ -19,7 +19,7 @@ declare module 'fastify' {
 }
 
 export type BullMqMetricsPluginOptions = {
-  redisClient: Redis
+  redisClients: Redis[]
   collectionOptions?:
     | {
         type: 'interval'
@@ -46,7 +46,7 @@ function plugin(
   const options = {
     bullMqPrefix: 'bull',
     metricsPrefix: 'bullmq',
-    queueDiscoverer: new BackgroundJobsBasedQueueDiscoverer(pluginOptions.redisClient),
+    queueDiscoverer: new BackgroundJobsBasedQueueDiscoverer(pluginOptions.redisClients),
     excludedQueues: [],
     histogramBuckets: [20, 50, 150, 400, 1000, 3000, 8000, 22000, 60000, 150000],
     collectionOptions: {
@@ -54,7 +54,7 @@ function plugin(
       intervalInMs: 5000,
     },
     ...pluginOptions,
-  }
+  } satisfies MetricCollectorOptions
 
   try {
     const collector = new MetricsCollector(options, fastify.metrics.client.register, fastify.log)

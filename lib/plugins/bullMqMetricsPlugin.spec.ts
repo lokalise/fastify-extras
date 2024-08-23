@@ -42,7 +42,7 @@ async function initAppWithBullMqMetrics(
   }
 
   await app.register(bullMqMetricsPlugin, {
-    queueDiscoverer: new RedisBasedQueueDiscoverer(pluginOptions.redisClient, 'bull'),
+    queueDiscoverer: new RedisBasedQueueDiscoverer(pluginOptions.redisClients, 'bull'),
     collectionOptions: {
       type: 'interval',
       intervalInMs: 50,
@@ -96,7 +96,7 @@ describe('bullMqMetricsPlugin', () => {
     await expect(() => {
       return initAppWithBullMqMetrics(
         {
-          redisClient: redis,
+          redisClients: [redis],
         },
         {
           enableMetricsPlugin: false,
@@ -109,7 +109,7 @@ describe('bullMqMetricsPlugin', () => {
 
   it('exposes metrics collect() function', async () => {
     app = await initAppWithBullMqMetrics({
-      redisClient: redis,
+      redisClients: [redis],
       collectionOptions: {
         type: 'manual',
       },
@@ -136,6 +136,39 @@ describe('bullMqMetricsPlugin', () => {
     const responseAfter = await getMetrics()
     expect(responseAfter.result.body).toContain(
       'bullmq_jobs_finished_duration_count{status="completed",queue="test_job"} 1',
+    )
+  })
+
+  it('works with multiple redis clients', async () => {
+    app = await initAppWithBullMqMetrics({
+      redisClients: [redis, redis],
+      collectionOptions: {
+        type: 'manual',
+      },
+    })
+
+    // exec collect to start listening for failed and completed events
+    await app.bullMqMetrics.collect()
+
+    const responseBefore = await getMetrics()
+    expect(responseBefore.result.body).not.toContain(
+      'bullmq_jobs_finished_duration_count{status="completed",queue="test_job"}',
+    )
+
+    await processor.schedule({
+      metadata: {
+        correlationId: 'test',
+      },
+    })
+
+    await setTimeout(100)
+
+    await app.bullMqMetrics.collect()
+
+    const responseAfter = await getMetrics()
+    expect(responseAfter.result.body).toContain(
+      // value is 2 since we are counting same redis client twice (only for tests)
+      'bullmq_jobs_finished_duration_count{status="completed",queue="test_job"} 2',
     )
   })
 })

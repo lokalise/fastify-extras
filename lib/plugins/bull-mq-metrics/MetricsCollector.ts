@@ -1,6 +1,5 @@
 import { PromisePool } from '@supercharge/promise-pool'
 import type { FastifyBaseLogger } from 'fastify'
-import type { Redis } from 'ioredis'
 import * as prometheus from 'prom-client'
 
 import { ObservableQueue } from './ObservableQueue'
@@ -13,7 +12,6 @@ export type Metrics = {
 }
 
 export type MetricCollectorOptions = {
-  redisClient: Redis
   bullMqPrefix: string
   metricsPrefix: string
   queueDiscoverer: QueueDiscoverer
@@ -42,7 +40,6 @@ const getMetrics = (prefix: string, histogramBuckets: number[]): Metrics => ({
 })
 
 export class MetricsCollector {
-  private readonly redis: Redis
   private readonly metrics: Metrics
   private observedQueues: ObservableQueue[] | undefined
 
@@ -51,7 +48,6 @@ export class MetricsCollector {
     private readonly registry: prometheus.Registry,
     private readonly logger: FastifyBaseLogger,
   ) {
-    this.redis = options.redisClient
     this.metrics = this.registerMetrics(this.registry, this.options)
   }
 
@@ -61,11 +57,14 @@ export class MetricsCollector {
   async collect() {
     if (!this.observedQueues) {
       this.observedQueues = (await this.options.queueDiscoverer.discoverQueues())
-        .filter((name) => !this.options.excludedQueues.includes(name))
-        .map((name) => new ObservableQueue(name, this.redis, this.metrics, this.logger))
+        .filter((queue) => !this.options.excludedQueues.includes(queue.queueName))
+        .map(
+          (queue) =>
+            new ObservableQueue(queue.queueName, queue.redisInstance, this.metrics, this.logger),
+        )
     }
 
-    await PromisePool.for(this.observedQueues).process((queue) => {
+    await PromisePool.for(this.observedQueues).process((queue: ObservableQueue) => {
       queue.collect()
     })
   }
