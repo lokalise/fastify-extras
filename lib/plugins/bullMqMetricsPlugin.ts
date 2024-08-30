@@ -1,8 +1,8 @@
 import type { FastifyInstance } from 'fastify'
 import 'fastify-metrics'
 import fp from 'fastify-plugin'
-import type { Redis } from 'ioredis'
 
+import type { RedisConfig } from '@lokalise/node-core'
 import type { CollectionScheduler } from './bull-mq-metrics/CollectionScheduler'
 import { PromiseBasedCollectionScheduler } from './bull-mq-metrics/CollectionScheduler'
 import type { MetricCollectorOptions } from './bull-mq-metrics/MetricsCollector'
@@ -19,7 +19,7 @@ declare module 'fastify' {
 }
 
 export type BullMqMetricsPluginOptions = {
-  redisClients: Redis[]
+  redisConfigs: RedisConfig[]
   collectionOptions?:
     | {
         type: 'interval'
@@ -46,7 +46,7 @@ function plugin(
   const options = {
     bullMqPrefix: 'bull',
     metricsPrefix: 'bullmq',
-    queueDiscoverer: new BackgroundJobsBasedQueueDiscoverer(pluginOptions.redisClients),
+    queueDiscoverer: new BackgroundJobsBasedQueueDiscoverer(pluginOptions.redisConfigs),
     excludedQueues: [],
     histogramBuckets: [20, 50, 150, 400, 1000, 3000, 8000, 22000, 60000, 150000],
     collectionOptions: {
