@@ -29,7 +29,8 @@
         "lint:fix": "biome check --write",
         "docker:start": "docker compose -f docker-compose.yml up --build -d redis && docker compose -f docker-compose.yml up --build -d wait_for_redis",
         "docker:stop": "docker compose -f docker-compose.yml down",
-        "version": "auto-changelog -p && git add CHANGELOG.md"
+        "version": "auto-changelog -p && git add CHANGELOG.md",
+        "postversion": "biome check --write package.json"
     },
     "dependencies": {
         "@bugsnag/js": "^7.25.0",
