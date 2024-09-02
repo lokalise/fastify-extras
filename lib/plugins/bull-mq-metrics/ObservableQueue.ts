@@ -1,8 +1,8 @@
 import { Queue, QueueEvents } from 'bullmq'
 import type { FinishedStatus } from 'bullmq'
 import type { FastifyBaseLogger } from 'fastify'
-import type { Redis } from 'ioredis'
 
+import type { RedisConfig } from '@lokalise/node-core'
 import type { Metrics } from './MetricsCollector'
 
 export class ObservableQueue {
@@ -33,12 +33,12 @@ export class ObservableQueue {
 
   constructor(
     readonly name: string,
-    private readonly redis: Redis,
+    readonly redisConfig: RedisConfig,
     private readonly metrics: Metrics,
     private readonly logger: FastifyBaseLogger,
   ) {
-    this.queue = new Queue(name, { connection: redis })
-    this.events = new QueueEvents(name, { connection: redis, autorun: true })
+    this.queue = new Queue(name, { connection: redisConfig })
+    this.events = new QueueEvents(name, { connection: redisConfig, autorun: true })
 
     this.events.on('failed', async ({ jobId }) => {
       await this.collectDurationMetric(jobId, 'failed')

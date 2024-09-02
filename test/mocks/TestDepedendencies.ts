@@ -1,7 +1,6 @@
 import type { BackgroundJobProcessorDependencies } from '@lokalise/background-jobs-common'
 import { CommonBullmqFactory } from '@lokalise/background-jobs-common'
-import { globalLogger } from '@lokalise/node-core'
-import { Redis } from 'ioredis'
+import { type RedisConfig, globalLogger } from '@lokalise/node-core'
 import type { MockInstance } from 'vitest'
 import { vi, vitest } from 'vitest'
 
@@ -10,8 +9,6 @@ export let lastInfoSpy: MockInstance
 export let lastErrorSpy: MockInstance
 
 export class TestDepedendencies {
-  private client?: Redis
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   createMocksForBackgroundJobProcessor(): BackgroundJobProcessorDependencies<any, any> {
     const originalChildFn = testLogger.child.bind(testLogger)
@@ -37,11 +34,7 @@ export class TestDepedendencies {
     }
   }
 
-  async dispose(): Promise<void> {
-    await this.client?.quit()
-  }
-
-  startRedis(): Redis {
+  getRedisConfig(): RedisConfig {
     const db = process.env.REDIS_DB ? Number.parseInt(process.env.REDIS_DB) : undefined
     const host = process.env.REDIS_HOST
     const port = process.env.REDIS_PORT ? Number(process.env.REDIS_PORT) : undefined
@@ -53,7 +46,16 @@ export class TestDepedendencies {
     const commandTimeout = process.env.REDIS_COMMAND_TIMEOUT
       ? Number.parseInt(process.env.REDIS_COMMAND_TIMEOUT, 10)
       : undefined
-    this.client = new Redis({
+
+    if (!host) {
+      throw new Error('Missing REDIS_HOST env')
+    }
+
+    if (!port) {
+      throw new Error('Missing REDIS_PORT env')
+    }
+
+    return {
       host,
       db,
       port,
@@ -61,10 +63,9 @@ export class TestDepedendencies {
       password,
       connectTimeout,
       commandTimeout,
-      maxRetriesPerRequest: null,
       enableReadyCheck: false,
-    })
-
-    return this.client
+      maxRetriesPerRequest: null,
+      useTls: false,
+    }
   }
 }

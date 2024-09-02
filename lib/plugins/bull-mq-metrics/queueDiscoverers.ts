@@ -1,24 +1,27 @@
-import { backgroundJobProcessorGetActiveQueueIds } from '@lokalise/background-jobs-common'
+import {
+  backgroundJobProcessorGetActiveQueueIds,
+  createSanitizedRedisClient,
+} from '@lokalise/background-jobs-common'
+import type { RedisConfig } from '@lokalise/node-core'
 import { PromisePool } from '@supercharge/promise-pool'
-import type { Redis } from 'ioredis'
 
 export type QueueDiscoverer = {
   discoverQueues: () => Promise<RedisQueue[]>
 }
 
 type RedisQueue = {
-  redisInstance: Redis
+  redisConfig: RedisConfig
   queueName: string
 }
 
 const QUEUE_DISCOVERY_CONCURRENCY = 3
 
 export abstract class AbstractRedisBasedQueueDiscoverer implements QueueDiscoverer {
-  constructor(protected readonly redisInstances: Redis[]) {}
+  constructor(protected readonly redisConfigs: RedisConfig[]) {}
 
   async discoverQueues(): Promise<RedisQueue[]> {
     const { results, errors } = await PromisePool.withConcurrency(QUEUE_DISCOVERY_CONCURRENCY)
-      .for(this.redisInstances)
+      .for(this.redisConfigs)
       .process((redisInstance) => this.discoverQueuesForInstance(redisInstance))
 
     if (errors.length > 0) {
@@ -29,19 +32,20 @@ export abstract class AbstractRedisBasedQueueDiscoverer implements QueueDiscover
     return results.flat()
   }
 
-  protected abstract discoverQueuesForInstance(redisInstance: Redis): Promise<RedisQueue[]>
+  protected abstract discoverQueuesForInstance(redisConfig: RedisConfig): Promise<RedisQueue[]>
 }
 
 export class RedisBasedQueueDiscoverer extends AbstractRedisBasedQueueDiscoverer {
   constructor(
-    redisInstances: Redis[],
+    redisConfigs: RedisConfig[],
     private readonly queuesPrefix: string,
   ) {
-    super(redisInstances)
+    super(redisConfigs)
   }
 
-  protected async discoverQueuesForInstance(redisInstance: Redis): Promise<RedisQueue[]> {
-    const scanStream = redisInstance.scanStream({
+  protected async discoverQueuesForInstance(redisConfig: RedisConfig): Promise<RedisQueue[]> {
+    const redis = createSanitizedRedisClient(redisConfig)
+    const scanStream = redis.scanStream({
       match: `${this.queuesPrefix}:*:meta`,
     })
 
@@ -57,17 +61,17 @@ export class RedisBasedQueueDiscoverer extends AbstractRedisBasedQueueDiscoverer
     return Array.from(queues)
       .sort()
       .map((queueName) => ({
-        redisInstance: redisInstance,
+        redisConfig,
         queueName,
       }))
   }
 }
 
 export class BackgroundJobsBasedQueueDiscoverer extends AbstractRedisBasedQueueDiscoverer {
-  protected async discoverQueuesForInstance(redisInstance: Redis): Promise<RedisQueue[]> {
-    return backgroundJobProcessorGetActiveQueueIds(redisInstance).then((queueNames) =>
+  protected async discoverQueuesForInstance(redisConfig: RedisConfig): Promise<RedisQueue[]> {
+    return backgroundJobProcessorGetActiveQueueIds(redisConfig).then((queueNames) =>
       queueNames.map((queueName) => ({
-        redisInstance,
+        redisConfig,
         queueName,
       })),
     )

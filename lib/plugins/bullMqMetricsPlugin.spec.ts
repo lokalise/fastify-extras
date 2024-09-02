@@ -1,17 +1,19 @@
 import { setTimeout } from 'node:timers/promises'
 
 import { buildClient, sendGet } from '@lokalise/backend-http-client'
-import type {
-  AbstractBackgroundJobProcessor,
-  BaseJobPayload,
+import {
+  type AbstractBackgroundJobProcessor,
+  type BaseJobPayload,
+  createSanitizedRedisClient,
 } from '@lokalise/background-jobs-common'
 import type { FastifyInstance } from 'fastify'
 import fastify from 'fastify'
-import type { Redis } from 'ioredis'
+import type Redis from 'ioredis'
 
 import { TestBackgroundJobProcessor } from '../../test/mocks/TestBackgroundJobProcessor'
 import { TestDepedendencies } from '../../test/mocks/TestDepedendencies'
 
+import type { RedisConfig } from '@lokalise/node-core'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { z } from 'zod'
 import { RedisBasedQueueDiscoverer } from './bull-mq-metrics/queueDiscoverers'
@@ -42,7 +44,7 @@ async function initAppWithBullMqMetrics(
   }
 
   await app.register(bullMqMetricsPlugin, {
-    queueDiscoverer: new RedisBasedQueueDiscoverer(pluginOptions.redisClients, 'bull'),
+    queueDiscoverer: new RedisBasedQueueDiscoverer(pluginOptions.redisConfigs, 'bull'),
     collectionOptions: {
       type: 'interval',
       intervalInMs: 50,
@@ -69,11 +71,14 @@ describe('bullMqMetricsPlugin', () => {
   let app: FastifyInstance
   let dependencies: TestDepedendencies
   let processor: AbstractBackgroundJobProcessor<BaseJobPayload, JobReturn>
+  let redisConfig: RedisConfig
   let redis: Redis
 
   beforeEach(async () => {
     dependencies = new TestDepedendencies()
-    redis = dependencies.startRedis()
+    redisConfig = dependencies.getRedisConfig()
+
+    redis = createSanitizedRedisClient(redisConfig)
     await redis.flushall()
 
     processor = new TestBackgroundJobProcessor<BaseJobPayload, JobReturn>(
@@ -88,7 +93,7 @@ describe('bullMqMetricsPlugin', () => {
     if (app) {
       await app.close()
     }
-    await dependencies.dispose()
+    await redis.quit()
     await processor.dispose()
   })
 
@@ -96,7 +101,7 @@ describe('bullMqMetricsPlugin', () => {
     await expect(() => {
       return initAppWithBullMqMetrics(
         {
-          redisClients: [redis],
+          redisConfigs: [redisConfig],
         },
         {
           enableMetricsPlugin: false,
@@ -109,7 +114,7 @@ describe('bullMqMetricsPlugin', () => {
 
   it('exposes metrics collect() function', async () => {
     app = await initAppWithBullMqMetrics({
-      redisClients: [redis],
+      redisConfigs: [redisConfig],
       collectionOptions: {
         type: 'manual',
       },
@@ -141,7 +146,7 @@ describe('bullMqMetricsPlugin', () => {
 
   it('works with multiple redis clients', async () => {
     app = await initAppWithBullMqMetrics({
-      redisClients: [redis, redis],
+      redisConfigs: [redisConfig, redisConfig],
       collectionOptions: {
         type: 'manual',
       },

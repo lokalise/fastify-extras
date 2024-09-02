@@ -60,7 +60,7 @@ export class MetricsCollector {
         .filter((queue) => !this.options.excludedQueues.includes(queue.queueName))
         .map(
           (queue) =>
-            new ObservableQueue(queue.queueName, queue.redisInstance, this.metrics, this.logger),
+            new ObservableQueue(queue.queueName, queue.redisConfig, this.metrics, this.logger),
         )
     }
 
