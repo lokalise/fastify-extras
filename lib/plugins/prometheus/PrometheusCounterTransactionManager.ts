@@ -11,7 +11,7 @@ export class PrometheusCounterTransactionManager implements TransactionObservabi
   private readonly metricDescription: string
   private readonly counter?: Counter<'status' | 'transactionName'>;
 
-  private readonly transactionNameById: Map<string, string> = new Map()
+  private readonly transactionNameByKey: Map<string, string> = new Map()
 
   constructor(
     metricName: string,
@@ -24,21 +24,21 @@ export class PrometheusCounterTransactionManager implements TransactionObservabi
   }
 
   start(transactionName: string, uniqueTransactionKey: string): void {
-    this.transactionNameById.set(uniqueTransactionKey, transactionName)
+    this.transactionNameByKey.set(uniqueTransactionKey, transactionName)
     this.counter?.inc({ status: 'started', transactionName: transactionName })
   }
 
   startWithGroup(transactionName: string, uniqueTransactionKey: string, _transactionGroup: string): void {
-    this.transactionNameById.set(uniqueTransactionKey, transactionName)
+    this.transactionNameByKey.set(uniqueTransactionKey, transactionName)
     this.counter?.inc({ status: 'started', transactionName })
   }
 
   stop(uniqueTransactionKey: string, wasSuccessful = true): void {
-    const transactionName = this.transactionNameById.get(uniqueTransactionKey)
+    const transactionName = this.transactionNameByKey.get(uniqueTransactionKey)
     if (!transactionName) return
 
     this.counter?.inc({ status: wasSuccessful ? 'success' : 'failed', transactionName })
-    this.transactionNameById.delete(uniqueTransactionKey)
+    this.transactionNameByKey.delete(uniqueTransactionKey)
   }
 
   private registerMetric(appMetrics?: IFastifyMetrics) {
