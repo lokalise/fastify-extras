@@ -1,6 +1,6 @@
-import type { Counter } from "prom-client";
-import type { TransactionObservabilityManager } from "@lokalise/node-core";
-import type { IFastifyMetrics } from "fastify-metrics";
+import type { TransactionObservabilityManager } from '@lokalise/node-core'
+import type { IFastifyMetrics } from 'fastify-metrics'
+import type { Counter } from 'prom-client'
 
 /**
  * TransactionObservabilityManager implementation that uses Prometheus counter
@@ -9,15 +9,11 @@ import type { IFastifyMetrics } from "fastify-metrics";
 export class PrometheusCounterTransactionManager implements TransactionObservabilityManager {
   private readonly metricName: string
   private readonly metricDescription: string
-  private readonly counter?: Counter<'status' | 'transactionName'>;
+  private readonly counter?: Counter<'status' | 'transactionName'>
 
   private readonly transactionNameByKey: Map<string, string> = new Map()
 
-  constructor(
-    metricName: string,
-    metricDescription:  string,
-    appMetrics?: IFastifyMetrics,
-  ) {
+  constructor(metricName: string, metricDescription: string, appMetrics?: IFastifyMetrics) {
     this.metricName = metricName
     this.metricDescription = metricDescription
     this.counter = this.registerMetric(appMetrics)
@@ -28,7 +24,11 @@ export class PrometheusCounterTransactionManager implements TransactionObservabi
     this.counter?.inc({ status: 'started', transactionName: transactionName })
   }
 
-  startWithGroup(transactionName: string, uniqueTransactionKey: string, _transactionGroup: string): void {
+  startWithGroup(
+    transactionName: string,
+    uniqueTransactionKey: string,
+    _transactionGroup: string,
+  ): void {
     this.transactionNameByKey.set(uniqueTransactionKey, transactionName)
     this.counter?.inc({ status: 'started', transactionName })
   }
@@ -44,8 +44,9 @@ export class PrometheusCounterTransactionManager implements TransactionObservabi
   private registerMetric(appMetrics?: IFastifyMetrics) {
     if (!appMetrics) return
 
-    const existingMetric: Counter| undefined =
-      appMetrics.client.register.getSingleMetric(this.metricName) as Counter | undefined
+    const existingMetric: Counter | undefined = appMetrics.client.register.getSingleMetric(
+      this.metricName,
+    ) as Counter | undefined
 
     if (existingMetric) return existingMetric
 
