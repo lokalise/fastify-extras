@@ -8,7 +8,6 @@ import {
 } from '@lokalise/background-jobs-common'
 import type { FastifyInstance } from 'fastify'
 import fastify from 'fastify'
-import type Redis from 'ioredis'
 
 import { TestBackgroundJobProcessor } from '../../test/mocks/TestBackgroundJobProcessor'
 import { TestDepedendencies } from '../../test/mocks/TestDepedendencies'
@@ -72,14 +71,14 @@ describe('bullMqMetricsPlugin', () => {
   let dependencies: TestDepedendencies
   let processor: AbstractBackgroundJobProcessor<BaseJobPayload, JobReturn>
   let redisConfig: RedisConfig
-  let redis: Redis
 
   beforeEach(async () => {
     dependencies = new TestDepedendencies()
     redisConfig = dependencies.getRedisConfig()
 
-    redis = createSanitizedRedisClient(redisConfig)
-    await redis.flushall()
+    const redis = createSanitizedRedisClient(redisConfig)
+    await redis.flushall('SYNC')
+    await redis.quit()
 
     processor = new TestBackgroundJobProcessor<BaseJobPayload, JobReturn>(
       dependencies.createMocksForBackgroundJobProcessor(),
@@ -90,11 +89,8 @@ describe('bullMqMetricsPlugin', () => {
   })
 
   afterEach(async () => {
-    if (app) {
-      await app.close()
-    }
-    await redis.quit()
     await processor.dispose()
+    if (app) await app.close()
   })
 
   it('throws if fastify-metrics was not initialized', async () => {
@@ -161,15 +157,12 @@ describe('bullMqMetricsPlugin', () => {
     )
 
     const jobId = await processor.schedule({
-      metadata: {
-        correlationId: 'test',
-      },
+      metadata: { correlationId: 'test' },
     })
 
     await processor.spy.waitForJobWithId(jobId, 'completed')
     await setTimeout(200)
 
-    await app.bullMqMetrics.collect()
     const responseAfter = await getMetrics()
     expect(responseAfter.result.body).toContain(
       // value is 2 since we are counting same redis client twice (only for tests)
