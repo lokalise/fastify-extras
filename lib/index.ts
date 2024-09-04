@@ -34,6 +34,8 @@ export type {
   HealthcheckMetricsPluginOptions,
 } from './plugins/healthcheck/healthcheckMetricsPlugin'
 
+export { PrometheusCounterTransactionManager } from './plugins/prometheus/PrometheusCounterTransactionManager'
+
 export { bullMqMetricsPlugin } from './plugins/bullMqMetricsPlugin'
 export type { BullMqMetricsPluginOptions } from './plugins/bullMqMetricsPlugin'
 export {
