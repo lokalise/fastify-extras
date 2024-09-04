@@ -134,6 +134,13 @@ Add the plugin to your Fastify instance by registering it with the following opt
 
 The plugin exposes a `GET /metrics` route in your Fastify app to retrieve Prometheus metrics. If something goes wrong while starting the Prometheus metrics server, an `Error` is thrown. Otherwise, a success message is displayed when the plugin has been loaded.
 
+#### `PrometheusCounterTransactionManager`
+
+`PrometheusCounterTransactionManager` is an implementation of `TransactionObservabilityManager` that uses Prometheus 
+counters to track the number of started, failed, and successful transactions. The results are automatically added to 
+the `/metrics` endpoint exposed by the metrics plugin.
+
+
 ### BullMQ Metrics Plugin
 
 Plugin to auto-discover BullMQ queues which can regularly collect metrics for them and expose via `fastify-metrics` global Prometheus registry. If used together with `metricsPlugin`, it will show these metrics on `GET /metrics` route.
