@@ -160,16 +160,15 @@ describe('bullMqMetricsPlugin', () => {
       'bullmq_jobs_finished_duration_count{status="completed",queue="test_job"}',
     )
 
-    await processor.schedule({
+    const jobId = await processor.schedule({
       metadata: {
         correlationId: 'test',
       },
     })
 
-    await setTimeout(100)
+    await processor.spy.waitForJobWithId(jobId, 'completed')
 
     await app.bullMqMetrics.collect()
-
     const responseAfter = await getMetrics()
     expect(responseAfter.result.body).toContain(
       // value is 2 since we are counting same redis client twice (only for tests)
