@@ -167,7 +167,7 @@ describe('bullMqMetricsPlugin', () => {
     })
 
     await processor.spy.waitForJobWithId(jobId, 'completed')
-    await setTimeout(100)
+    await setTimeout(200)
 
     await app.bullMqMetrics.collect()
     const responseAfter = await getMetrics()
