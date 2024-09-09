@@ -88,6 +88,7 @@ describe('bullMqMetricsPlugin', () => {
       bgDependencies,
       { result: 'done' },
       'test_job',
+      redisConfig,
     )
     await processor.start()
   })
