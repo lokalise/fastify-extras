@@ -73,6 +73,8 @@ describe('bullMqMetricsPlugin', () => {
   let redisConfig: RedisConfig
 
   beforeEach(async () => {
+    vi.restoreAllMocks()
+
     dependencies = new TestDependencies()
     redisConfig = dependencies.getRedisConfig()
 
