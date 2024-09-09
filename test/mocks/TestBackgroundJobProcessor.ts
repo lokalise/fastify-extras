@@ -29,7 +29,7 @@ export class TestBackgroundJobProcessor<
   }
 
   schedule(jobData: JobData): Promise<string> {
-    return super.schedule(jobData, { attempts: 1 })
+    return super.schedule(jobData, { attempts: 1, removeOnFail: false, removeOnComplete: false })
   }
 
   protected override process(): Promise<JobReturn> {
