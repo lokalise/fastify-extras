@@ -45,10 +45,7 @@ async function initAppWithBullMqMetrics(
 
   await app.register(bullMqMetricsPlugin, {
     queueDiscoverer: new RedisBasedQueueDiscoverer(pluginOptions.redisConfigs, 'bull'),
-    collectionOptions: {
-      type: 'interval',
-      intervalInMs: 50,
-    },
+    collectionOptions: { type: 'manual' },
     ...pluginOptions,
   })
 
@@ -116,9 +113,6 @@ describe('bullMqMetricsPlugin', () => {
   it('exposes metrics collect() function', async () => {
     app = await initAppWithBullMqMetrics({
       redisConfigs: [redisConfig],
-      collectionOptions: {
-        type: 'manual',
-      },
     })
 
     // exec collect to start listening for failed and completed events
@@ -153,9 +147,6 @@ describe('bullMqMetricsPlugin', () => {
 
     app = await initAppWithBullMqMetrics({
       redisConfigs: [redisConfig, redisConfig2],
-      collectionOptions: {
-        type: 'manual',
-      },
     })
 
     const processor2 = new TestBackgroundJobProcessor<BaseJobPayload, JobReturn>(
