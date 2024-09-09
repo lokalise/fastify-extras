@@ -13,7 +13,7 @@ import { TestBackgroundJobProcessor } from '../../test/mocks/TestBackgroundJobPr
 import { TestDepedendencies } from '../../test/mocks/TestDepedendencies'
 
 import type { RedisConfig } from '@lokalise/node-core'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { z } from 'zod'
 import { RedisBasedQueueDiscoverer } from './bull-mq-metrics/queueDiscoverers'
 import type { BullMqMetricsPluginOptions } from './bullMqMetricsPlugin'
@@ -161,9 +161,19 @@ describe('bullMqMetricsPlugin', () => {
     })
 
     await processor.spy.waitForJobWithId(jobId, 'completed')
-    await setTimeout(300)
 
-    const responseAfter = await getMetrics()
+    const responseAfter = await vi.waitUntil(async () => {
+      const responseAfter = await getMetrics()
+      // @ts-ignore
+      if (
+        responseAfter.result.body.includes(
+          'bullmq_jobs_finished_duration_count{status="completed",queue="test_job"} 2',
+        )
+      ) {
+        return responseAfter
+      }
+    })
+
     expect(responseAfter.result.body).toContain(
       // value is 2 since we are counting same redis client twice (only for tests)
       'bullmq_jobs_finished_duration_count{status="completed",queue="test_job"} 2',
