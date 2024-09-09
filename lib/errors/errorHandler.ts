@@ -123,6 +123,12 @@ export function createErrorHandler(params: ErrorHandlerParams) {
       params.errorReporter.report({
         error: isError(error) ? error : new Error('Unhandled error'),
         context: {
+          request: {
+            url: request.url,
+            params: request.params,
+            x: request.method,
+            routerPath: request.routeOptions.url,
+          },
           'x-request-id': request.id,
           // If error is not an instance of Error, include its properties in the context for additional information.
           // Error details are included in the 'error' property above, so duplicating them in the context is unnecessary.
