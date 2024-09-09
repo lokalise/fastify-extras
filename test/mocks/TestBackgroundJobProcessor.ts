@@ -5,6 +5,7 @@ import type {
 import { AbstractBackgroundJobProcessor } from '@lokalise/background-jobs-common'
 import { generateMonotonicUuid } from '@lokalise/id-utils'
 
+import type { RedisConfig } from '@lokalise/node-core'
 import { getTestRedisConfig } from '../setup'
 
 export class TestBackgroundJobProcessor<
@@ -17,13 +18,14 @@ export class TestBackgroundJobProcessor<
     dependencies: BackgroundJobProcessorDependencies<JobData, JobReturn>,
     returnValue: JobReturn,
     queueId: string = generateMonotonicUuid(),
+    redisConfig: RedisConfig = getTestRedisConfig(),
   ) {
     super(dependencies, {
       queueId,
       ownerName: 'test',
       isTest: true,
       workerOptions: { concurrency: 1 },
-      redisConfig: getTestRedisConfig(),
+      redisConfig,
     })
     this.returnValue = returnValue
   }

@@ -144,49 +144,78 @@ describe('bullMqMetricsPlugin', () => {
   })
 
   it('works with multiple redis clients', async () => {
+    const redisConfig2: RedisConfig = {
+      ...redisConfig,
+      db: 1,
+    }
+
     app = await initAppWithBullMqMetrics({
-      redisConfigs: [redisConfig, redisConfig],
+      redisConfigs: [redisConfig, redisConfig2],
       collectionOptions: {
         type: 'manual',
       },
     })
 
-    // exec collect to start listening for failed and completed events
-    await app.bullMqMetrics.collect()
-
-    const responseBefore = await getMetrics()
-    expect(responseBefore.result.body).not.toContain(
-      'bullmq_jobs_finished_duration_count{status="completed",queue="test_job"}',
+    const processor2 = new TestBackgroundJobProcessor<BaseJobPayload, JobReturn>(
+      dependencies.createMocksForBackgroundJobProcessor(),
+      { result: 'done' },
+      'test_job2',
+      redisConfig2,
     )
+    await processor2.start()
 
-    const jobId = await processor.schedule({
-      metadata: { correlationId: 'test' },
-    })
+    try {
+      // exec collect to start listening for failed and completed events
+      await app.bullMqMetrics.collect()
 
-    await processor.spy.waitForJobWithId(jobId, 'completed')
+      const responseBefore = await getMetrics()
+      expect(responseBefore.result.body).not.toContain(
+        'bullmq_jobs_finished_duration_count{status="completed",queue="test_job"}',
+      )
 
-    const responseAfter = await vi.waitUntil(
-      async () => {
-        await app.bullMqMetrics.collect()
-        const responseAfter = await getMetrics()
-        if (
-          // @ts-ignore
-          responseAfter.result.body.includes(
-            'bullmq_jobs_finished_duration_count{status="completed",queue="test_job"} 2',
-          )
-        ) {
-          return responseAfter
-        }
-      },
-      {
-        interval: 100,
-        timeout: 2000,
-      },
-    )
+      const jobId = await processor.schedule({
+        metadata: { correlationId: 'test' },
+      })
+      const jobId2 = await processor2.schedule({
+        metadata: { correlationId: 'test2' },
+      })
 
-    expect(responseAfter.result.body).toContain(
-      // value is 2 since we are counting same redis client twice (only for tests)
-      'bullmq_jobs_finished_duration_count{status="completed",queue="test_job"} 2',
-    )
+      await processor.spy.waitForJobWithId(jobId, 'completed')
+      await processor2.spy.waitForJobWithId(jobId2, 'completed')
+
+      const responseAfter = await vi.waitUntil(
+        async () => {
+          await app.bullMqMetrics.collect()
+          const responseAfter = await getMetrics()
+          if (
+            // @ts-ignore
+            responseAfter.result.body.includes(
+              'bullmq_jobs_finished_duration_count{status="completed",queue="test_job"} 1',
+            ) &&
+            // @ts-ignore
+            responseAfter.result.body.includes(
+              'bullmq_jobs_finished_duration_count{status="completed",queue="test_job2"} 1',
+            )
+          ) {
+            return responseAfter
+          }
+        },
+        {
+          interval: 100,
+          timeout: 2000,
+        },
+      )
+
+      expect(responseAfter.result.body).toContain(
+        // value is 2 since we are counting same redis client twice (only for tests)
+        'bullmq_jobs_finished_duration_count{status="completed",queue="test_job"} 1',
+      )
+      expect(responseAfter.result.body).toContain(
+        // value is 2 since we are counting same redis client twice (only for tests)
+        'bullmq_jobs_finished_duration_count{status="completed",queue="test_job2"} 1',
+      )
+    } finally {
+      await processor2.dispose()
+    }
   })
 })
