@@ -14,7 +14,6 @@ describe('amplitudePlugin', () => {
   })
 
   afterEach(async () => {
-    vitest.restoreAllMocks()
     await app.close()
   })
 

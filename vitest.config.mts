@@ -13,6 +13,7 @@ export default defineConfig({
     pool: 'threads',
     environment: 'node',
     reporters: ['verbose'],
+    restoreMocks: true,
     coverage: {
       provider: 'v8',
       include: ['lib/**/*.ts'],

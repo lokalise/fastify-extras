@@ -91,7 +91,6 @@ describe('bullMqMetricsPlugin', () => {
   afterEach(async () => {
     await processor.dispose()
     if (app) await app.close()
-    vitest.restoreAllMocks()
   })
 
   it('throws if fastify-metrics was not initialized', async () => {
