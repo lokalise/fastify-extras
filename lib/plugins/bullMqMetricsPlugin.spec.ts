@@ -13,7 +13,7 @@ import { TestBackgroundJobProcessor } from '../../test/mocks/TestBackgroundJobPr
 import { TestDependencies } from '../../test/mocks/TestDependencies'
 
 import type { RedisConfig } from '@lokalise/node-core'
-import { afterEach, beforeEach, describe, expect, it, vi, vitest } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { z } from 'zod'
 import { RedisBasedQueueDiscoverer } from './bull-mq-metrics/queueDiscoverers'
 import type { BullMqMetricsPluginOptions } from './bullMqMetricsPlugin'
