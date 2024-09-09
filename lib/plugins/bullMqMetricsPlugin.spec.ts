@@ -91,8 +91,6 @@ describe('bullMqMetricsPlugin', () => {
   afterEach(async () => {
     await processor.dispose()
     if (app) await app.close()
-
-    vitest.clearAllMocks()
     vitest.restoreAllMocks()
   })
 
