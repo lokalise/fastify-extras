@@ -162,17 +162,23 @@ describe('bullMqMetricsPlugin', () => {
 
     await processor.spy.waitForJobWithId(jobId, 'completed')
 
-    const responseAfter = await vi.waitUntil(async () => {
-      const responseAfter = await getMetrics()
-      if (
-        // @ts-ignore
-        responseAfter.result.body.includes(
-          'bullmq_jobs_finished_duration_count{status="completed",queue="test_job"} 2',
-        )
-      ) {
-        return responseAfter
-      }
-    })
+    const responseAfter = await vi.waitUntil(
+      async () => {
+        const responseAfter = await getMetrics()
+        if (
+          // @ts-ignore
+          responseAfter.result.body.includes(
+            'bullmq_jobs_finished_duration_count{status="completed",queue="test_job"} 2',
+          )
+        ) {
+          return responseAfter
+        }
+      },
+      {
+        interval: 100,
+        timeout: 2000,
+      },
+    )
 
     expect(responseAfter.result.body).toContain(
       // value is 2 since we are counting same redis client twice (only for tests)
