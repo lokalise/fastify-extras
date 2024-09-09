@@ -164,8 +164,8 @@ describe('bullMqMetricsPlugin', () => {
 
     const responseAfter = await vi.waitUntil(async () => {
       const responseAfter = await getMetrics()
-      // @ts-ignore
       if (
+        // @ts-ignore
         responseAfter.result.body.includes(
           'bullmq_jobs_finished_duration_count{status="completed",queue="test_job"} 2',
         )
