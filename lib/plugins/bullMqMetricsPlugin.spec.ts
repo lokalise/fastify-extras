@@ -164,6 +164,7 @@ describe('bullMqMetricsPlugin', () => {
 
     const responseAfter = await vi.waitUntil(
       async () => {
+        await app.bullMqMetrics.collect()
         const responseAfter = await getMetrics()
         if (
           // @ts-ignore
