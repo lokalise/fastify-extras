@@ -10,10 +10,10 @@ import type { FastifyInstance } from 'fastify'
 import fastify from 'fastify'
 
 import { TestBackgroundJobProcessor } from '../../test/mocks/TestBackgroundJobProcessor'
-import { TestDepedendencies } from '../../test/mocks/TestDepedendencies'
+import { TestDependencies } from '../../test/mocks/TestDependencies'
 
 import type { RedisConfig } from '@lokalise/node-core'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi, vitest } from 'vitest'
 import { z } from 'zod'
 import { RedisBasedQueueDiscoverer } from './bull-mq-metrics/queueDiscoverers'
 import type { BullMqMetricsPluginOptions } from './bullMqMetricsPlugin'
@@ -68,12 +68,12 @@ async function getMetrics() {
 
 describe('bullMqMetricsPlugin', () => {
   let app: FastifyInstance
-  let dependencies: TestDepedendencies
+  let dependencies: TestDependencies
   let processor: AbstractBackgroundJobProcessor<BaseJobPayload, JobReturn>
   let redisConfig: RedisConfig
 
   beforeEach(async () => {
-    dependencies = new TestDepedendencies()
+    dependencies = new TestDependencies()
     redisConfig = dependencies.getRedisConfig()
 
     const redis = createSanitizedRedisClient(redisConfig)
@@ -91,6 +91,9 @@ describe('bullMqMetricsPlugin', () => {
   afterEach(async () => {
     await processor.dispose()
     if (app) await app.close()
+
+    vitest.clearAllMocks()
+    vitest.restoreAllMocks()
   })
 
   it('throws if fastify-metrics was not initialized', async () => {
