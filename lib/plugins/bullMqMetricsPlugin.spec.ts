@@ -16,7 +16,7 @@ import { TestDependencies } from '../../test/mocks/TestDependencies'
 import type { RedisConfig } from '@lokalise/node-core'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { z } from 'zod'
-import { BackgroundJobsBasedQueueDiscoverer } from './bull-mq-metrics/queueDiscoverers'
+import { BackgroundJobsBasedQueueDiscoverer } from "./bull-mq-metrics/queueDiscoverers";
 import type { BullMqMetricsPluginOptions } from './bullMqMetricsPlugin'
 import { bullMqMetricsPlugin } from './bullMqMetricsPlugin'
 import { metricsPlugin } from './metricsPlugin'
@@ -45,7 +45,7 @@ async function initAppWithBullMqMetrics(
 
   await app.register(bullMqMetricsPlugin, {
     queueDiscoverer: new BackgroundJobsBasedQueueDiscoverer(pluginOptions.redisConfigs),
-    collectionOptions: { type: 'interval', intervalInMs: 50 },
+    collectionOptions: { type: 'interval', intervalInMs: 50},
     ...pluginOptions,
   })
 
