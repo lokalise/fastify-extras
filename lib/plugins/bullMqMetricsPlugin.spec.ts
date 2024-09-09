@@ -3,6 +3,7 @@ import { setTimeout } from 'node:timers/promises'
 import { buildClient, sendGet } from '@lokalise/backend-http-client'
 import {
   type AbstractBackgroundJobProcessor,
+  type BackgroundJobProcessorDependencies,
   type BaseJobPayload,
   createSanitizedRedisClient,
 } from '@lokalise/background-jobs-common'
@@ -69,12 +70,11 @@ async function getMetrics() {
 describe('bullMqMetricsPlugin', () => {
   let app: FastifyInstance
   let dependencies: TestDependencies
+  let bgDependencies: BackgroundJobProcessorDependencies<any, any>
   let processor: AbstractBackgroundJobProcessor<BaseJobPayload, JobReturn>
   let redisConfig: RedisConfig
 
   beforeEach(async () => {
-    vi.restoreAllMocks()
-
     dependencies = new TestDependencies()
     redisConfig = dependencies.getRedisConfig()
 
@@ -82,8 +82,10 @@ describe('bullMqMetricsPlugin', () => {
     await redis.flushall('SYNC')
     await redis.quit()
 
+    bgDependencies = dependencies.createMocksForBackgroundJobProcessor()
+
     processor = new TestBackgroundJobProcessor<BaseJobPayload, JobReturn>(
-      dependencies.createMocksForBackgroundJobProcessor(),
+      bgDependencies,
       { result: 'done' },
       'test_job',
     )
@@ -156,7 +158,7 @@ describe('bullMqMetricsPlugin', () => {
     })
 
     const processor2 = new TestBackgroundJobProcessor<BaseJobPayload, JobReturn>(
-      dependencies.createMocksForBackgroundJobProcessor(),
+      bgDependencies,
       { result: 'done' },
       'test_job2',
       redisConfig2,
