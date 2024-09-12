@@ -149,10 +149,22 @@ describe('errorHandler', () => {
 
     expect(response.statusCode).toBe(500)
     expect(logs).toHaveLength(1)
-    expect(logs[0].error).toMatchObject({
+    const [logEntry] = logs
+    expect(logEntry.error).toMatchObject({
       message: 'Internal error',
       errorCode: 'INTERNAL',
     })
+    expect(logEntry.context).toMatchInlineSnapshot(`
+      {
+        "request": {
+          "params": {},
+          "routerPath": "/",
+          "url": "/",
+          "x": "GET",
+        },
+        "x-request-id": "req-1",
+      }
+    `)
   })
   it('sends generic error to the reporter', async () => {
     const logs: ErrorReport[] = []

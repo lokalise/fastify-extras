@@ -8,7 +8,7 @@ const testLogger = globalLogger
 export let lastInfoSpy: MockInstance
 export let lastErrorSpy: MockInstance
 
-export class TestDepedendencies {
+export class TestDependencies {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   createMocksForBackgroundJobProcessor(): BackgroundJobProcessorDependencies<any, any> {
     const originalChildFn = testLogger.child.bind(testLogger)

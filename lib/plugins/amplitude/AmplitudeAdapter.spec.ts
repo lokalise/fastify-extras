@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto'
 
 import type { MockInstance } from 'vitest'
-import { beforeAll, describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { z } from 'zod'
 
 import { Amplitude } from './Amplitude'
@@ -25,7 +25,7 @@ describe('Amplitude adapter', () => {
   let amplitudeAdapter: AmplitudeAdapter<SupportedMessages>
   let amplitudeTrackSpy: MockInstance
 
-  beforeAll(() => {
+  beforeEach(() => {
     const amplitude = new Amplitude(true)
     amplitudeTrackSpy = vi
       .spyOn(amplitude, 'track')

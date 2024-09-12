@@ -5,6 +5,7 @@ export default defineConfig({
   test: {
     globals: true,
     watch: false,
+    setupFiles: ['./test/setup.ts'],
     poolOptions: {
       threads: {
         singleThread: true,
@@ -13,6 +14,7 @@ export default defineConfig({
     pool: 'threads',
     environment: 'node',
     reporters: ['verbose'],
+    restoreMocks: true,
     coverage: {
       provider: 'v8',
       include: ['lib/**/*.ts'],
