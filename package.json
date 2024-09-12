@@ -33,7 +33,7 @@
     },
     "dependencies": {
         "@amplitude/analytics-node": "^1.3.6",
-        "@bugsnag/js": "^7.25.0",
+        "@bugsnag/js": "^8.0.0",
         "@lokalise/background-jobs-common": "^7.6.0",
         "@lokalise/error-utils": "^2.0.0",
         "@splitsoftware/splitio": "^10.27.0",
