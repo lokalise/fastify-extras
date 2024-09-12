@@ -3,10 +3,8 @@ import type {
   BaseJobPayload,
 } from '@lokalise/background-jobs-common'
 import { AbstractBackgroundJobProcessor } from '@lokalise/background-jobs-common'
-import { generateMonotonicUuid } from '@lokalise/id-utils'
 
 import type { RedisConfig } from '@lokalise/node-core'
-import { getTestRedisConfig } from '../setup'
 
 export class TestBackgroundJobProcessor<
   JobData extends BaseJobPayload,
@@ -17,8 +15,8 @@ export class TestBackgroundJobProcessor<
   constructor(
     dependencies: BackgroundJobProcessorDependencies<JobData, JobReturn>,
     returnValue: JobReturn,
-    queueId: string = generateMonotonicUuid(),
-    redisConfig: RedisConfig = getTestRedisConfig(),
+    queueId: string,
+    redisConfig: RedisConfig,
   ) {
     super(dependencies, {
       queueId,
@@ -31,7 +29,7 @@ export class TestBackgroundJobProcessor<
   }
 
   schedule(jobData: JobData): Promise<string> {
-    return super.schedule(jobData, { attempts: 1 })
+    return super.schedule(jobData, { attempts: 1, removeOnFail: false, removeOnComplete: false })
   }
 
   protected override process(): Promise<JobReturn> {
