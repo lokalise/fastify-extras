@@ -65,7 +65,7 @@
         "@vitest/coverage-v8": "^2.0.5",
         "auto-changelog": "^2.4.0",
         "bullmq": "^5.12.10",
-        "fastify": "^4.28.1",
+        "fastify": "^5.0.0",
         "ioredis": "^5.4.1",
         "newrelic": "12.5.0",
         "pino": "^9.3.2",
