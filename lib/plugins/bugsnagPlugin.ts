@@ -32,6 +32,6 @@ function plugin(_app: FastifyInstance, opts: BugsnagPluginConfig, done: () => vo
 }
 
 export const bugsnagPlugin = fp(plugin, {
-  fastify: '4.x',
+  fastify: '5.x',
   name: 'bugsnag-plugin',
 })

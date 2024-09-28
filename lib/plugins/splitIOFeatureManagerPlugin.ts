@@ -118,6 +118,6 @@ function plugin(fastify: FastifyInstance, opts: SplitIOOptions, done: () => void
 }
 
 export const splitIOFeatureManagerPlugin = fp(plugin, {
-  fastify: '4.x',
+  fastify: '5.x',
   name: 'split-io-feature-manager-plugin',
 })

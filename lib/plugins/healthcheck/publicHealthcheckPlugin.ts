@@ -93,6 +93,6 @@ function plugin(app: FastifyInstance, opts: PublicHealthcheckPluginOptions, done
 }
 
 export const publicHealthcheckPlugin = fp(plugin, {
-  fastify: '4.x',
+  fastify: '5.x',
   name: 'public-healthcheck-plugin',
 })

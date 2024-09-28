@@ -114,6 +114,6 @@ export interface AmplitudeConfig {
  * ```
  */
 export const amplitudePlugin = fp<AmplitudeConfig>(plugin, {
-  fastify: '4.x',
+  fastify: '5.x',
   name: 'amplitude-plugin',
 })

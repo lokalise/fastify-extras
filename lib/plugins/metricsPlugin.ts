@@ -70,6 +70,6 @@ function plugin(app: FastifyInstance, opts: MetricsPluginOptions, done: (err?: E
 }
 
 export const metricsPlugin = fp(plugin, {
-  fastify: '4.x',
+  fastify: '5.x',
   name: 'metrics-plugin',
 })
