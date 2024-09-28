@@ -93,6 +93,6 @@ function plugin(
 }
 
 export const bullMqMetricsPlugin = fp<BullMqMetricsPluginOptions>(plugin, {
-  fastify: '4.x',
+  fastify: '5.x',
   name: 'bull-mq-metrics-plugin',
 })

@@ -101,6 +101,6 @@ function plugin(
 }
 
 export const healthcheckMetricsPlugin = fp(plugin, {
-  fastify: '4.x',
+  fastify: '5.x',
   name: 'healthcheck-metrics-plugin',
 })

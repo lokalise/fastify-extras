@@ -123,6 +123,6 @@ function plugin(
 }
 
 export const newrelicTransactionManagerPlugin = fp(plugin, {
-  fastify: '4.x',
+  fastify: '5.x',
   name: 'newrelic-transaction-manager-plugin',
 })

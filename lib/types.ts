@@ -7,6 +7,7 @@ import type {
 import type { RouteGenericInterface } from 'fastify/types/route'
 
 export type FastifyReplyWithPayload<Payload extends RouteGenericInterface> = FastifyReply<
+  RouteGenericInterface,
   RawServerDefault,
   RawRequestDefaultExpression,
   RawReplyDefaultExpression,
