@@ -1,6 +1,13 @@
 import type { FastifyInstance } from 'fastify'
 import fp from 'fastify-plugin'
 
+import type { CommonLogger } from '@lokalise/node-core'
+import type { FastifyTypeProviderDefault } from 'fastify/types/type-provider'
+import type {
+  RawReplyDefaultExpression,
+  RawRequestDefaultExpression,
+  RawServerDefault,
+} from 'fastify/types/utils'
 import type { HealthChecker } from './healthcheckCommons'
 
 export interface PublicHealthcheckPluginOptions {
@@ -22,7 +29,17 @@ export type HealthCheck = {
   checker: HealthChecker
 }
 
-function plugin(app: FastifyInstance, opts: PublicHealthcheckPluginOptions, done: () => void) {
+function plugin(
+  app: FastifyInstance<
+    RawServerDefault,
+    RawRequestDefaultExpression,
+    RawReplyDefaultExpression,
+    CommonLogger,
+    FastifyTypeProviderDefault
+  >,
+  opts: PublicHealthcheckPluginOptions,
+  done: () => void,
+) {
   const responsePayload = opts.responsePayload ?? {}
   app.route({
     url: opts.url ?? '/health',

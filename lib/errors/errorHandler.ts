@@ -128,9 +128,16 @@ export type ErrorHandlerParams = {
   resolveLogObject?: (error: unknown) => FreeformRecord | undefined
 }
 
-export function createErrorHandler(params: ErrorHandlerParams) {
+export function createErrorHandler(params: ErrorHandlerParams): (
+  // biome-ignore lint/suspicious/noExplicitAny: We should support any fastify instance generics
+  this: FastifyInstance<any, any, any, any, any>,
+  error: FreeformRecord,
+  request: FastifyRequest,
+  reply: FastifyReply,
+) => void {
   return function errorHandler(
-    this: FastifyInstance,
+    // biome-ignore lint/suspicious/noExplicitAny: We should support any fastify instance generics
+    this: FastifyInstance<any, any, any, any, any>,
     error: FreeformRecord,
     request: FastifyRequest,
     reply: FastifyReply,

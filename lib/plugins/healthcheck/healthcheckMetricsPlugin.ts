@@ -1,6 +1,13 @@
 import type { FastifyInstance } from 'fastify'
 import fp from 'fastify-plugin'
 
+import type { CommonLogger } from '@lokalise/node-core'
+import type { FastifyTypeProviderDefault } from 'fastify/types/type-provider'
+import type {
+  RawReplyDefaultExpression,
+  RawRequestDefaultExpression,
+  RawServerDefault,
+} from 'fastify/types/utils'
 import type { HealthChecker } from './healthcheckCommons'
 
 const VALID_PROMETHEUS_NAME_REGEX = /[a-zA-Z_:][a-zA-Z0-9_:]*/
@@ -16,7 +23,15 @@ export type HealthcheckResult = {
 
 export type PrometheusHealthCheck = {
   name: string
-  checker: (app: FastifyInstance) => Promise<HealthcheckResult>
+  checker: (
+    app: FastifyInstance<
+      RawServerDefault,
+      RawRequestDefaultExpression,
+      RawReplyDefaultExpression,
+      CommonLogger,
+      FastifyTypeProviderDefault
+    >,
+  ) => Promise<HealthcheckResult>
 }
 
 /**
@@ -28,7 +43,15 @@ export const wrapHealthCheckForPrometheus = (
 ): PrometheusHealthCheck => {
   return {
     name: healthcheckName,
-    checker: async (app: FastifyInstance): Promise<HealthcheckResult> => {
+    checker: async (
+      app: FastifyInstance<
+        RawServerDefault,
+        RawRequestDefaultExpression,
+        RawReplyDefaultExpression,
+        CommonLogger,
+        FastifyTypeProviderDefault
+      >,
+    ): Promise<HealthcheckResult> => {
       const startTime = Date.now()
       const response = await healthCheck(app)
       const checkTimeInMsecs = Date.now() - startTime
@@ -42,7 +65,13 @@ export const wrapHealthCheckForPrometheus = (
 }
 
 function plugin(
-  app: FastifyInstance,
+  app: FastifyInstance<
+    RawServerDefault,
+    RawRequestDefaultExpression,
+    RawReplyDefaultExpression,
+    CommonLogger,
+    FastifyTypeProviderDefault
+  >,
   opts: HealthcheckMetricsPluginOptions,
   done: (err?: Error) => void,
 ) {
