@@ -4,8 +4,9 @@ import type { FastifyInstance } from 'fastify'
 import fastify from 'fastify'
 import type { RouteHandlerMethod } from 'fastify/types/route'
 import { type MockInstance, afterAll, describe, expect, it, vitest } from 'vitest'
-import { z } from 'zod'
+import { type ZodSchema, z } from 'zod'
 
+import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod'
 import type { ErrorHandlerParams, FreeformRecord } from './errorHandler'
 import { createErrorHandler } from './errorHandler'
 
@@ -13,10 +14,14 @@ async function initApp(
   routeHandler: RouteHandlerMethod,
   errorHandlerParams: Partial<ErrorHandlerParams> = {},
   awaitApp = true,
+  routeSchema: ZodSchema = z.any(),
 ) {
   const app = fastify({
     logger: true,
   })
+  app.setValidatorCompiler(validatorCompiler)
+  app.setSerializerCompiler(serializerCompiler)
+
   app.setErrorHandler(
     createErrorHandler({
       errorReporter: {
@@ -29,6 +34,9 @@ async function initApp(
   app.route({
     method: 'GET',
     url: '/',
+    schema: {
+      params: routeSchema,
+    },
     handler: routeHandler,
   })
   if (awaitApp) {
@@ -293,28 +301,63 @@ describe('errorHandler', () => {
     })
   })
 
-  it('returns 400 for Zod errors', async () => {
+  it('returns 500 for internal Zod errors', async () => {
     app = await initApp(() => {
       z.string().parse(45)
     })
 
     const response = await app.inject().get('/').end()
 
-    expect(response.statusCode).toBe(400)
-    expect(response.json()).toEqual({
-      errorCode: 'VALIDATION_ERROR',
-      message: 'Invalid params',
-      details: {
-        error: [
-          {
-            code: 'invalid_type',
-            expected: 'string',
-            message: 'Expected string, received number',
-            path: [],
-            received: 'number',
-          },
-        ],
+    expect(response.statusCode).toBe(500)
+    expect(response.json()).toMatchInlineSnapshot(`
+      {
+        "errorCode": "INTERNAL_SERVER_ERROR",
+        "message": "Internal server error",
+      }
+    `)
+  })
+
+  it('returns 400 for validation errors', async () => {
+    app = await initApp(
+      () => {
+        z.string().parse(45)
       },
-    })
+      {},
+      true,
+      z.object({
+        name: z.string(),
+      }),
+    )
+
+    const response = await app.inject().get('/').end()
+
+    expect(response.statusCode).toBe(400)
+    expect(response.json()).toMatchInlineSnapshot(`
+      {
+        "details": {
+          "error": [
+            {
+              "instancePath": "/name",
+              "keyword": "invalid_type",
+              "message": "Required",
+              "params": {
+                "issue": {
+                  "code": "invalid_type",
+                  "expected": "string",
+                  "message": "Required",
+                  "path": [
+                    "name",
+                  ],
+                  "received": "undefined",
+                },
+              },
+              "schemaPath": "#/name/invalid_type",
+            },
+          ],
+        },
+        "errorCode": "VALIDATION_ERROR",
+        "message": "Invalid params",
+      }
+    `)
   })
 })

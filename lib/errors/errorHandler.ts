@@ -7,6 +7,10 @@ import {
   isStandardizedError,
 } from '@lokalise/node-core'
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
+import {
+  hasZodFastifySchemaValidationErrors,
+  isResponseSerializationError,
+} from 'fastify-type-provider-zod'
 import pino from 'pino'
 import type { ZodError } from 'zod'
 
@@ -64,14 +68,29 @@ function resolveResponseObject(error: FreeformRecord): ErrorResponseObject {
     }
   }
 
-  if (isZodError(error)) {
+  if (hasZodFastifySchemaValidationErrors(error)) {
     return {
       statusCode: 400,
       payload: {
         message: 'Invalid params',
         errorCode: 'VALIDATION_ERROR',
         details: {
-          error: error.issues,
+          error: error.validation,
+        },
+      },
+    }
+  }
+
+  if (isResponseSerializationError(error)) {
+    return {
+      statusCode: 500,
+      payload: {
+        message: 'Invalid response',
+        errorCode: 'RESPONSE_VALIDATION_ERROR',
+        details: {
+          error: error.cause.issues,
+          method: error.method,
+          url: error.url,
         },
       },
     }
