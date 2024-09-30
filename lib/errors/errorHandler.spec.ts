@@ -340,7 +340,6 @@ describe('errorHandler', () => {
               "instancePath": "/name",
               "keyword": "invalid_type",
               "message": "Required",
-              "name": "ZodFastifySchemaValidationError",
               "params": {
                 "issue": {
                   "code": "invalid_type",
@@ -350,20 +349,6 @@ describe('errorHandler', () => {
                     "name",
                   ],
                   "received": "undefined",
-                },
-                "zodError": {
-                  "issues": [
-                    {
-                      "code": "invalid_type",
-                      "expected": "string",
-                      "message": "Required",
-                      "path": [
-                        "name",
-                      ],
-                      "received": "undefined",
-                    },
-                  ],
-                  "name": "ZodError",
                 },
               },
               "schemaPath": "#/name/invalid_type",
