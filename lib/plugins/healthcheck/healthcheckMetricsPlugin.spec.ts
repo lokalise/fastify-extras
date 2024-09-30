@@ -23,7 +23,7 @@ async function initApp(healthChecks: PrometheusHealthCheck[]) {
   app = testApp
   await app.register(metricsPlugin, {
     bindAddress: '0.0.0.0',
-    loggerOptions: false,
+    logger: false,
     errorObjectResolver: (err: unknown) => err,
   })
   await app.register(healthcheckMetricsPlugin, {

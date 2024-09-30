@@ -2,14 +2,14 @@ import type { FastifyInstance } from 'fastify'
 import fastify from 'fastify'
 import fastifyMetrics from 'fastify-metrics'
 import fp from 'fastify-plugin'
-import type { PinoLoggerOptions } from 'fastify/types/logger'
+import type { Logger } from 'pino'
 
 const METRICS_PORT = 9080
 
 export type ErrorObjectResolver = (err: unknown, correlationID?: string) => unknown
 
 export interface MetricsPluginOptions {
-  loggerOptions: PinoLoggerOptions | boolean
+  logger: Logger | false
   disablePrometheusRequestLogging?: boolean
   bindAddress?: string
   errorObjectResolver: ErrorObjectResolver
@@ -25,7 +25,8 @@ function plugin(app: FastifyInstance, opts: MetricsPluginOptions, done: (err?: E
   })
   try {
     const promServer = fastify({
-      logger: opts.loggerOptions,
+      loggerInstance: opts.logger ? opts.logger : undefined,
+      logger: opts.logger === false ? false : undefined,
       disableRequestLogging: opts.disablePrometheusRequestLogging ?? true,
     })
 
