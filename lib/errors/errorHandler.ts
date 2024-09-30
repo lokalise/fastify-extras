@@ -6,13 +6,14 @@ import {
   isPublicNonRecoverableError,
   isStandardizedError,
 } from '@lokalise/node-core'
-import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 import {
   hasZodFastifySchemaValidationErrors,
   isResponseSerializationError,
 } from 'fastify-type-provider-zod'
 import pino from 'pino'
 import type { ZodError } from 'zod'
+import type { AnyFastifyInstance } from '../plugins/pluginsCommon'
 
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
 export type FreeformRecord = Record<string, any>
@@ -128,9 +129,16 @@ export type ErrorHandlerParams = {
   resolveLogObject?: (error: unknown) => FreeformRecord | undefined
 }
 
-export function createErrorHandler(params: ErrorHandlerParams) {
+export function createErrorHandler(
+  params: ErrorHandlerParams,
+): (
+  this: AnyFastifyInstance,
+  error: FreeformRecord,
+  request: FastifyRequest,
+  reply: FastifyReply,
+) => void {
   return function errorHandler(
-    this: FastifyInstance,
+    this: AnyFastifyInstance,
     error: FreeformRecord,
     request: FastifyRequest,
     reply: FastifyReply,
