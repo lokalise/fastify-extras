@@ -9,7 +9,7 @@ async function initApp(errorObjectResolver = (err: unknown) => err) {
   const app = fastify()
   await app.register(metricsPlugin, {
     bindAddress: '0.0.0.0',
-    loggerOptions: false,
+    logger: false,
     errorObjectResolver,
   })
 
