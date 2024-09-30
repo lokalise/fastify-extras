@@ -87,3 +87,4 @@ export type { ErrorHandlerParams, FreeformRecord } from './errors/errorHandler'
 export { generateJwtToken, decodeJwtToken } from './jwt-utils/tokenUtils'
 
 export { createStaticTokenAuthPreHandler } from './route-utils/authPreHandlers'
+export type { AnyFastifyInstance, CommonFastifyInstance } from './plugins/pluginsCommon'
