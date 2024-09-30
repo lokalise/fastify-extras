@@ -1,4 +1,4 @@
-import type { FastifyInstance } from 'fastify'
+import type { FastifyInstance, FastifyPluginCallback } from 'fastify'
 import 'fastify-metrics'
 import fp from 'fastify-plugin'
 
@@ -92,7 +92,8 @@ function plugin(
   }
 }
 
-export const bullMqMetricsPlugin = fp<BullMqMetricsPluginOptions>(plugin, {
-  fastify: '5.x',
-  name: 'bull-mq-metrics-plugin',
-})
+export const bullMqMetricsPlugin: FastifyPluginCallback<BullMqMetricsPluginOptions> =
+  fp<BullMqMetricsPluginOptions>(plugin, {
+    fastify: '5.x',
+    name: 'bull-mq-metrics-plugin',
+  })

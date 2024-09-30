@@ -10,7 +10,7 @@ import type {
   Treatment,
   TreatmentWithConfig,
 } from '@splitsoftware/splitio/types/splitio'
-import type { FastifyInstance } from 'fastify'
+import type { FastifyInstance, FastifyPluginAsync } from 'fastify'
 import fp from 'fastify-plugin'
 
 const DISABLED_TREATMENT: Treatment = 'control'
@@ -93,7 +93,7 @@ export class SplitIOFeatureManager {
   }
 }
 
-function plugin(fastify: FastifyInstance, opts: SplitIOOptions, done: () => void) {
+async function plugin(fastify: FastifyInstance, opts: SplitIOOptions): Promise<void> {
   const manager = new SplitIOFeatureManager(
     opts.isEnabled,
     opts.apiKey,
@@ -109,15 +109,10 @@ function plugin(fastify: FastifyInstance, opts: SplitIOOptions, done: () => void
     })
   }
 
-  void manager
-    .init()
-    .then(() => done())
-    .catch(() => {
-      throw new Error('Split IO client is not ready')
-    })
+  await manager.init()
 }
 
-export const splitIOFeatureManagerPlugin = fp(plugin, {
+export const splitIOFeatureManagerPlugin: FastifyPluginAsync<SplitIOOptions> = fp(plugin, {
   fastify: '5.x',
   name: 'split-io-feature-manager-plugin',
 })
