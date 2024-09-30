@@ -1,4 +1,4 @@
-import type { FastifyInstance } from 'fastify'
+import type { FastifyInstance, FastifyPluginCallback } from 'fastify'
 import fastify from 'fastify'
 import fastifyMetrics from 'fastify-metrics'
 import fp from 'fastify-plugin'
@@ -70,7 +70,7 @@ function plugin(app: FastifyInstance, opts: MetricsPluginOptions, done: (err?: E
   }
 }
 
-export const metricsPlugin = fp(plugin, {
+export const metricsPlugin: FastifyPluginCallback<MetricsPluginOptions> = fp(plugin, {
   fastify: '5.x',
   name: 'metrics-plugin',
 })

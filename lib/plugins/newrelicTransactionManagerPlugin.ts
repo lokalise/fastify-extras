@@ -1,5 +1,5 @@
 import type { TransactionObservabilityManager } from '@lokalise/node-core'
-import type { FastifyInstance } from 'fastify'
+import type { FastifyInstance, FastifyPluginCallback } from 'fastify'
 import fp from 'fastify-plugin'
 import type {
   getTransaction as GetTransaction,
@@ -122,7 +122,8 @@ function plugin(
   done()
 }
 
-export const newrelicTransactionManagerPlugin = fp(plugin, {
-  fastify: '5.x',
-  name: 'newrelic-transaction-manager-plugin',
-})
+export const newrelicTransactionManagerPlugin: FastifyPluginCallback<NewRelicTransactionManagerOptions> =
+  fp(plugin, {
+    fastify: '5.x',
+    name: 'newrelic-transaction-manager-plugin',
+  })

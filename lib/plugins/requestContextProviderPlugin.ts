@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto'
 import type { CommonLogger } from '@lokalise/node-core'
 import type {
   FastifyInstance,
+  FastifyPluginCallback,
   FastifyReply,
   FastifyRequest,
   FastifyServerOptions,
@@ -68,7 +69,7 @@ function plugin(fastify: FastifyInstance, _opts: unknown, done: () => void) {
   done()
 }
 
-export const requestContextProviderPlugin = fp(plugin, {
+export const requestContextProviderPlugin: FastifyPluginCallback = fp(plugin, {
   fastify: '5.x',
   name: 'request-context-provider-plugin',
 })

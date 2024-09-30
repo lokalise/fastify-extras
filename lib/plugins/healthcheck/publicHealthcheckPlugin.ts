@@ -1,3 +1,4 @@
+import type { FastifyPluginCallback } from 'fastify'
 import fp from 'fastify-plugin'
 import type { AnyFastifyInstance } from '../pluginsCommon'
 import type { HealthChecker } from './healthcheckCommons'
@@ -21,7 +22,11 @@ export type HealthCheck = {
   checker: HealthChecker
 }
 
-function plugin(app: AnyFastifyInstance, opts: PublicHealthcheckPluginOptions, done: () => void) {
+function plugin(
+  app: AnyFastifyInstance,
+  opts: PublicHealthcheckPluginOptions,
+  done: () => void,
+): void {
   const responsePayload = opts.responsePayload ?? {}
   app.route({
     url: opts.url ?? '/health',
@@ -91,7 +96,10 @@ function plugin(app: AnyFastifyInstance, opts: PublicHealthcheckPluginOptions, d
   done()
 }
 
-export const publicHealthcheckPlugin = fp(plugin, {
-  fastify: '5.x',
-  name: 'public-healthcheck-plugin',
-})
+export const publicHealthcheckPlugin: FastifyPluginCallback<PublicHealthcheckPluginOptions> = fp(
+  plugin,
+  {
+    fastify: '5.x',
+    name: 'public-healthcheck-plugin',
+  },
+)

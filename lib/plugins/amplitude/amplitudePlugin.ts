@@ -2,6 +2,7 @@ import { add, init } from '@amplitude/analytics-node'
 import type { BaseEvent, NodeOptions, Plugin } from '@amplitude/analytics-types'
 import type {
   FastifyInstance,
+  FastifyPluginCallback,
   FastifyReply,
   FastifyRequest,
   HookHandlerDoneFunction,
@@ -113,7 +114,7 @@ export interface AmplitudeConfig {
  * })
  * ```
  */
-export const amplitudePlugin = fp<AmplitudeConfig>(plugin, {
+export const amplitudePlugin: FastifyPluginCallback<AmplitudeConfig> = fp<AmplitudeConfig>(plugin, {
   fastify: '5.x',
   name: 'amplitude-plugin',
 })

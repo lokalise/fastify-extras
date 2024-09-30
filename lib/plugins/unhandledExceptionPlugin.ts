@@ -1,6 +1,6 @@
 import type { ErrorReporter } from '@lokalise/node-core'
 import { InternalError, isError } from '@lokalise/node-core'
-import type { FastifyInstance } from 'fastify'
+import type { FastifyInstance, FastifyPluginCallback } from 'fastify'
 import fp from 'fastify-plugin'
 import { stdSerializers } from 'pino'
 
@@ -55,7 +55,10 @@ function plugin(app: FastifyInstance, opts: UnhandledExceptionPluginOptions, don
   done()
 }
 
-export const unhandledExceptionPlugin = fp(plugin, {
-  fastify: '5.x',
-  name: 'unhandled-exception-plugin',
-})
+export const unhandledExceptionPlugin: FastifyPluginCallback<UnhandledExceptionPluginOptions> = fp(
+  plugin,
+  {
+    fastify: '5.x',
+    name: 'unhandled-exception-plugin',
+  },
+)

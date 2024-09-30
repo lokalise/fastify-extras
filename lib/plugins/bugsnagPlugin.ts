@@ -7,7 +7,7 @@ import {
   bugsnagErrorReporter,
   reportErrorToBugsnag,
 } from '@lokalise/error-utils'
-import type { FastifyInstance } from 'fastify'
+import type { FastifyInstance, FastifyPluginCallback } from 'fastify'
 import fp from 'fastify-plugin'
 
 export {
@@ -31,7 +31,7 @@ function plugin(_app: FastifyInstance, opts: BugsnagPluginConfig, done: () => vo
   done()
 }
 
-export const bugsnagPlugin = fp(plugin, {
+export const bugsnagPlugin: FastifyPluginCallback<BugsnagPluginConfig> = fp(plugin, {
   fastify: '5.x',
   name: 'bugsnag-plugin',
 })

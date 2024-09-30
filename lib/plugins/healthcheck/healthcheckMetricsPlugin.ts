@@ -1,3 +1,4 @@
+import type { FastifyPluginCallback } from 'fastify'
 import fp from 'fastify-plugin'
 import type { AnyFastifyInstance, CommonFastifyInstance } from '../pluginsCommon'
 import type { HealthChecker } from './healthcheckCommons'
@@ -99,7 +100,10 @@ function plugin(
   done()
 }
 
-export const healthcheckMetricsPlugin = fp(plugin, {
-  fastify: '5.x',
-  name: 'healthcheck-metrics-plugin',
-})
+export const healthcheckMetricsPlugin: FastifyPluginCallback<HealthcheckMetricsPluginOptions> = fp(
+  plugin,
+  {
+    fastify: '5.x',
+    name: 'healthcheck-metrics-plugin',
+  },
+)
