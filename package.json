@@ -60,7 +60,7 @@
         "@biomejs/biome": "^1.9.2",
         "@lokalise/backend-http-client": "^2.3.0",
         "@lokalise/biome-config": "^1.4.0",
-        "@lokalise/node-core": "^12.3.2",
+        "@lokalise/node-core": "^13.0.1",
         "@types/newrelic": "^9.14.4",
         "@types/node": "^22.7.4",
         "@vitest/coverage-v8": "^2.1.1",
