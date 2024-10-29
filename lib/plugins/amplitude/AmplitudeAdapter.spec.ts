@@ -61,12 +61,57 @@ describe('Amplitude adapter', () => {
     })
   })
 
+  it('accepts groups', () => {
+    const user_id = randomUUID()
+    amplitudeAdapter.track(testMessages.myEvent, {
+      user_id,
+      groups: { myGroup: 'value', myOtherGroup: 'otherValue' },
+      event_properties: { number: 42 },
+    })
+
+    expect(amplitudeTrackSpy).toHaveBeenCalledWith({
+      user_id,
+      event_type: 'my event',
+      groups: { myGroup: 'value', myOtherGroup: 'otherValue' },
+      event_properties: { number: 42 },
+    })
+  })
+
+  it('accepts groups with multiple values', () => {
+    const user_id = randomUUID()
+    amplitudeAdapter.track(testMessages.myEvent, {
+      user_id,
+      groups: { myGroup: ['value1', 'value2'] },
+      event_properties: { number: 42 },
+    })
+
+    expect(amplitudeTrackSpy).toHaveBeenCalledWith({
+      user_id,
+      event_type: 'my event',
+      groups: { myGroup: ['value1', 'value2'] },
+      event_properties: { number: 42 },
+    })
+  })
+
   it('wrong type', () => {
     expect(() =>
       amplitudeAdapter.track(testMessages.myEvent, {
         user_id: randomUUID(),
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         event_properties: { number: 'bad' as any },
+      }),
+    ).toThrow(z.ZodError)
+  })
+
+  it('wrong group type', () => {
+    expect(() =>
+      amplitudeAdapter.track(testMessages.myEvent, {
+        user_id: randomUUID(),
+        event_properties: {
+          number: 1,
+        },
+        // @ts-expect-error intentional wrong type
+        groups: 123,
       }),
     ).toThrow(z.ZodError)
   })

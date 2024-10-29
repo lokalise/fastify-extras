@@ -7,6 +7,7 @@ export const AMPLITUDE_BASE_MESSAGE_SCHEMA = z
     event_type: z.literal<string>('<replace.me>'),
     event_properties: z.object({}),
     user_id: z.string().uuid().or(z.literal('SYSTEM')),
+    groups: z.record(z.string(), z.any()).optional(),
   })
   .strip()
 
