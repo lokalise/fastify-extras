@@ -110,6 +110,7 @@ describe('Amplitude adapter', () => {
         event_properties: {
           number: 1,
         },
+        // @ts-expect-error intentional wrong type
         groups: 123,
       }),
     ).toThrow(z.ZodError)
