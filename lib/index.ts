@@ -81,7 +81,7 @@ export {
 } from './plugins/unhandledExceptionPlugin'
 export type { UnhandledExceptionPluginOptions } from './plugins/unhandledExceptionPlugin'
 
-export { createErrorHandler, isZodError } from './errors/errorHandler'
+export { createErrorHandler, isZodError, type ErrorResponseObject } from './errors/errorHandler'
 export type { ErrorHandlerParams, FreeformRecord } from './errors/errorHandler'
 
 export { generateJwtToken, decodeJwtToken } from './jwt-utils/tokenUtils'

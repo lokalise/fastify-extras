@@ -24,7 +24,7 @@ const knownAuthErrors = new Set([
   'FST_JWT_AUTHORIZATION_TOKEN_INVALID',
 ])
 
-type ErrorResponseObject = {
+export type ErrorResponseObject = {
   statusCode: number
   payload: {
     message: string
