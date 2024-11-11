@@ -71,7 +71,7 @@
         "ioredis": "^5.4.1",
         "newrelic": "12.6.0",
         "pino": "^9.4.0",
-        "pino-pretty": "^11.2.2",
+        "pino-pretty": "^13.0.0",
         "shx": "^0.3.4",
         "typescript": "^5.6.3",
         "vitest": "^2.1.4",
