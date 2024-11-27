@@ -114,16 +114,17 @@ function addRoute(
 
       if (opts.healthChecks.length) {
         const results = await Promise.all(
-          opts.healthChecks.map(async (healthcheck) => {
-            const result = await healthcheck.checker(app)
-            if (result.error) {
-              app.log.error(result.error, `${healthcheck.name} healthcheck has failed`)
-            }
-            return {
-              name: healthcheck.name,
-              result,
-              isMandatory: healthcheck.isMandatory,
-            }
+          opts.healthChecks.map((healthcheck) => {
+            return healthcheck.checker(app).then((result) => {
+              if (result.error) {
+                app.log.error(result.error, `${healthcheck.name} healthcheck has failed`)
+              }
+              return {
+                name: healthcheck.name,
+                result,
+                isMandatory: healthcheck.isMandatory,
+              }
+            })
           }),
         )
 
