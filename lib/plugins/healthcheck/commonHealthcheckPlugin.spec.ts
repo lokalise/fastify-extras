@@ -37,7 +37,7 @@ describe('commonHealthcheckPlugin', () => {
 
       const response = await app.inject().get(PUBLIC_ENDPOINT).end()
       expect(response.statusCode).toBe(200)
-      expect(response.json()).toEqual({ heartbeat: 'HEALTHY', checks: {} })
+      expect(response.json()).toEqual({ heartbeat: 'HEALTHY' })
     })
 
     it('returns custom heartbeat', async () => {
@@ -48,7 +48,6 @@ describe('commonHealthcheckPlugin', () => {
       expect(response.json()).toEqual({
         heartbeat: 'HEALTHY',
         version: 1,
-        checks: {},
       })
     })
 
@@ -74,9 +73,6 @@ describe('commonHealthcheckPlugin', () => {
       expect(response.json()).toEqual({
         heartbeat: 'FAIL',
         version: 1,
-        checks: {
-          aggregation: 'FAIL',
-        },
       })
     })
 
@@ -102,9 +98,6 @@ describe('commonHealthcheckPlugin', () => {
       expect(response.json()).toEqual({
         heartbeat: 'PARTIALLY_HEALTHY',
         version: 1,
-        checks: {
-          aggregation: 'PARTIALLY_HEALTHY',
-        },
       })
     })
 
@@ -130,9 +123,6 @@ describe('commonHealthcheckPlugin', () => {
       expect(response.json()).toEqual({
         heartbeat: 'HEALTHY',
         version: 1,
-        checks: {
-          aggregation: 'HEALTHY',
-        },
       })
     })
 
@@ -163,9 +153,6 @@ describe('commonHealthcheckPlugin', () => {
       expect(response.json()).toEqual({
         heartbeat: 'HEALTHY',
         version: 1,
-        checks: {
-          aggregation: 'HEALTHY',
-        },
       })
     })
   })

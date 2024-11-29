@@ -13,7 +13,7 @@ export interface CommonHealthcheckPluginOptions {
 
 type HealthcheckRouteOptions = {
   url: string
-  useHealthcheckAggregations: boolean
+  isPublicRoute: boolean
 }
 
 type HealthcheckResult = {
@@ -42,28 +42,8 @@ export type HealthCheck = {
 function resolveHealthcheckResults(
   results: HealthcheckResult[],
   opts: CommonHealthcheckPluginOptions,
-  routeOpts: HealthcheckRouteOptions,
 ): ResolvedHealthcheckResponse {
   const healthChecks: Record<string, string> = {}
-
-  if (routeOpts.useHealthcheckAggregations) {
-    // Use aggregation to determine the overall health of the service
-    // Omit separate healthcheck results from the response
-    const isFullyHealthy = results.every((entry) => !entry.result.error)
-    const isPartiallyHealthy = results.every((entry) => !entry.result.error || !entry.isMandatory)
-    healthChecks.aggregation = isFullyHealthy
-      ? 'HEALTHY'
-      : isPartiallyHealthy
-        ? 'PARTIALLY_HEALTHY'
-        : 'FAIL'
-
-    return {
-      isFullyHealthy,
-      isPartiallyHealthy,
-      healthChecks,
-    }
-  }
-
   let isFullyHealthy = true
   let isPartiallyHealthy = false
 
@@ -128,28 +108,36 @@ function addRoute(
           }),
         )
 
-        const resolvedHealthcheckResponse = resolveHealthcheckResults(results, opts, routeOpts)
+        const resolvedHealthcheckResponse = resolveHealthcheckResults(results, opts)
         healthChecks = resolvedHealthcheckResponse.healthChecks
         isFullyHealthy = resolvedHealthcheckResponse.isFullyHealthy
         isPartiallyHealthy = resolvedHealthcheckResponse.isPartiallyHealthy
       }
 
-      const extraInfo =
-        opts.infoProviders && !routeOpts.useHealthcheckAggregations
-          ? opts.infoProviders.map((infoProvider) => {
-              return {
-                name: infoProvider.name,
-                value: infoProvider.dataResolver(),
-              }
-            })
-          : undefined
+      const extraInfo = opts.infoProviders
+        ? opts.infoProviders.map((infoProvider) => {
+            return {
+              name: infoProvider.name,
+              value: infoProvider.dataResolver(),
+            }
+          })
+        : undefined
 
-      return reply.status(isFullyHealthy || isPartiallyHealthy ? 200 : 500).send({
+      const heartbeat = isFullyHealthy
+        ? 'HEALTHY'
+        : isPartiallyHealthy
+          ? 'PARTIALLY_HEALTHY'
+          : 'FAIL'
+
+      const response = {
         ...responsePayload,
-        checks: healthChecks,
-        ...(extraInfo && { extraInfo }),
-        heartbeat: isFullyHealthy ? 'HEALTHY' : isPartiallyHealthy ? 'PARTIALLY_HEALTHY' : 'FAIL',
-      })
+        heartbeat,
+        ...(routeOpts.isPublicRoute
+          ? {}
+          : { checks: healthChecks, ...(extraInfo && { extraInfo }) }),
+      }
+
+      return reply.status(isFullyHealthy || isPartiallyHealthy ? 200 : 500).send(response)
     },
   })
 }
@@ -161,11 +149,11 @@ function plugin(
 ): void {
   addRoute(app, opts, {
     url: '/',
-    useHealthcheckAggregations: true,
+    isPublicRoute: true,
   })
   addRoute(app, opts, {
     url: '/health',
-    useHealthcheckAggregations: false,
+    isPublicRoute: false,
   })
 
   done()

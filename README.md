@@ -77,24 +77,21 @@ Plugin to monitor app status through public and private healthchecks.
 Add the plugin to your Fastify instance by registering it with the following options:
 
 - `healthChecks`, a list of promises with healthcheck in the callback;
-- `responsePayload` (optional), the response payload that the public healthcheck should return. If no response payload is provided, the default response is:
+- `responsePayload` (optional), the response payload that the healthcheck should return. If no response payload is provided, the default response is:
   ```json
   { "heartbeat": "HEALTHY", "checks": {} }
   ```
 
-Your Fastify app will reply with the status of the app when hitting the `GET /` route with aggregated results from healthchecks provided, example:
+Your Fastify app will reply with the status of the app when hitting the `GET /` public route with aggregated heartbeat from healthchecks provided, example:
 ```json
 {
-  "heartbeat": "HEALTHY",
-  "checks": {
-    "aggregation": "HEALTHY"
-  }
+  "heartbeat": "HEALTHY"
 }
 ```
 
 
 
-Your Fastify app will reply with the status of the app when hitting the `GET /health` route with detailed results from healthchecks provided, example:
+Your Fastify app will reply with the status of the app when hitting the `GET /health` private route with detailed results from healthchecks provided, example:
 ```json
 {
   "heartbeat": "PARTIALLY_HEALTHY",
