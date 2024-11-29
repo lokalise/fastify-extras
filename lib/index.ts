@@ -60,6 +60,9 @@ export type {
 export { wrapHealthCheck } from './plugins/healthcheck/healthcheckCommons'
 export type { HealthChecker } from './plugins/healthcheck/healthcheckCommons'
 
+export { commonHealthcheckPlugin } from './plugins/healthcheck/commonHealthcheckPlugin'
+export type { CommonHealthcheckPluginOptions } from './plugins/healthcheck/commonHealthcheckPlugin'
+
 export {
   amplitudePlugin,
   type AmplitudeConfig,
