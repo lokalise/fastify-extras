@@ -70,6 +70,39 @@ Add the plugin to your Fastify instance by registering it with the following opt
 
 Your Fastify app will reply with the status of the app when hitting the `GET /` route.
 
+### Common Healthcheck Plugin
+
+Plugin to monitor app status through public and private healthchecks.
+
+Add the plugin to your Fastify instance by registering it with the following options:
+
+- `healthChecks`, a list of promises with healthcheck in the callback;
+- `responsePayload` (optional), the response payload that the healthcheck should return. If no response payload is provided, the default response is:
+  ```json
+  { "heartbeat": "HEALTHY", "checks": {} }
+  ```
+
+Your Fastify app will reply with the status of the app when hitting the `GET /` public route with aggregated heartbeat from healthchecks provided, example:
+```json
+{
+  "heartbeat": "HEALTHY"
+}
+```
+
+
+
+Your Fastify app will reply with the status of the app when hitting the `GET /health` private route with detailed results from healthchecks provided, example:
+```json
+{
+  "heartbeat": "PARTIALLY_HEALTHY",
+  "checks": {
+    "check1": "HEALTHY",
+    "check2": "HEALTHY",
+    "check3": "FAIL"
+  }
+}
+```
+
 ### Split IO Plugin
 
 Plugin to handle feature flags in Split IO.
