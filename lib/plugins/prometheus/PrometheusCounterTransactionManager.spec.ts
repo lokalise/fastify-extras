@@ -92,4 +92,56 @@ describe('PrometheusCounterTransactionManager', () => {
       )
     })
   })
+
+  describe('customAttributes', () => {
+    const initApp = async () => {
+      const app = fastify()
+      await app.register(metricsPlugin, {
+        bindAddress: '0.0.0.0',
+        logger: false,
+        errorObjectResolver: () => undefined,
+      })
+
+      await app.ready()
+      return app
+    }
+
+    let app: FastifyInstance
+
+    beforeAll(async () => {
+      app = await initApp()
+    })
+
+    afterAll(async () => {
+      await app.close()
+    })
+
+    it('includes only supported customAttributes (labels)', async () => {
+      const counterManager = new PrometheusCounterTransactionManager(
+        'myMetric',
+        'this is my first metric',
+        app.metrics,
+        ['label1', 'label2'],
+      )
+
+      counterManager.start('myTransaction', 'myKey1')
+      counterManager.addCustomAttributes('myKey1', {
+        label1: 'val1',
+        label2: 'val2',
+        label3: 'val3',
+      })
+      counterManager.stop('myKey1')
+
+      const response = await sendGet(buildClient('http://127.0.0.1:9080'), '/metrics', TEST_OPTIONS)
+      expect(response.result.statusCode).toBe(200)
+      expect(response.result.body).toContain(
+        [
+          '# HELP myMetric this is my first metric',
+          '# TYPE myMetric counter',
+          'myMetric{status="started",transactionName="myTransaction"} 1',
+          'myMetric{status="success",transactionName="myTransaction",label1="val1",label2="val2"} 1',
+        ].join('\n'),
+      )
+    })
+  })
 })

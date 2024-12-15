@@ -21,7 +21,7 @@ export class PrometheusCounterTransactionManager<CustomLabels extends string = n
     metricName: string,
     metricDescription: string,
     appMetrics?: IFastifyMetrics,
-    customLabels?: string[],
+    customLabels?: Array<CustomLabels>,
   ) {
     this.metricName = metricName
     this.metricDescription = metricDescription
