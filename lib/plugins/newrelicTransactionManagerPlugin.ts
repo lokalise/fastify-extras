@@ -14,6 +14,7 @@ interface Newrelic {
   shutdown: typeof Shutdown
   getTransaction: typeof GetTransaction
   addCustomAttribute(key: string, value: string | number | boolean): void
+  addCustomAttributes(atts: { [key: string]: string | number | boolean }): void
 }
 
 let newrelic: Newrelic
@@ -48,6 +49,17 @@ export class NewRelicTransactionManager implements TransactionObservabilityManag
     }
 
     newrelic.addCustomAttribute(attrName, attrValue)
+  }
+
+  public addCustomAttributes(
+    _uniqueTransactionKey: string,
+    atts: { [p: string]: string | number | boolean },
+  ): void {
+    if (!this.isEnabled) {
+      return
+    }
+
+    newrelic.addCustomAttributes(atts)
   }
 
   /**
