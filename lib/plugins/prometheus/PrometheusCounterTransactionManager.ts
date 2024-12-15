@@ -11,6 +11,7 @@ export class PrometheusCounterTransactionManager<CustomLabels extends string = n
 {
   private readonly metricName: string
   private readonly metricDescription: string
+  private readonly supportedCustomLabels: Set<string>
   private readonly counter?: Counter<'status' | 'transactionName'>
 
   private readonly transactionNameByKey: Map<string, string> = new Map()
@@ -24,6 +25,7 @@ export class PrometheusCounterTransactionManager<CustomLabels extends string = n
   ) {
     this.metricName = metricName
     this.metricDescription = metricDescription
+    this.supportedCustomLabels = new Set(customLabels) ?? new Set()
     this.counter = this.registerMetric(appMetrics, customLabels)
   }
 
@@ -64,7 +66,10 @@ export class PrometheusCounterTransactionManager<CustomLabels extends string = n
     this.customLabelsByKey.delete(uniqueTransactionKey)
   }
 
-  // Prometheus labels are the way Prometheus handles custom attributes
+  /**
+   * Prometheus labels are the way Prometheus handles custom attributes
+   * Note that it will skip any attributes that were not included in the constructor param "customLabels"
+   */
   addCustomAttributes(
     uniqueTransactionKey: string,
     atts: { [p: string]: string | number | boolean },
@@ -72,8 +77,17 @@ export class PrometheusCounterTransactionManager<CustomLabels extends string = n
     const transactionName = this.transactionNameByKey.get(uniqueTransactionKey)
     if (!transactionName) return
 
-    // @ts-expect-error We only enforce types lightly here. If this ever causes us problem, we can start doing runtime validation here, but it seems to be an overkill for now.
-    this.customLabelsByKey.set(uniqueTransactionKey, atts)
+    const supportedLabels = Object.entries(atts).reduce(
+      (acc, [key, value]) => {
+        if (this.supportedCustomLabels.has(key)) {
+          acc[key as CustomLabels] = value as string
+        }
+        return acc
+      },
+      {} as Record<CustomLabels, string>,
+    )
+
+    this.customLabelsByKey.set(uniqueTransactionKey, supportedLabels)
   }
 
   private registerMetric(appMetrics?: IFastifyMetrics, customLabels: string[] = []) {
