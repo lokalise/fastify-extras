@@ -213,7 +213,8 @@ The plugin decorates your Fastify instance with a `NewRelicTransactionManager`, 
 
 - `start()`, which takes a `jobName`, and starts a background transaction with the provided name;
 - `stop()`, which takes a `jobId`, and ends the background transaction referenced by the ID;
-- `addCustomAttribute()`, which takes `attrName` and `attrValue` and records the custom attribute as such defined. `attrValue` can be a string, a number, or a boolean.
+- `addCustomAttribute()`, which takes `attrName` and `attrValue` and adds the custom attribute to the current transaction. `attrValue` can be a string, a number, or a boolean.
+- `addCustomAttributes()`, which passes `atts` map of the custom attributes to the current transaction. `_uniqueTransactionKey` argument is not used (because New Relic doesn't support setting custom attributes directly on the transaction handle), any string can be passed.
 
 ### Amplitude Plugin
 
