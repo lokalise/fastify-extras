@@ -9,7 +9,7 @@ export interface CommonHealthcheckPluginOptions {
   logLevel?: 'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace' | 'silent'
   healthChecks: readonly HealthCheck[]
   infoProviders?: readonly InfoProvider[]
-  isRootRouteDisabled?: boolean
+  isRootRouteEnabled?: boolean
 }
 
 type HealthcheckRouteOptions = {
@@ -139,7 +139,9 @@ function addRoute(
 }
 
 const plugin: FastifyPluginCallback<CommonHealthcheckPluginOptions> = (app, opts, done) => {
-  if (!opts.isRootRouteDisabled) {
+  const isRootRouteEnabled = opts.isRootRouteEnabled ?? true
+
+  if (isRootRouteEnabled) {
     addRoute(app, opts, {
       url: '/',
       isPublicRoute: true,

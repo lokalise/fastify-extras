@@ -40,8 +40,8 @@ describe('commonHealthcheckPlugin', () => {
       expect(response.json()).toEqual({ heartbeat: 'HEALTHY' })
     })
 
-    it('returns 404 if healthcheck on root route is disabled', async () => {
-      app = await initApp({ healthChecks: [], isRootRouteDisabled: true })
+    it('returns 404 if healthcheck on root route is not enabled', async () => {
+      app = await initApp({ healthChecks: [], isRootRouteEnabled: false })
 
       const response = await app.inject().get(PUBLIC_ENDPOINT).end()
       expect(response.statusCode).toBe(404)
