@@ -115,8 +115,8 @@ function addRoute(
       }
 
       const extraInfo = opts.infoProviders?.map((infoProvider) => ({
-          name: infoProvider.name,
-          value: infoProvider.dataResolver(),
+        name: infoProvider.name,
+        value: infoProvider.dataResolver(),
       }))
 
       const heartbeat = isFullyHealthy
@@ -136,11 +136,7 @@ function addRoute(
   })
 }
 
-const plugin: FastifyPluginCallback<CommonHealthcheckPluginOptions> = (
-  app,
-  opts,
-  done,
-) => {
+const plugin: FastifyPluginCallback<CommonHealthcheckPluginOptions> = (app, opts, done) => {
   if (!opts.isRootRouteDisabled) {
     addRoute(app, opts, {
       url: '/',
@@ -156,10 +152,7 @@ const plugin: FastifyPluginCallback<CommonHealthcheckPluginOptions> = (
   done()
 }
 
-export const commonHealthcheckPlugin = fp(
-  plugin,
-  {
-    fastify: '5.x',
-    name: 'common-healthcheck-plugin',
-  },
-)
+export const commonHealthcheckPlugin = fp(plugin, {
+  fastify: '5.x',
+  name: 'common-healthcheck-plugin',
+})
