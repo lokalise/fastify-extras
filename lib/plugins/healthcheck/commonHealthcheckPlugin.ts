@@ -128,7 +128,9 @@ function addRoute(
       const response = {
         ...responsePayload,
         heartbeat,
-        ...(routeOpts.isPublicRoute && { checks: healthChecks, ...(extraInfo && { extraInfo }) }),
+        ...(routeOpts.isPublicRoute
+          ? {}
+          : { checks: healthChecks, ...(extraInfo && { extraInfo }) }),
       }
 
       return reply.status(isFullyHealthy || isPartiallyHealthy ? 200 : 500).send(response)
