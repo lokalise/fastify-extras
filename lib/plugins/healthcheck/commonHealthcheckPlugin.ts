@@ -9,6 +9,7 @@ export interface CommonHealthcheckPluginOptions {
   logLevel?: 'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace' | 'silent'
   healthChecks: readonly HealthCheck[]
   infoProviders?: readonly InfoProvider[]
+  isRootRouteDisabled?: boolean
 }
 
 type HealthcheckRouteOptions = {
@@ -94,17 +95,16 @@ function addRoute(
 
       if (opts.healthChecks.length) {
         const results = await Promise.all(
-          opts.healthChecks.map((healthcheck) => {
-            return healthcheck.checker(app).then((result) => {
-              if (result.error) {
-                app.log.error(result.error, `${healthcheck.name} healthcheck has failed`)
-              }
-              return {
-                name: healthcheck.name,
-                result,
-                isMandatory: healthcheck.isMandatory,
-              }
-            })
+          opts.healthChecks.map(async (healthcheck) => {
+            const result = await healthcheck.checker(app)
+            if (result.error) {
+              app.log.error(result.error, `${healthcheck.name} healthcheck has failed`)
+            }
+            return {
+              name: healthcheck.name,
+              result,
+              isMandatory: healthcheck.isMandatory,
+            }
           }),
         )
 
@@ -114,14 +114,10 @@ function addRoute(
         isPartiallyHealthy = resolvedHealthcheckResponse.isPartiallyHealthy
       }
 
-      const extraInfo = opts.infoProviders
-        ? opts.infoProviders.map((infoProvider) => {
-            return {
-              name: infoProvider.name,
-              value: infoProvider.dataResolver(),
-            }
-          })
-        : undefined
+      const extraInfo = opts.infoProviders?.map((infoProvider) => ({
+          name: infoProvider.name,
+          value: infoProvider.dataResolver(),
+      }))
 
       const heartbeat = isFullyHealthy
         ? 'HEALTHY'
@@ -132,9 +128,7 @@ function addRoute(
       const response = {
         ...responsePayload,
         heartbeat,
-        ...(routeOpts.isPublicRoute
-          ? {}
-          : { checks: healthChecks, ...(extraInfo && { extraInfo }) }),
+        ...(routeOpts.isPublicRoute && { checks: healthChecks, ...(extraInfo && { extraInfo }) }),
       }
 
       return reply.status(isFullyHealthy || isPartiallyHealthy ? 200 : 500).send(response)
@@ -142,15 +136,18 @@ function addRoute(
   })
 }
 
-function plugin(
-  app: AnyFastifyInstance,
-  opts: CommonHealthcheckPluginOptions,
-  done: () => void,
-): void {
-  addRoute(app, opts, {
-    url: '/',
-    isPublicRoute: true,
-  })
+const plugin: FastifyPluginCallback<CommonHealthcheckPluginOptions> = (
+  app,
+  opts,
+  done,
+) => {
+  if (!opts.isRootRouteDisabled) {
+    addRoute(app, opts, {
+      url: '/',
+      isPublicRoute: true,
+    })
+  }
+
   addRoute(app, opts, {
     url: '/health',
     isPublicRoute: false,
@@ -159,7 +156,7 @@ function plugin(
   done()
 }
 
-export const commonHealthcheckPlugin: FastifyPluginCallback<CommonHealthcheckPluginOptions> = fp(
+export const commonHealthcheckPlugin = fp(
   plugin,
   {
     fastify: '5.x',
