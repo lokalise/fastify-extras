@@ -9,9 +9,9 @@ const pluginCallback: FastifyPluginCallback = (fastify, _options, done) => {
 
     if (pathname.length > 1 && pathname.endsWith('/')) {
       reply.redirect(`${pathname.slice(0, -1)}${search}`, 302)
+    } else {
+      done()
     }
-
-    done()
   })
 
   done()
