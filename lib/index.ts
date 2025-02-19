@@ -78,6 +78,8 @@ export {
 
 export type { FastifyReplyWithPayload } from './types'
 
+export { stripTrailingSlashPlugin } from './plugins/stripTrailingSlashPlugin'
+
 export {
   unhandledExceptionPlugin,
   commonErrorObjectResolver,

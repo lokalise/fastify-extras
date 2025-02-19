@@ -240,6 +240,10 @@ Additionally, you have the option to enhance the safety and accuracy of your eve
 
 > 📘Check [`AmplitudeAdapter.spec.ts](./lib/plugins/amplitude/amplitudePlugin.spec.ts) for a practical example
 
+### Strip Trailing Slash Plugin
+
+This plugin helps with SEO and SSR by ensuring search engines index only one version of a URL, avoiding duplicate content. It redirects URLs with a trailing slash to the version without it, making it easier for search engines to crawl your site consistently.
+
 ### UnhandledException Plugin
 
 This plugin provides a mechanism for handling uncaught exceptions within your Fastify application, ensuring that such exceptions are logged and reported. It's especially useful for capturing unforeseen exceptions and provides a controlled shutdown of the Fastify server, thereby ensuring no potential data corruption.
