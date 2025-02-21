@@ -3,12 +3,14 @@ import fp from 'fastify-plugin'
 
 const pluginCallback: FastifyPluginCallback = (fastify, _options, done) => {
   fastify.addHook('onRequest', (request, reply, done) => {
-    // Using a hardcoded origin for simplicity and reliability,
-    // as the request's origin is not relevant in this case.
-    const { pathname, search } = new URL(request.url, 'https://example.com')
+    const questionMarkIndex = request.url.indexOf('?')
 
-    if (pathname.length > 1 && pathname.endsWith('/')) {
-      reply.redirect(`${pathname.slice(0, -1)}${search}`, 302)
+    const path = questionMarkIndex === -1 ? request.url : request.url.slice(0, questionMarkIndex)
+
+    const search = questionMarkIndex === -1 ? '' : request.url.slice(questionMarkIndex)
+
+    if (path.length > 1 && path.endsWith('/')) {
+      reply.redirect(`${path.slice(0, -1)}${search}`, 302)
     } else {
       done()
     }
