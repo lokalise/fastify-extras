@@ -62,7 +62,7 @@ describe('Amplitude adapter', () => {
   })
 
   it('accepts groups', () => {
-    const user_id = randomUUID()
+    const user_id = '1'
     amplitudeAdapter.track(testMessages.myEvent, {
       user_id,
       groups: { myGroup: 'value', myOtherGroup: 'otherValue' },
@@ -78,7 +78,7 @@ describe('Amplitude adapter', () => {
   })
 
   it('accepts groups with multiple values', () => {
-    const user_id = randomUUID()
+    const user_id = '2'
     amplitudeAdapter.track(testMessages.myEvent, {
       user_id,
       groups: { myGroup: ['value1', 'value2'] },
@@ -119,7 +119,7 @@ describe('Amplitude adapter', () => {
   it('wrong user id', () => {
     expect(() =>
       amplitudeAdapter.track(testMessages.myEvent, {
-        user_id: 'wrong',
+        user_id: '',
         event_properties: {
           number: 1,
         },
