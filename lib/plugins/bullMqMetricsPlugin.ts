@@ -3,11 +3,11 @@ import 'fastify-metrics'
 import fp from 'fastify-plugin'
 
 import type { RedisConfig } from '@lokalise/node-core'
-import type { CollectionScheduler } from './bull-mq-metrics/CollectionScheduler'
-import { PromiseBasedCollectionScheduler } from './bull-mq-metrics/CollectionScheduler'
-import type { MetricCollectorOptions } from './bull-mq-metrics/MetricsCollector'
-import { MetricsCollector } from './bull-mq-metrics/MetricsCollector'
-import { BackgroundJobsBasedQueueDiscoverer } from './bull-mq-metrics/queueDiscoverers'
+import type { CollectionScheduler } from './bull-mq-metrics/CollectionScheduler.js'
+import { PromiseBasedCollectionScheduler } from './bull-mq-metrics/CollectionScheduler.js'
+import type { MetricCollectorOptions } from './bull-mq-metrics/MetricsCollector.js'
+import { MetricsCollector } from './bull-mq-metrics/MetricsCollector.js'
+import { BackgroundJobsBasedQueueDiscoverer } from './bull-mq-metrics/queueDiscoverers.js'
 
 // Augment existing FastifyRequest interface with new fields
 declare module 'fastify' {

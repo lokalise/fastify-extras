@@ -13,7 +13,7 @@ import {
 } from 'fastify-type-provider-zod'
 import pino from 'pino'
 import type { ZodError } from 'zod'
-import type { AnyFastifyInstance } from '../plugins/pluginsCommon'
+import type { AnyFastifyInstance } from '../plugins/pluginsCommon.js'
 
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
 export type FreeformRecord = Record<string, any>

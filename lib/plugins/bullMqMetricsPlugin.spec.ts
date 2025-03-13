@@ -1,5 +1,3 @@
-import { setTimeout } from 'node:timers/promises'
-
 import { buildClient, sendGet } from '@lokalise/backend-http-client'
 import {
   type AbstractBackgroundJobProcessor,
@@ -7,19 +5,17 @@ import {
   type BaseJobPayload,
   createSanitizedRedisClient,
 } from '@lokalise/background-jobs-common'
+import { type RedisConfig, waitAndRetry } from '@lokalise/node-core'
 import type { FastifyInstance } from 'fastify'
 import fastify from 'fastify'
-
-import { TestBackgroundJobProcessor } from '../../test/mocks/TestBackgroundJobProcessor'
-import { TestDependencies } from '../../test/mocks/TestDependencies'
-
-import type { RedisConfig } from '@lokalise/node-core'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { z } from 'zod'
-import { RedisBasedQueueDiscoverer } from './bull-mq-metrics/queueDiscoverers'
-import type { BullMqMetricsPluginOptions } from './bullMqMetricsPlugin'
-import { bullMqMetricsPlugin } from './bullMqMetricsPlugin'
-import { metricsPlugin } from './metricsPlugin'
+import { TestBackgroundJobProcessor } from '../../test/mocks/TestBackgroundJobProcessor.js'
+import { TestDependencies } from '../../test/mocks/TestDependencies.js'
+import { RedisBasedQueueDiscoverer } from './bull-mq-metrics/queueDiscoverers.js'
+import type { BullMqMetricsPluginOptions } from './bullMqMetricsPlugin.js'
+import { bullMqMetricsPlugin } from './bullMqMetricsPlugin.js'
+import { metricsPlugin } from './metricsPlugin.js'
 
 type TestOptions = {
   enableMetricsPlugin: boolean
@@ -123,20 +119,19 @@ describe('bullMqMetricsPlugin', () => {
       'bullmq_jobs_finished_duration_count{status="completed",queue="test_job"} 1',
     )
 
-    await processor.schedule({
-      metadata: {
-        correlationId: 'test',
-      },
+    await processor.schedule({ metadata: { correlationId: 'test' } })
+
+    const found = await waitAndRetry(async () => {
+      await app.bullMqMetrics.collect()
+      const metrics = await getMetrics()
+      return (
+        (metrics.result.body as string).indexOf(
+          'bullmq_jobs_finished_duration_count{status="completed",queue="test_job"} 1',
+        ) !== -1
+      )
     })
 
-    await setTimeout(100)
-
-    await app.bullMqMetrics.collect()
-
-    const responseAfter = await getMetrics()
-    expect(responseAfter.result.body).toContain(
-      'bullmq_jobs_finished_duration_count{status="completed",queue="test_job"} 1',
-    )
+    expect(found).toBe(true)
   })
 
   // This is failing in CI, we don't know why, our attempts at fixing it are failing,

@@ -1,7 +1,7 @@
 import type { FastifyPluginCallback } from 'fastify'
 import fp from 'fastify-plugin'
-import type { AnyFastifyInstance } from '../pluginsCommon'
-import type { HealthChecker } from './healthcheckCommons'
+import type { AnyFastifyInstance } from '../pluginsCommon.js'
+import type { HealthChecker } from './healthcheckCommons.js'
 
 export interface PublicHealthcheckPluginOptions {
   responsePayload?: Record<string, unknown>
@@ -62,14 +62,16 @@ function plugin(
 
         for (let i = 0; i < results.length; i++) {
           const entry = results[i]
+          if (!entry) continue
+
           healthChecks[entry.name] = entry.result.error ? 'FAIL' : 'HEALTHY'
-          if (entry.result.error && opts.healthChecks[i].isMandatory) {
+          if (entry.result.error && opts.healthChecks[i]?.isMandatory) {
             isFullyHealthy = false
             isPartiallyHealthy = false
           }
 
           // Check if we are only partially healthy (only optional dependencies are failing)
-          if (isFullyHealthy && entry.result.error && !opts.healthChecks[i].isMandatory) {
+          if (isFullyHealthy && entry.result.error && !opts.healthChecks[i]?.isMandatory) {
             isFullyHealthy = false
             isPartiallyHealthy = true
           }

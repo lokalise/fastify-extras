@@ -3,8 +3,8 @@ import type {
   RawReplyDefaultExpression,
   RawRequestDefaultExpression,
   RawServerDefault,
+  RouteGenericInterface,
 } from 'fastify'
-import type { RouteGenericInterface } from 'fastify/types/route'
 
 export type FastifyReplyWithPayload<Payload extends RouteGenericInterface> = FastifyReply<
   RouteGenericInterface,

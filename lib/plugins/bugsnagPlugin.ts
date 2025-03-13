@@ -25,7 +25,7 @@ export interface BugsnagPluginConfig {
 
 function plugin(_app: FastifyInstance, opts: BugsnagPluginConfig, done: () => void) {
   if (opts.isEnabled) {
-    Bugsnag.start(opts.bugsnag)
+    Bugsnag.default.start(opts.bugsnag)
   }
 
   done()

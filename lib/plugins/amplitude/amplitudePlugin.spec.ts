@@ -4,7 +4,7 @@ import type { FastifyInstance } from 'fastify'
 import fastify from 'fastify'
 import { afterEach, beforeEach, describe, expect, it, vitest } from 'vitest'
 
-import { amplitudePlugin } from './amplitudePlugin'
+import { amplitudePlugin } from './amplitudePlugin.js'
 
 describe('amplitudePlugin', () => {
   let app: FastifyInstance

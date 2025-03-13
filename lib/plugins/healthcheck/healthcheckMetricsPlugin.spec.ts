@@ -3,11 +3,14 @@ import type { Either } from '@lokalise/node-core'
 import type { FastifyInstance } from 'fastify'
 import fastify from 'fastify'
 import { afterEach, describe, expect, it } from 'vitest'
-import { metricsPlugin } from '../metricsPlugin'
+import { metricsPlugin } from '../metricsPlugin.js'
 
 import { z } from 'zod'
-import type { PrometheusHealthCheck } from './healthcheckMetricsPlugin'
-import { healthcheckMetricsPlugin, wrapHealthCheckForPrometheus } from './healthcheckMetricsPlugin'
+import type { PrometheusHealthCheck } from './healthcheckMetricsPlugin.js'
+import {
+  healthcheckMetricsPlugin,
+  wrapHealthCheckForPrometheus,
+} from './healthcheckMetricsPlugin.js'
 
 const UNKNOWN_RESPONSE_SCHEMA = z.unknown()
 

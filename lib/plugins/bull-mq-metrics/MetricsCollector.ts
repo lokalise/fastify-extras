@@ -2,8 +2,8 @@ import { PromisePool } from '@supercharge/promise-pool'
 import type { FastifyBaseLogger } from 'fastify'
 import * as prometheus from 'prom-client'
 
-import { ObservableQueue } from './ObservableQueue'
-import type { QueueDiscoverer } from './queueDiscoverers'
+import { ObservableQueue } from './ObservableQueue.js'
+import type { QueueDiscoverer } from './queueDiscoverers.js'
 
 export type Metrics = {
   countGauge: prometheus.Gauge<'status' | 'queue'>
@@ -41,13 +41,20 @@ const getMetrics = (prefix: string, histogramBuckets: number[]): Metrics => ({
 
 export class MetricsCollector {
   private readonly metrics: Metrics
+  private readonly options: MetricCollectorOptions
+  private readonly registry: prometheus.Registry
+  private readonly logger: FastifyBaseLogger
+
   private observedQueues: ObservableQueue[] | undefined
 
   constructor(
-    private readonly options: MetricCollectorOptions,
-    private readonly registry: prometheus.Registry,
-    private readonly logger: FastifyBaseLogger,
+    options: MetricCollectorOptions,
+    registry: prometheus.Registry,
+    logger: FastifyBaseLogger,
   ) {
+    this.options = options
+    this.registry = registry
+    this.logger = logger
     this.metrics = this.registerMetrics(this.registry, this.options)
   }
 
@@ -86,10 +93,10 @@ export class MetricsCollector {
     const metricNames = Object.keys(metrics)
 
     // If metrics are already registered, just return them to avoid triggering a Prometheus error
-    if (metricNames.length > 0 && registry.getSingleMetric(metricNames[0])) {
+    if (metricNames.length > 0 && registry.getSingleMetric(metricNames[0] ?? '')) {
       const retrievedMetrics = registry.getMetricsAsArray()
-      const returnValue: Record<string, prometheus.MetricObject> = {}
 
+      const returnValue: Record<string, prometheus.MetricObject> = {}
       for (const metric of retrievedMetrics) {
         if (metricNames.includes(metric.name)) {
           returnValue[metric.name as keyof Metrics] = metric

@@ -14,18 +14,21 @@
     "keywords": ["fastify", "newrelic", "bugsnag", "request-context", "request-id", "split-io"],
     "homepage": "https://github.com/lokalise/fastify-extras",
     "files": ["dist/**", "LICENSE", "README.md"],
-    "main": "dist/index.js",
-    "types": "dist/index.d.ts",
-    "type": "commonjs",
+    "type": "module",
+    "main": "./dist/index.js",
+    "exports": {
+        ".": "./dist/index.js",
+        "./package.json": "./package.json"
+    },
     "publishConfig": {
         "access": "public"
     },
     "scripts": {
-        "build": "shx rm -rf ./dist && tsc",
+        "build": "shx rm -rf ./dist && tsc --project tsconfig.build.json",
         "test": "vitest",
         "test:coverage": "vitest --coverage",
         "test:ci": "npm run lint && npm run test:coverage",
-        "lint": "biome check . && tsc --project tsconfig.lint.json --noEmit",
+        "lint": "biome check . && tsc",
         "lint:fix": "biome check --write",
         "docker:start": "docker compose -f docker-compose.yml up --build -d redis && docker compose -f docker-compose.yml up --build -d wait_for_redis",
         "docker:stop": "docker compose -f docker-compose.yml down",
@@ -58,13 +61,14 @@
     "devDependencies": {
         "@amplitude/analytics-types": "^2.8.4",
         "@biomejs/biome": "^1.9.4",
-        "@lokalise/backend-http-client": "^3.0.0",
+        "@lokalise/backend-http-client": "^4.1.1",
         "@lokalise/background-jobs-common": "^11.0.0",
         "@lokalise/biome-config": "^1.5.0",
         "@lokalise/node-core": "^13.3.0",
+        "@lokalise/tsconfig": "^1.0.2",
         "@types/newrelic": "^9.14.6",
         "@types/node": "^22.10.2",
-        "@vitest/coverage-v8": "^2.1.8",
+        "@vitest/coverage-v8": "^3.0.8",
         "auto-changelog": "^2.4.0",
         "bullmq": "^5.34.2",
         "fastify": "^5.2.0",
@@ -75,7 +79,7 @@
         "pino-pretty": "^13.0.0",
         "shx": "^0.3.4",
         "typescript": "^5.7.2",
-        "vitest": "^2.1.8",
+        "vitest": "^3.0.8",
         "zod": "^3.24.1"
     },
     "engines": {

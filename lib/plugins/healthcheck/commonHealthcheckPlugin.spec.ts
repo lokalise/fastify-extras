@@ -6,7 +6,7 @@ import {
   type CommonHealthcheckPluginOptions,
   commonHealthcheckPlugin,
 } from './commonHealthcheckPlugin.js'
-import type { HealthChecker } from './healthcheckCommons'
+import type { HealthChecker } from './healthcheckCommons.js'
 
 const positiveHealthcheckChecker: HealthChecker = () => {
   return Promise.resolve({ result: true })
