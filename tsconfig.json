@@ -1,27 +1,11 @@
 {
+    "extends": "@lokalise/tsconfig/tsc",
+    "include": ["lib/**/*", "test/**/*", "vitest.config.ts"],
     "compilerOptions": {
-        "outDir": "dist",
-        "module": "commonjs",
-        "target": "ES2022",
-        "lib": ["ES2022", "dom"],
-        "sourceMap": true,
-        "declaration": true,
-        "declarationMap": false,
-        "types": ["node", "vitest/globals"],
-        "strict": true,
-        "skipLibCheck": true,
-        "moduleResolution": "node",
-        "noUnusedLocals": false,
-        "noUnusedParameters": false,
-        "noFallthroughCasesInSwitch": true,
-        "strictNullChecks": true,
-        "importHelpers": true,
-        "baseUrl": ".",
-        "allowSyntheticDefaultImports": true,
-        "esModuleInterop": true,
-        "forceConsistentCasingInFileNames": true,
-        "resolveJsonModule": true
-    },
-    "include": ["lib/**/*.ts"],
-    "exclude": ["lib/**/*.spec.ts", "lib/**/*.test.ts"]
+        "types": ["vitest/globals"],
+        // The following rules are due to an issue with `redis-semaphore` https://github.com/swarthy/redis-semaphore/pull/230#issuecomment-2717755204
+        // should be removed once the issue is resolved
+        "verbatimModuleSyntax": false,
+        "isolatedModules": true
+    }
 }
