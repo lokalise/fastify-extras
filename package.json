@@ -1,6 +1,6 @@
 {
     "name": "@lokalise/fastify-extras",
-    "version": "26.1.1",
+    "version": "26.2.0",
     "description": "Opinionated set of fastify plugins, commonly used in Lokalise",
     "author": {
         "name": "Lokalise",
@@ -62,7 +62,7 @@
         "@amplitude/analytics-types": "^2.8.4",
         "@biomejs/biome": "^1.9.4",
         "@lokalise/backend-http-client": "^4.1.0",
-        "@lokalise/background-jobs-common": "^10.0.1",
+        "@lokalise/background-jobs-common": "^11.0.0",
         "@lokalise/biome-config": "^1.5.0",
         "@lokalise/node-core": "^13.3.0",
         "@lokalise/tsconfig": "^1.0.2",
@@ -74,7 +74,7 @@
         "fastify": "^5.2.0",
         "fastify-type-provider-zod": "^4.0.2",
         "ioredis": "^5.4.1",
-        "newrelic": "12.14.0",
+        "newrelic": "12.15.0",
         "pino": "^9.5.0",
         "pino-pretty": "^13.0.0",
         "shx": "^0.3.4",
