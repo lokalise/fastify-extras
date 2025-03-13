@@ -17,7 +17,11 @@ type RedisQueue = {
 const QUEUE_DISCOVERY_CONCURRENCY = 3
 
 export abstract class AbstractRedisBasedQueueDiscoverer implements QueueDiscoverer {
-  constructor(protected readonly redisConfigs: RedisConfig[]) {}
+  protected readonly redisConfigs: RedisConfig[]
+
+  constructor(redisConfigs: RedisConfig[]) {
+    this.redisConfigs = redisConfigs
+  }
 
   async discoverQueues(): Promise<RedisQueue[]> {
     const { results, errors } = await PromisePool.withConcurrency(QUEUE_DISCOVERY_CONCURRENCY)
@@ -36,11 +40,11 @@ export abstract class AbstractRedisBasedQueueDiscoverer implements QueueDiscover
 }
 
 export class RedisBasedQueueDiscoverer extends AbstractRedisBasedQueueDiscoverer {
-  constructor(
-    redisConfigs: RedisConfig[],
-    private readonly queuesPrefix: string,
-  ) {
+  private readonly queuesPrefix: string
+
+  constructor(redisConfigs: RedisConfig[], queuesPrefix: string) {
     super(redisConfigs)
+    this.queuesPrefix = queuesPrefix
   }
 
   protected async discoverQueuesForInstance(redisConfig: RedisConfig): Promise<RedisQueue[]> {
@@ -55,7 +59,8 @@ export class RedisBasedQueueDiscoverer extends AbstractRedisBasedQueueDiscoverer
       ;(chunk as string[])
         .map((key) => key.split(':')[1])
         .filter((value) => !!value)
-        .forEach((queue) => queues.add(queue))
+        // biome-ignore lint/style/noNonNullAssertion: undefined removed in previous filter
+        .forEach((queue) => queues.add(queue!))
     }
 
     return Array.from(queues)

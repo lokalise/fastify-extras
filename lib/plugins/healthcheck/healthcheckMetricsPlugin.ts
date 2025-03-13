@@ -1,7 +1,7 @@
 import type { FastifyPluginCallback } from 'fastify'
 import fp from 'fastify-plugin'
-import type { AnyFastifyInstance, CommonFastifyInstance } from '../pluginsCommon'
-import type { HealthChecker } from './healthcheckCommons'
+import type { AnyFastifyInstance, CommonFastifyInstance } from '../pluginsCommon.js'
+import type { HealthChecker } from './healthcheckCommons.js'
 
 const VALID_PROMETHEUS_NAME_REGEX = /[a-zA-Z_:][a-zA-Z0-9_:]*/
 

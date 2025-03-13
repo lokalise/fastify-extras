@@ -1,5 +1,4 @@
 import { setTimeout } from 'node:timers/promises'
-
 import { buildClient, sendGet } from '@lokalise/backend-http-client'
 import {
   type AbstractBackgroundJobProcessor,
@@ -7,19 +6,17 @@ import {
   type BaseJobPayload,
   createSanitizedRedisClient,
 } from '@lokalise/background-jobs-common'
+import type { RedisConfig } from '@lokalise/node-core'
 import type { FastifyInstance } from 'fastify'
 import fastify from 'fastify'
-
-import { TestBackgroundJobProcessor } from '../../test/mocks/TestBackgroundJobProcessor'
-import { TestDependencies } from '../../test/mocks/TestDependencies'
-
-import type { RedisConfig } from '@lokalise/node-core'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { z } from 'zod'
-import { RedisBasedQueueDiscoverer } from './bull-mq-metrics/queueDiscoverers'
-import type { BullMqMetricsPluginOptions } from './bullMqMetricsPlugin'
-import { bullMqMetricsPlugin } from './bullMqMetricsPlugin'
-import { metricsPlugin } from './metricsPlugin'
+import { TestBackgroundJobProcessor } from '../../test/mocks/TestBackgroundJobProcessor.js'
+import { TestDependencies } from '../../test/mocks/TestDependencies.js'
+import { RedisBasedQueueDiscoverer } from './bull-mq-metrics/queueDiscoverers.js'
+import type { BullMqMetricsPluginOptions } from './bullMqMetricsPlugin.js'
+import { bullMqMetricsPlugin } from './bullMqMetricsPlugin.js'
+import { metricsPlugin } from './metricsPlugin.js'
 
 type TestOptions = {
   enableMetricsPlugin: boolean

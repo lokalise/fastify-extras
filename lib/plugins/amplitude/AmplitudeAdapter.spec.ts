@@ -4,11 +4,11 @@ import type { MockInstance } from 'vitest'
 import { describe, expect, it, vi } from 'vitest'
 import { z } from 'zod'
 
-import { Amplitude } from './Amplitude'
-import { AMPLITUDE_BASE_MESSAGE_SCHEMA, AmplitudeAdapter } from './AmplitudeAdapter'
-import type { AmplitudeMessage } from './AmplitudeAdapter'
+import { Amplitude } from './Amplitude.js'
+import { AMPLITUDE_BASE_MESSAGE_SCHEMA, AmplitudeAdapter } from './AmplitudeAdapter.js'
+import type { AmplitudeMessage } from './AmplitudeAdapter.js'
 
-const testMessages: Record<string, AmplitudeMessage> = {
+const testMessages: Record<'myEvent', AmplitudeMessage> = {
   myEvent: {
     schema: AMPLITUDE_BASE_MESSAGE_SCHEMA.extend({
       event_type: z.literal('my event'),

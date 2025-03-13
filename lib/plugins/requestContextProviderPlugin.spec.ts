@@ -1,11 +1,10 @@
 import type { FastifyInstance } from 'fastify'
-import fastify from 'fastify'
-import type { RouteHandlerMethod } from 'fastify/types/route'
+import { type RouteHandlerMethod, fastify } from 'fastify'
 
 import {
   getRequestIdFastifyAppConfig,
   requestContextProviderPlugin,
-} from './requestContextProviderPlugin'
+} from './requestContextProviderPlugin.js'
 
 async function initApp(routeHandler: RouteHandlerMethod) {
   const app = fastify({

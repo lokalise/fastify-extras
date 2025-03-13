@@ -1,6 +1,6 @@
 import z, { type ZodObject } from 'zod'
 
-import type { Amplitude } from './Amplitude'
+import type { Amplitude } from './Amplitude.js'
 
 export const AMPLITUDE_BASE_MESSAGE_SCHEMA = z
   .object({

@@ -16,6 +16,7 @@ export interface MetricsPluginOptions {
 }
 
 function plugin(app: FastifyInstance, opts: MetricsPluginOptions, done: (err?: Error) => void) {
+  // @ts-expect-error fixme
   void app.register(fastifyMetrics, {
     defaultMetrics: { enabled: true },
     endpoint: null,

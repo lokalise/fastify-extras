@@ -3,7 +3,7 @@ import type { FastifyInstance } from 'fastify'
 import fastify from 'fastify'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import { metricsPlugin } from './metricsPlugin'
+import { metricsPlugin } from './metricsPlugin.js'
 
 async function initApp(errorObjectResolver = (err: unknown) => err) {
   const app = fastify()

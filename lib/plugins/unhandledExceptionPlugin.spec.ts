@@ -1,13 +1,12 @@
 import type { ErrorReport } from '@lokalise/error-utils'
-import fastify from 'fastify'
-import type { RouteHandlerMethod } from 'fastify/types/route'
+import { type RouteHandlerMethod, fastify } from 'fastify'
 import { beforeEach, describe, expect, it, vitest } from 'vitest'
 
 import {
   getRequestIdFastifyAppConfig,
   requestContextProviderPlugin,
-} from './requestContextProviderPlugin'
-import { unhandledExceptionPlugin } from './unhandledExceptionPlugin'
+} from './requestContextProviderPlugin.js'
+import { unhandledExceptionPlugin } from './unhandledExceptionPlugin.js'
 
 const errors: ErrorReport[] = []
 

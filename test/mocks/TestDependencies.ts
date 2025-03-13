@@ -2,22 +2,20 @@ import type { BackgroundJobProcessorDependencies } from '@lokalise/background-jo
 import { CommonBullmqFactory } from '@lokalise/background-jobs-common'
 import { type RedisConfig, globalLogger } from '@lokalise/node-core'
 import type { MockInstance } from 'vitest'
-import { vi, vitest } from 'vitest'
 
 const testLogger = globalLogger
 export let lastInfoSpy: MockInstance
 export let lastErrorSpy: MockInstance
 
 export class TestDependencies {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   createMocksForBackgroundJobProcessor(): BackgroundJobProcessorDependencies<any, any> {
     const originalChildFn = testLogger.child.bind(testLogger)
 
-    const originalMethodSpy = vitest.spyOn(testLogger, 'child')
+    const originalMethodSpy = vi.spyOn(testLogger, 'child')
     originalMethodSpy.mockImplementation((...args) => {
       const childLogger = originalChildFn.apply(testLogger, args)
-      lastInfoSpy = vitest.spyOn(childLogger, 'info')
-      lastErrorSpy = vitest.spyOn(childLogger, 'error')
+      lastInfoSpy = vi.spyOn(childLogger, 'info')
+      lastErrorSpy = vi.spyOn(childLogger, 'error')
       return childLogger
     })
 

@@ -28,7 +28,7 @@ export class TestBackgroundJobProcessor<
     this.returnValue = returnValue
   }
 
-  schedule(jobData: JobData): Promise<string> {
+  override schedule(jobData: JobData): Promise<string> {
     return super.schedule(jobData, { attempts: 1, removeOnFail: false, removeOnComplete: false })
   }
 

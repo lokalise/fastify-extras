@@ -1,14 +1,12 @@
 import type { ErrorReport } from '@lokalise/node-core'
 import { InternalError, PublicNonRecoverableError } from '@lokalise/node-core'
-import type { FastifyInstance } from 'fastify'
-import fastify from 'fastify'
-import type { RouteHandlerMethod } from 'fastify/types/route'
+import { type FastifyInstance, type RouteHandlerMethod, fastify } from 'fastify'
 import { type MockInstance, afterAll, describe, expect, it, vitest } from 'vitest'
 import { type ZodSchema, z } from 'zod'
 
 import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod'
-import type { ErrorHandlerParams, FreeformRecord } from './errorHandler'
-import { createErrorHandler } from './errorHandler'
+import type { ErrorHandlerParams, FreeformRecord } from './errorHandler.js'
+import { createErrorHandler } from './errorHandler.js'
 
 async function initApp(
   routeHandler: RouteHandlerMethod,
@@ -158,11 +156,11 @@ describe('errorHandler', () => {
     expect(response.statusCode).toBe(500)
     expect(logs).toHaveLength(1)
     const [logEntry] = logs
-    expect(logEntry.error).toMatchObject({
+    expect(logEntry!.error).toMatchObject({
       message: 'Internal error',
       errorCode: 'INTERNAL',
     })
-    expect(logEntry.context).toMatchInlineSnapshot(`
+    expect(logEntry!.context).toMatchInlineSnapshot(`
       {
         "request": {
           "params": {},
@@ -194,7 +192,7 @@ describe('errorHandler', () => {
 
     expect(response.statusCode).toBe(500)
     expect(logs).toHaveLength(1)
-    expect(logs[0].error).toMatchObject({
+    expect(logs[0]!.error).toMatchObject({
       message: 'Something generic happened',
       stack: expect.stringContaining('Something generic happened'),
     })
@@ -221,10 +219,10 @@ describe('errorHandler', () => {
 
     expect(response.statusCode).toBe(500)
     expect(logs).toHaveLength(1)
-    expect(logs[0].error).toMatchObject({
+    expect(logs[0]!.error).toMatchObject({
       message: 'Unhandled error',
     })
-    expect(logs[0].context).toMatchObject({
+    expect(logs[0]!.context).toMatchObject({
       foo: 'Something happened',
     })
   })

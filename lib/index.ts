@@ -3,93 +3,93 @@ export {
   reportErrorToBugsnag,
   bugsnagErrorReporter,
   addFeatureFlag,
-} from './plugins/bugsnagPlugin'
-export type { ErrorReport } from './plugins/bugsnagPlugin'
+} from './plugins/bugsnagPlugin.js'
+export type { ErrorReport } from './plugins/bugsnagPlugin.js'
 
 export {
   requestContextProviderPlugin,
   getRequestIdFastifyAppConfig,
-} from './plugins/requestContextProviderPlugin'
-export type { BaseRequestContext as RequestContext } from './plugins/requestContextProviderPlugin'
+} from './plugins/requestContextProviderPlugin.js'
+export type { BaseRequestContext as RequestContext } from './plugins/requestContextProviderPlugin.js'
 
 export {
   newrelicTransactionManagerPlugin,
   NewRelicTransactionManager,
-} from './plugins/newrelicTransactionManagerPlugin'
-export type { NewRelicTransactionManagerOptions } from './plugins/newrelicTransactionManagerPlugin'
+} from './plugins/newrelicTransactionManagerPlugin.js'
+export type { NewRelicTransactionManagerOptions } from './plugins/newrelicTransactionManagerPlugin.js'
 
 export {
   splitIOFeatureManagerPlugin,
   SplitIOFeatureManager,
-} from './plugins/splitIOFeatureManagerPlugin'
-export type { SplitIOOptions } from './plugins/splitIOFeatureManagerPlugin'
+} from './plugins/splitIOFeatureManagerPlugin.js'
+export type { SplitIOOptions } from './plugins/splitIOFeatureManagerPlugin.js'
 
 export {
   healthcheckMetricsPlugin,
   wrapHealthCheckForPrometheus,
-} from './plugins/healthcheck/healthcheckMetricsPlugin'
+} from './plugins/healthcheck/healthcheckMetricsPlugin.js'
 export type {
   PrometheusHealthCheck,
   HealthcheckResult,
   HealthcheckMetricsPluginOptions,
-} from './plugins/healthcheck/healthcheckMetricsPlugin'
+} from './plugins/healthcheck/healthcheckMetricsPlugin.js'
 
-export { PrometheusCounterTransactionManager } from './plugins/prometheus/PrometheusCounterTransactionManager'
+export { PrometheusCounterTransactionManager } from './plugins/prometheus/PrometheusCounterTransactionManager.js'
 
-export { bullMqMetricsPlugin } from './plugins/bullMqMetricsPlugin'
-export type { BullMqMetricsPluginOptions } from './plugins/bullMqMetricsPlugin'
+export { bullMqMetricsPlugin } from './plugins/bullMqMetricsPlugin.js'
+export type { BullMqMetricsPluginOptions } from './plugins/bullMqMetricsPlugin.js'
 export {
   RedisBasedQueueDiscoverer,
   BackgroundJobsBasedQueueDiscoverer,
-} from './plugins/bull-mq-metrics/queueDiscoverers'
-export type { QueueDiscoverer } from './plugins/bull-mq-metrics/queueDiscoverers'
+} from './plugins/bull-mq-metrics/queueDiscoverers.js'
+export type { QueueDiscoverer } from './plugins/bull-mq-metrics/queueDiscoverers.js'
 
-export { metricsPlugin } from './plugins/metricsPlugin'
+export { metricsPlugin } from './plugins/metricsPlugin.js'
 export type {
   ErrorObjectResolver,
   MetricsPluginOptions,
-} from './plugins/metricsPlugin'
+} from './plugins/metricsPlugin.js'
 
-export { publicHealthcheckPlugin } from './plugins/healthcheck/publicHealthcheckPlugin'
+export { publicHealthcheckPlugin } from './plugins/healthcheck/publicHealthcheckPlugin.js'
 export type {
   PublicHealthcheckPluginOptions,
   HealthCheck,
   InfoProvider,
-} from './plugins/healthcheck/publicHealthcheckPlugin'
+} from './plugins/healthcheck/publicHealthcheckPlugin.js'
 
-export { wrapHealthCheck } from './plugins/healthcheck/healthcheckCommons'
-export type { HealthChecker } from './plugins/healthcheck/healthcheckCommons'
+export { wrapHealthCheck } from './plugins/healthcheck/healthcheckCommons.js'
+export type { HealthChecker } from './plugins/healthcheck/healthcheckCommons.js'
 
-export { commonHealthcheckPlugin } from './plugins/healthcheck/commonHealthcheckPlugin'
-export type { CommonHealthcheckPluginOptions } from './plugins/healthcheck/commonHealthcheckPlugin'
+export { commonHealthcheckPlugin } from './plugins/healthcheck/commonHealthcheckPlugin.js'
+export type { CommonHealthcheckPluginOptions } from './plugins/healthcheck/commonHealthcheckPlugin.js'
 
 export {
   amplitudePlugin,
   type AmplitudeConfig,
   type CreateApiTrackingEventFn,
-} from './plugins/amplitude/amplitudePlugin'
-export { Amplitude } from './plugins/amplitude/Amplitude'
+} from './plugins/amplitude/amplitudePlugin.js'
+export { Amplitude } from './plugins/amplitude/Amplitude.js'
 export {
   AmplitudeAdapter,
   AMPLITUDE_BASE_MESSAGE_SCHEMA,
   type AmplitudeMessage,
   type AmplitudeAdapterDependencies,
-} from './plugins/amplitude/AmplitudeAdapter'
+} from './plugins/amplitude/AmplitudeAdapter.js'
 
-export type { FastifyReplyWithPayload } from './types'
+export type { FastifyReplyWithPayload } from './types.js'
 
-export { stripTrailingSlashPlugin } from './plugins/stripTrailingSlashPlugin'
+export { stripTrailingSlashPlugin } from './plugins/stripTrailingSlashPlugin.js'
 
 export {
   unhandledExceptionPlugin,
   commonErrorObjectResolver,
-} from './plugins/unhandledExceptionPlugin'
-export type { UnhandledExceptionPluginOptions } from './plugins/unhandledExceptionPlugin'
+} from './plugins/unhandledExceptionPlugin.js'
+export type { UnhandledExceptionPluginOptions } from './plugins/unhandledExceptionPlugin.js'
 
-export { createErrorHandler, isZodError, type ErrorResponseObject } from './errors/errorHandler'
-export type { ErrorHandlerParams, FreeformRecord } from './errors/errorHandler'
+export { createErrorHandler, isZodError, type ErrorResponseObject } from './errors/errorHandler.js'
+export type { ErrorHandlerParams, FreeformRecord } from './errors/errorHandler.js'
 
-export { generateJwtToken, decodeJwtToken } from './jwt-utils/tokenUtils'
+export { generateJwtToken, decodeJwtToken } from './jwt-utils/tokenUtils.js'
 
-export { createStaticTokenAuthPreHandler } from './route-utils/authPreHandlers'
-export type { AnyFastifyInstance, CommonFastifyInstance } from './plugins/pluginsCommon'
+export { createStaticTokenAuthPreHandler } from './route-utils/authPreHandlers.js'
+export type { AnyFastifyInstance, CommonFastifyInstance } from './plugins/pluginsCommon.js'
