@@ -93,9 +93,8 @@ export class MetricsCollector {
     const metricNames = Object.keys(metrics)
 
     // If metrics are already registered, just return them to avoid triggering a Prometheus error
-    if (metricNames.length > 0) {
+    if (metricNames.length > 0 && registry.getSingleMetric(metricNames[0] ?? '')) {
       const retrievedMetrics = registry.getMetricsAsArray()
-      if (retrievedMetrics.length === 0) return metrics
 
       const returnValue: Record<string, prometheus.MetricObject> = {}
       for (const metric of retrievedMetrics) {
