@@ -1,4 +1,3 @@
-import { setTimeout } from 'node:timers/promises'
 import { buildClient, sendGet } from '@lokalise/backend-http-client'
 import {
   type AbstractBackgroundJobProcessor,
@@ -6,7 +5,7 @@ import {
   type BaseJobPayload,
   createSanitizedRedisClient,
 } from '@lokalise/background-jobs-common'
-import type { RedisConfig } from '@lokalise/node-core'
+import { type RedisConfig, waitAndRetry } from "@lokalise/node-core";
 import type { FastifyInstance } from 'fastify'
 import fastify from 'fastify'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -120,20 +119,17 @@ describe('bullMqMetricsPlugin', () => {
       'bullmq_jobs_finished_duration_count{status="completed",queue="test_job"} 1',
     )
 
-    await processor.schedule({
-      metadata: {
-        correlationId: 'test',
-      },
+    await processor.schedule({ metadata: { correlationId: 'test' } })
+
+    const found = await waitAndRetry(async () => {
+      await app.bullMqMetrics.collect()
+      const metrics = await getMetrics()
+      return (metrics.result.body as string).indexOf(
+        'bullmq_jobs_finished_duration_count{status="completed",queue="test_job"} 1',
+      ) !== -1
     })
 
-    await setTimeout(100)
-
-    await app.bullMqMetrics.collect()
-
-    const responseAfter = await getMetrics()
-    expect(responseAfter.result.body).toContain(
-      'bullmq_jobs_finished_duration_count{status="completed",queue="test_job"} 1',
-    )
+    expect(found).toBe(true)
   })
 
   // This is failing in CI, we don't know why, our attempts at fixing it are failing,
