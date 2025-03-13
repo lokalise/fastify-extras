@@ -5,7 +5,7 @@ import {
   type BaseJobPayload,
   createSanitizedRedisClient,
 } from '@lokalise/background-jobs-common'
-import { type RedisConfig, waitAndRetry } from "@lokalise/node-core";
+import { type RedisConfig, waitAndRetry } from '@lokalise/node-core'
 import type { FastifyInstance } from 'fastify'
 import fastify from 'fastify'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -124,9 +124,11 @@ describe('bullMqMetricsPlugin', () => {
     const found = await waitAndRetry(async () => {
       await app.bullMqMetrics.collect()
       const metrics = await getMetrics()
-      return (metrics.result.body as string).indexOf(
-        'bullmq_jobs_finished_duration_count{status="completed",queue="test_job"} 1',
-      ) !== -1
+      return (
+        (metrics.result.body as string).indexOf(
+          'bullmq_jobs_finished_duration_count{status="completed",queue="test_job"} 1',
+        ) !== -1
+      )
     })
 
     expect(found).toBe(true)
