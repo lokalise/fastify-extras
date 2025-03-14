@@ -35,8 +35,8 @@ export class NewRelicTransactionManager implements TransactionObservabilityManag
 
   constructor(isNewRelicEnabled: boolean) {
     if (isNewRelicEnabled) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      newrelic = require('newrelic')
+      // @ts-ignore
+      newrelic = import('newrelic')
     }
 
     this.isEnabled = isNewRelicEnabled
