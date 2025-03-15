@@ -113,10 +113,7 @@ export class NewRelicTransactionManager implements TransactionObservabilityManag
   }
 }
 
-async function plugin(
-  fastify: FastifyInstance,
-  opts: NewRelicTransactionManagerOptions,
-) {
+async function plugin(fastify: FastifyInstance, opts: NewRelicTransactionManagerOptions) {
   const manager = await NewRelicTransactionManager.create(opts.isEnabled)
   fastify.decorate('newrelicTransactionManager', manager)
 
