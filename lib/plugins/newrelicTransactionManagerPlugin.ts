@@ -39,7 +39,7 @@ export class NewRelicTransactionManager implements TransactionObservabilityManag
   }
 
   public static async create(isNewRelicEnabled: boolean): Promise<NewRelicTransactionManager> {
-    if (isNewRelicEnabled) {
+    if (isNewRelicEnabled && !newrelic) {
       // @ts-ignore
       newrelic = await import('newrelic')
     }
