@@ -33,14 +33,18 @@ export class NewRelicTransactionManager implements TransactionObservabilityManag
   private readonly isEnabled: boolean
   private readonly transactionMap: FifoMap<TransactionHandle>
 
-  constructor(isNewRelicEnabled: boolean) {
-    if (isNewRelicEnabled) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      newrelic = require('newrelic')
-    }
-
+  private constructor(isNewRelicEnabled: boolean) {
     this.isEnabled = isNewRelicEnabled
     this.transactionMap = new FifoMap(2000)
+  }
+
+  public static async create(isNewRelicEnabled: boolean): Promise<NewRelicTransactionManager> {
+    if (isNewRelicEnabled && !newrelic) {
+      // @ts-ignore
+      newrelic = await import('newrelic')
+    }
+
+    return new NewRelicTransactionManager(isNewRelicEnabled)
   }
 
   public addCustomAttribute(attrName: string, attrValue: string | number | boolean) {
@@ -109,13 +113,8 @@ export class NewRelicTransactionManager implements TransactionObservabilityManag
   }
 }
 
-function plugin(
-  fastify: FastifyInstance,
-  opts: NewRelicTransactionManagerOptions,
-  done: () => void,
-) {
-  const manager = new NewRelicTransactionManager(opts.isEnabled)
-
+async function plugin(fastify: FastifyInstance, opts: NewRelicTransactionManagerOptions) {
+  const manager = await NewRelicTransactionManager.create(opts.isEnabled)
   fastify.decorate('newrelicTransactionManager', manager)
 
   if (opts.isEnabled) {
@@ -130,8 +129,6 @@ function plugin(
       })
     })
   }
-
-  done()
 }
 
 export const newrelicTransactionManagerPlugin: FastifyPluginCallback<NewRelicTransactionManagerOptions> =
