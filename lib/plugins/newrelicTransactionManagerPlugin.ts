@@ -78,6 +78,7 @@ export class NewRelicTransactionManager implements TransactionObservabilityManag
     }
 
     this.newrelic?.startBackgroundTransaction(transactionName, () => {
+      // biome-ignore lint/style/noNonNullAssertion: At this point it should be defined
       this.transactionMap.set(uniqueTransactionKey, this.newrelic!.getTransaction())
     })
   }
@@ -97,6 +98,7 @@ export class NewRelicTransactionManager implements TransactionObservabilityManag
     }
 
     this.newrelic?.startBackgroundTransaction(transactionName, transactionGroup, () => {
+      // biome-ignore lint/style/noNonNullAssertion: At this point it should be defined
       this.transactionMap.set(uniqueTransactionKey, this.newrelic!.getTransaction())
     })
   }
