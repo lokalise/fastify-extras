@@ -43,7 +43,7 @@ export class NewRelicTransactionManager implements TransactionObservabilityManag
     let newrelic: Newrelic | undefined = undefined
     if (isNewRelicEnabled) {
       // @ts-ignore
-      newrelic = await import('newrelic')
+      newrelic = (await import('newrelic')).default
     }
 
     return new NewRelicTransactionManager(isNewRelicEnabled, newrelic)
