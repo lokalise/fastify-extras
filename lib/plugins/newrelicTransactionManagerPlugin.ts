@@ -42,6 +42,7 @@ export class NewRelicTransactionManager implements TransactionObservabilityManag
   public static async create(isNewRelicEnabled: boolean): Promise<NewRelicTransactionManager> {
     let newrelic: Newrelic | undefined = undefined
     if (isNewRelicEnabled) {
+      // newrelic import is returning a wrapper, property `default` is the actual newrelic object
       // @ts-ignore
       newrelic = (await import('newrelic')).default
     }
