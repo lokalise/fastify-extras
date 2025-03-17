@@ -17,8 +17,6 @@ interface Newrelic {
   addCustomAttributes(atts: { [key: string]: string | number | boolean }): void
 }
 
-let newrelic: Newrelic
-
 declare module 'fastify' {
   interface FastifyInstance {
     newrelicTransactionManager: NewRelicTransactionManager
@@ -30,21 +28,25 @@ export interface NewRelicTransactionManagerOptions {
 }
 
 export class NewRelicTransactionManager implements TransactionObservabilityManager {
+  public readonly newrelic?: Newrelic
+
   private readonly isEnabled: boolean
   private readonly transactionMap: FifoMap<TransactionHandle>
 
-  private constructor(isNewRelicEnabled: boolean) {
+  private constructor(isNewRelicEnabled: boolean, newrelic?: Newrelic) {
     this.isEnabled = isNewRelicEnabled
+    this.newrelic = newrelic
     this.transactionMap = new FifoMap(2000)
   }
 
   public static async create(isNewRelicEnabled: boolean): Promise<NewRelicTransactionManager> {
-    if (isNewRelicEnabled && !newrelic) {
+    let newrelic: Newrelic | undefined = undefined
+    if (isNewRelicEnabled) {
       // @ts-ignore
       newrelic = await import('newrelic')
     }
 
-    return new NewRelicTransactionManager(isNewRelicEnabled)
+    return new NewRelicTransactionManager(isNewRelicEnabled, newrelic)
   }
 
   public addCustomAttribute(attrName: string, attrValue: string | number | boolean) {
@@ -52,7 +54,7 @@ export class NewRelicTransactionManager implements TransactionObservabilityManag
       return
     }
 
-    newrelic.addCustomAttribute(attrName, attrValue)
+    this.newrelic?.addCustomAttribute(attrName, attrValue)
   }
 
   public addCustomAttributes(
@@ -63,7 +65,7 @@ export class NewRelicTransactionManager implements TransactionObservabilityManag
       return
     }
 
-    newrelic.addCustomAttributes(atts)
+    this.newrelic?.addCustomAttributes(atts)
   }
 
   /**
@@ -75,8 +77,8 @@ export class NewRelicTransactionManager implements TransactionObservabilityManag
       return
     }
 
-    newrelic.startBackgroundTransaction(transactionName, () => {
-      this.transactionMap.set(uniqueTransactionKey, newrelic.getTransaction())
+    this.newrelic?.startBackgroundTransaction(transactionName, () => {
+      this.transactionMap.set(uniqueTransactionKey, this.newrelic!.getTransaction())
     })
   }
 
@@ -94,8 +96,8 @@ export class NewRelicTransactionManager implements TransactionObservabilityManag
       return
     }
 
-    newrelic.startBackgroundTransaction(transactionName, transactionGroup, () => {
-      this.transactionMap.set(uniqueTransactionKey, newrelic.getTransaction())
+    this.newrelic?.startBackgroundTransaction(transactionName, transactionGroup, () => {
+      this.transactionMap.set(uniqueTransactionKey, this.newrelic!.getTransaction())
     })
   }
 
@@ -120,7 +122,7 @@ async function plugin(fastify: FastifyInstance, opts: NewRelicTransactionManager
   if (opts.isEnabled) {
     fastify.addHook('onClose', async () => {
       return new Promise((resolve, reject) => {
-        newrelic.shutdown((error) => {
+        manager.newrelic?.shutdown((error) => {
           if (error) {
             return reject(error)
           }
