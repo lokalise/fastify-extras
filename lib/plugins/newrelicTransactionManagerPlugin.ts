@@ -50,22 +50,20 @@ export class NewRelicTransactionManager implements TransactionObservabilityManag
   }
 
   public addCustomAttribute(attrName: string, attrValue: string | number | boolean) {
-    if (!this.isEnabled) {
-      return
-    }
+    if (!this.isEnabled) return
 
-    this.newrelic?.addCustomAttribute(attrName, attrValue)
+    // biome-ignore lint/style/noNonNullAssertion: It should be defined
+    this.newrelic!.addCustomAttribute(attrName, attrValue)
   }
 
   public addCustomAttributes(
     _uniqueTransactionKey: string,
     atts: { [p: string]: string | number | boolean },
   ): void {
-    if (!this.isEnabled) {
-      return
-    }
+    if (!this.isEnabled) return
 
-    this.newrelic?.addCustomAttributes(atts)
+    // biome-ignore lint/style/noNonNullAssertion: It should be defined
+    this.newrelic!.addCustomAttributes(atts)
   }
 
   /**
@@ -73,12 +71,11 @@ export class NewRelicTransactionManager implements TransactionObservabilityManag
    * @param uniqueTransactionKey - used for identifying specific ongoing transaction. Must be reasonably unique to reduce possibility of collisions
    */
   public start(transactionName: string, uniqueTransactionKey: string): void {
-    if (!this.isEnabled) {
-      return
-    }
+    if (!this.isEnabled) return
 
-    this.newrelic?.startBackgroundTransaction(transactionName, () => {
-      // biome-ignore lint/style/noNonNullAssertion: At this point it should be defined
+    // biome-ignore lint/style/noNonNullAssertion: It should be defined
+    this.newrelic!.startBackgroundTransaction(transactionName, () => {
+      // biome-ignore lint/style/noNonNullAssertion: It should be defined
       this.transactionMap.set(uniqueTransactionKey, this.newrelic!.getTransaction())
     })
   }
@@ -97,21 +94,19 @@ export class NewRelicTransactionManager implements TransactionObservabilityManag
       return
     }
 
-    this.newrelic?.startBackgroundTransaction(transactionName, transactionGroup, () => {
-      // biome-ignore lint/style/noNonNullAssertion: At this point it should be defined
+    // biome-ignore lint/style/noNonNullAssertion: It should be defined
+    this.newrelic!.startBackgroundTransaction(transactionName, transactionGroup, () => {
+      // biome-ignore lint/style/noNonNullAssertion: It should be defined
       this.transactionMap.set(uniqueTransactionKey, this.newrelic!.getTransaction())
     })
   }
 
   public stop(uniqueTransactionKey: string): void {
-    if (!this.isEnabled) {
-      return
-    }
+    if (!this.isEnabled) return
 
     const transaction = this.transactionMap.get(uniqueTransactionKey) ?? null
-    if (!transaction) {
-      return
-    }
+    if (!transaction) return
+
     transaction.end()
     this.transactionMap.delete(uniqueTransactionKey)
   }
@@ -125,9 +120,7 @@ async function plugin(fastify: FastifyInstance, opts: NewRelicTransactionManager
     fastify.addHook('onClose', async () => {
       return new Promise((resolve, reject) => {
         manager.newrelic?.shutdown((error) => {
-          if (error) {
-            return reject(error)
-          }
+          if (error) return reject(error)
           resolve()
         })
       })
