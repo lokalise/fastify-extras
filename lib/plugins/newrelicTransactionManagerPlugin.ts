@@ -15,6 +15,8 @@ interface Newrelic {
   getTransaction: typeof GetTransaction
   addCustomAttribute(key: string, value: string | number | boolean): void
   addCustomAttributes(atts: { [key: string]: string | number | boolean }): void
+  setUserID(userId: string): void
+  setControllerName(moduleName: string, action: string): void
 }
 
 declare module 'fastify' {
@@ -65,6 +67,20 @@ export class NewRelicTransactionManager implements TransactionObservabilityManag
 
     // biome-ignore lint/style/noNonNullAssertion: It should be defined
     this.newrelic!.addCustomAttributes(atts)
+  }
+
+  public setUserID(userId: string): void {
+    if (!this.isEnabled) return
+
+    // biome-ignore lint/style/noNonNullAssertion: It should be defined
+    this.newrelic!.setUserID(userId)
+  }
+
+  public setControllerName(moduleName: string, action: string): void {
+    if (!this.isEnabled) return
+
+    // biome-ignore lint/style/noNonNullAssertion: It should be defined
+    this.newrelic!.setControllerName(moduleName, action)
   }
 
   /**
