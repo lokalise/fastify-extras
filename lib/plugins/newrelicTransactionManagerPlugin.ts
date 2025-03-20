@@ -3,6 +3,8 @@ import type { FastifyInstance, FastifyPluginCallback } from 'fastify'
 import fp from 'fastify-plugin'
 import type {
   getTransaction as GetTransaction,
+  setControllerName as SetControllerName,
+  setUserID as SetUserID,
   shutdown as Shutdown,
   TransactionHandle,
   startBackgroundTransaction as startBackgroundTransactionType,
@@ -15,6 +17,8 @@ interface Newrelic {
   getTransaction: typeof GetTransaction
   addCustomAttribute(key: string, value: string | number | boolean): void
   addCustomAttributes(atts: { [key: string]: string | number | boolean }): void
+  setUserID: typeof SetUserID
+  setControllerName: typeof SetControllerName
 }
 
 declare module 'fastify' {
@@ -65,6 +69,20 @@ export class NewRelicTransactionManager implements TransactionObservabilityManag
 
     // biome-ignore lint/style/noNonNullAssertion: It should be defined
     this.newrelic!.addCustomAttributes(atts)
+  }
+
+  public setUserID(userId: string): void {
+    if (!this.isEnabled) return
+
+    // biome-ignore lint/style/noNonNullAssertion: It should be defined
+    this.newrelic!.setUserID(userId)
+  }
+
+  public setControllerName(name: string, action: string): void {
+    if (!this.isEnabled) return
+
+    // biome-ignore lint/style/noNonNullAssertion: It should be defined
+    this.newrelic!.setControllerName(name, action)
   }
 
   /**
