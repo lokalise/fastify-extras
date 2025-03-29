@@ -49,6 +49,10 @@ export class NewRelicTransactionManager implements TransactionObservabilityManag
     return new NewRelicTransactionManager(isNewRelicEnabled, newrelic)
   }
 
+  public static createDisabled(): NewRelicTransactionManager {
+    return new NewRelicTransactionManager(false, undefined)
+  }
+
   public addCustomAttribute(attrName: string, attrValue: string | number | boolean) {
     if (!this.isEnabled) {
       return
