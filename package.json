@@ -60,7 +60,7 @@
     "devDependencies": {
         "@amplitude/analytics-types": "^2.8.4",
         "@biomejs/biome": "^1.9.4",
-        "@lokalise/backend-http-client": "^5.0.0",
+        "@lokalise/backend-http-client": "^7.0.0",
         "@lokalise/background-jobs-common": "^12.0.1",
         "@lokalise/biome-config": "^2.0.0",
         "@lokalise/node-core": "^14.0.1",
