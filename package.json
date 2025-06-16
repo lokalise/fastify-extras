@@ -42,7 +42,7 @@
         "@supercharge/promise-pool": "^3.2.0",
         "fastify-metrics": "^12.1.0",
         "fastify-plugin": "^5.0.1",
-        "fastify-type-provider-zod": "^4.0.2",
+        "fastify-type-provider-zod": "^5.0.1",
         "prom-client": "^15.1.3",
         "toad-cache": "^3.7.0"
     },
@@ -71,7 +71,7 @@
         "auto-changelog": "^2.4.0",
         "bullmq": "^5.34.2",
         "fastify": "^5.2.0",
-        "fastify-type-provider-zod": "^4.0.2",
+        "fastify-type-provider-zod": "^5.0.1",
         "ioredis": "^5.4.1",
         "newrelic": "12.21.0",
         "pino": "^9.5.0",
