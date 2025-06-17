@@ -1,11 +1,10 @@
-import z, { type ZodObject } from 'zod'
+import { z } from 'zod/v4'
 
 import type { Amplitude } from './Amplitude.js'
 
 export const AMPLITUDE_BASE_MESSAGE_SCHEMA = z
   .object({
     event_type: z.literal<string>('<replace.me>'),
-    event_properties: z.object({}),
     user_id: z.string().min(1).or(z.literal('SYSTEM')),
     groups: z.record(z.string(), z.any()).optional(),
   })
@@ -16,7 +15,7 @@ export type AmplitudeAdapterDependencies = {
 }
 
 export type AmplitudeMessage = {
-  schema: ZodObject<(typeof AMPLITUDE_BASE_MESSAGE_SCHEMA)['shape']>
+  schema: z.ZodObject<(typeof AMPLITUDE_BASE_MESSAGE_SCHEMA)['shape'], z.core.$strip>
 }
 type AmplitudeMessageSchemaType<T extends AmplitudeMessage> = z.infer<T['schema']>
 

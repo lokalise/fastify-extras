@@ -86,7 +86,6 @@ function addRoute(
     logLevel: opts.logLevel ?? 'info',
     schema: {
       // hide route from swagger plugins
-      // @ts-expect-error
       hide: true,
     },
 

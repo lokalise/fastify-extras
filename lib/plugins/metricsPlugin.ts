@@ -37,7 +37,6 @@ function plugin(app: FastifyInstance, opts: MetricsPluginOptions, done: (err?: E
       logLevel: 'info',
       schema: {
         // hide route from swagger plugins
-        // @ts-expect-error
         hide: true,
       },
       handler: async (_, reply) => {

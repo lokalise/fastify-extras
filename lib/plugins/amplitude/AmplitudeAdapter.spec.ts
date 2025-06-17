@@ -2,13 +2,13 @@ import { randomUUID } from 'node:crypto'
 
 import type { MockInstance } from 'vitest'
 import { describe, expect, it, vi } from 'vitest'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 
 import { Amplitude } from './Amplitude.js'
 import { AMPLITUDE_BASE_MESSAGE_SCHEMA, AmplitudeAdapter } from './AmplitudeAdapter.js'
 import type { AmplitudeMessage } from './AmplitudeAdapter.js'
 
-const testMessages: Record<'myEvent', AmplitudeMessage> = {
+const testMessages = {
   myEvent: {
     schema: AMPLITUDE_BASE_MESSAGE_SCHEMA.extend({
       event_type: z.literal('my event'),
@@ -17,7 +17,7 @@ const testMessages: Record<'myEvent', AmplitudeMessage> = {
       }),
     }),
   },
-}
+} as const satisfies Record<'myEvent', AmplitudeMessage>
 const testMessagesValues = Object.values(testMessages)
 type SupportedMessages = typeof testMessagesValues
 
@@ -97,7 +97,6 @@ describe('Amplitude adapter', () => {
     expect(() =>
       amplitudeAdapter.track(testMessages.myEvent, {
         user_id: randomUUID(),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         event_properties: { number: 'bad' as any },
       }),
     ).toThrow(z.ZodError)
@@ -123,7 +122,8 @@ describe('Amplitude adapter', () => {
         event_properties: {
           number: 1,
         },
+        groups: {},
       }),
-    ).toThrow(z.ZodError)
+    ).toThrowError(z.ZodError)
   })
 })

@@ -12,7 +12,7 @@ import {
   isResponseSerializationError,
 } from 'fastify-type-provider-zod'
 import pino from 'pino'
-import type { ZodError } from 'zod'
+import type { ZodError } from 'zod/v4'
 import type { AnyFastifyInstance } from '../plugins/pluginsCommon.js'
 
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
