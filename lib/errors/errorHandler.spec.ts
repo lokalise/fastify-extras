@@ -337,17 +337,9 @@ describe('errorHandler', () => {
             {
               "instancePath": "/name",
               "keyword": "invalid_type",
-              "message": "Required",
+              "message": "Invalid input: expected string, received undefined",
               "params": {
-                "issue": {
-                  "code": "invalid_type",
-                  "expected": "string",
-                  "message": "Required",
-                  "path": [
-                    "name",
-                  ],
-                  "received": "undefined",
-                },
+                "expected": "string",
               },
               "schemaPath": "#/name/invalid_type",
             },

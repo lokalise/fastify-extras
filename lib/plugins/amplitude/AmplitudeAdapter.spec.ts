@@ -118,12 +118,12 @@ describe('Amplitude adapter', () => {
   it('wrong user id', () => {
     expect(() =>
       amplitudeAdapter.track(testMessages.myEvent, {
-        user_id: randomUUID(),
+        user_id: '',
         event_properties: {
           number: 1,
         },
         groups: {},
       }),
-    ).toThrow(z.ZodError)
+    ).toThrowError(z.ZodError)
   })
 })
