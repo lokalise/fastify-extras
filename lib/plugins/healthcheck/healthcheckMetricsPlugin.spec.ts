@@ -5,7 +5,7 @@ import fastify from 'fastify'
 import { afterEach, describe, expect, it } from 'vitest'
 import { metricsPlugin } from '../metricsPlugin.js'
 
-import { z } from 'zod'
+import { z } from 'zod/v4'
 import type { PrometheusHealthCheck } from './healthcheckMetricsPlugin.js'
 import {
   healthcheckMetricsPlugin,

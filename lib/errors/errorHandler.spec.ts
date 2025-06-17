@@ -2,7 +2,7 @@ import type { ErrorReport } from '@lokalise/node-core'
 import { InternalError, PublicNonRecoverableError } from '@lokalise/node-core'
 import { type FastifyInstance, type RouteHandlerMethod, fastify } from 'fastify'
 import { type MockInstance, afterAll, describe, expect, it, vitest } from 'vitest'
-import { type ZodSchema, z } from 'zod'
+import { type ZodSchema, z } from 'zod/v4'
 
 import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod'
 import type { ErrorHandlerParams, FreeformRecord } from './errorHandler.js'
