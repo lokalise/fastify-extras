@@ -3,7 +3,7 @@ import fp from 'fastify-plugin'
 
 const removeNullChars = (data: unknown): unknown => {
   if (typeof data === 'string') {
-    return data.replace(/\u0000/g, '');
+    return data.replaceAll('\u0000', '');
   }
 
   if (Array.isArray(data)) {
