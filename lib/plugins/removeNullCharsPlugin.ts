@@ -20,7 +20,7 @@ const removeNullChars = (data: unknown): unknown => {
 }
 
 const pluginCallback: FastifyPluginCallback = (fastify, _options, done) => {
-  fastify.addHook('preValidation', (request, reply, done) => {
+  fastify.addHook('preValidation', (request, _reply, done) => {
     if (request.body) {
       request.body = removeNullChars(request.body);
     }
