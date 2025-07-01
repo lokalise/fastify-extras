@@ -244,6 +244,16 @@ Additionally, you have the option to enhance the safety and accuracy of your eve
 
 This plugin helps with SEO and SSR by ensuring search engines index only one version of a URL, avoiding duplicate content. It redirects URLs with a trailing slash to the version without it, making it easier for search engines to crawl your site consistently.
 
+### Remove Null Characters Plugin
+
+This plugin sanitizes incoming request bodies by recursively removing all Unicode null characters (`\u0000`). These characters can cause issues when storing data in databases like **PostgreSQL**, where null bytes are not allowed in text fields and will raise an error:
+
+```
+ERROR: invalid byte sequence for encoding "UTF8": 0x00
+```
+
+By stripping null characters from all strings in the request body, this plugin prevents malformed input from breaking requests or causing database errors. It helps ensure safer, cleaner, and more predictable application behavior.
+
 ### UnhandledException Plugin
 
 This plugin provides a mechanism for handling uncaught exceptions within your Fastify application, ensuring that such exceptions are logged and reported. It's especially useful for capturing unforeseen exceptions and provides a controlled shutdown of the Fastify server, thereby ensuring no potential data corruption.

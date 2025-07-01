@@ -80,6 +80,8 @@ export type { FastifyReplyWithPayload } from './types.js'
 
 export { stripTrailingSlashPlugin } from './plugins/stripTrailingSlashPlugin.js'
 
+export { removeNullCharsPlugin } from './plugins/removeNullCharsPlugin.js'
+
 export {
   unhandledExceptionPlugin,
   commonErrorObjectResolver,
