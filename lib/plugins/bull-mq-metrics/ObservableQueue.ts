@@ -51,9 +51,7 @@ export class ObservableQueue {
   async collect() {
     const countByStatus = await this.queue.getJobCounts(
       'active',
-      'completed',
       'delayed',
-      'failed',
       'paused',
       'prioritized',
       'waiting',
