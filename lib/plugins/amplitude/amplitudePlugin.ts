@@ -36,7 +36,6 @@ function plugin(fastify: FastifyInstance, config: AmplitudeConfig, next: (err?: 
       }
       if (config.plugins) {
         for (const e of config.plugins) {
-          // @ts-expect-error
           add(e)
         }
       }
