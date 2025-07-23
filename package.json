@@ -35,14 +35,14 @@
         "version": "auto-changelog -p && git add CHANGELOG.md && biome check --write package.json && git add package.json"
     },
     "dependencies": {
-        "@amplitude/analytics-node": "^1.3.8",
-        "@bugsnag/js": "^8.2.0",
+        "@amplitude/analytics-node": "^1.4.1",
+        "@bugsnag/js": "^8.4.0",
         "@lokalise/error-utils": "^3.0.0",
         "@splitsoftware/splitio": "^11.4.1",
         "@supercharge/promise-pool": "^3.2.0",
         "fastify-metrics": "^12.1.0",
         "fastify-plugin": "^5.0.1",
-        "fastify-type-provider-zod": "^5.0.0",
+        "fastify-type-provider-zod": "^5.0.2",
         "prom-client": "^15.1.3",
         "toad-cache": "^3.7.0"
     },
