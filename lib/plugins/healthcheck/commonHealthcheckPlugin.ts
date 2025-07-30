@@ -77,6 +77,7 @@ function resolveHealthcheckResults(
 async function performHealthchecks(
   app: AnyFastifyInstance,
   opts: CommonHealthcheckPluginOptions,
+  logHealthchecks = false,
 ): Promise<ResolvedHealthcheckResponse> {
   if (opts.healthChecks.length) {
     const results = await Promise.all(
@@ -84,6 +85,10 @@ async function performHealthchecks(
         const result = await healthcheck.checker(app)
         if (result.error) {
           app.log.error(result.error, `${healthcheck.name} healthcheck has failed`)
+        } else {
+          if (logHealthchecks) {
+            app.log.info(`${healthcheck.name} healthcheck has succeeded`)
+          }
         }
         return {
           name: healthcheck.name,
@@ -154,11 +159,7 @@ const plugin: FastifyPluginCallback<CommonHealthcheckPluginOptions> = (app, opts
 
   if (opts.runOnStartup) {
     app.addHook('onReady', async () => {
-      const { healthChecks } = await performHealthchecks(app, opts)
-      app.log.info({
-        message: 'Healthcheck results',
-        healthChecks,
-      })
+      await performHealthchecks(app, opts, true)
     })
   }
 
