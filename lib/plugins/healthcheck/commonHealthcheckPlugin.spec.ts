@@ -31,6 +31,23 @@ describe('commonHealthcheckPlugin', () => {
     await app.close()
   })
 
+  describe('runOnStartup', () => {
+    it('runs healthchecks on startup', async () => {
+      await expect(
+        initApp({
+          runOnStartup: true,
+          healthChecks: [
+            {
+              name: 'check1',
+              isMandatory: true,
+              checker: positiveHealthcheckChecker,
+            },
+          ],
+        }),
+      ).resolves.not.toThrow()
+    })
+  })
+
   describe('public endpoint', () => {
     it('returns a heartbeat', async () => {
       app = await initApp({ healthChecks: [] })

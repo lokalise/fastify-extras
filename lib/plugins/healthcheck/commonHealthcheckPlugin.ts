@@ -10,6 +10,7 @@ export interface CommonHealthcheckPluginOptions {
   healthChecks: readonly HealthCheck[]
   infoProviders?: readonly InfoProvider[]
   isRootRouteEnabled?: boolean
+  runOnStartup?: boolean
 }
 
 type HealthcheckRouteOptions = {
@@ -73,6 +74,35 @@ function resolveHealthcheckResults(
   }
 }
 
+async function performHealthchecks(
+  app: AnyFastifyInstance,
+  opts: CommonHealthcheckPluginOptions,
+): Promise<ResolvedHealthcheckResponse> {
+  if (opts.healthChecks.length) {
+    const results = await Promise.all(
+      opts.healthChecks.map(async (healthcheck) => {
+        const result = await healthcheck.checker(app)
+        if (result.error) {
+          app.log.error(result.error, `${healthcheck.name} healthcheck has failed`)
+        }
+        return {
+          name: healthcheck.name,
+          result,
+          isMandatory: healthcheck.isMandatory,
+        }
+      }),
+    )
+
+    return resolveHealthcheckResults(results, opts)
+  }
+
+  return {
+    isFullyHealthy: true,
+    isPartiallyHealthy: false,
+    healthChecks: {},
+  }
+}
+
 function addRoute(
   app: AnyFastifyInstance,
   opts: CommonHealthcheckPluginOptions,
@@ -90,30 +120,10 @@ function addRoute(
     },
 
     handler: async (_, reply) => {
-      let isFullyHealthy = true
-      let isPartiallyHealthy = false
-      let healthChecks: Record<string, string> = {}
-
-      if (opts.healthChecks.length) {
-        const results = await Promise.all(
-          opts.healthChecks.map(async (healthcheck) => {
-            const result = await healthcheck.checker(app)
-            if (result.error) {
-              app.log.error(result.error, `${healthcheck.name} healthcheck has failed`)
-            }
-            return {
-              name: healthcheck.name,
-              result,
-              isMandatory: healthcheck.isMandatory,
-            }
-          }),
-        )
-
-        const resolvedHealthcheckResponse = resolveHealthcheckResults(results, opts)
-        healthChecks = resolvedHealthcheckResponse.healthChecks
-        isFullyHealthy = resolvedHealthcheckResponse.isFullyHealthy
-        isPartiallyHealthy = resolvedHealthcheckResponse.isPartiallyHealthy
-      }
+      const { isFullyHealthy, healthChecks, isPartiallyHealthy } = await performHealthchecks(
+        app,
+        opts,
+      )
 
       const extraInfo = opts.infoProviders?.map((infoProvider) => ({
         name: infoProvider.name,
@@ -141,6 +151,16 @@ function addRoute(
 
 const plugin: FastifyPluginCallback<CommonHealthcheckPluginOptions> = (app, opts, done) => {
   const isRootRouteEnabled = opts.isRootRouteEnabled ?? true
+
+  if (opts.runOnStartup) {
+    app.addHook('onReady', async () => {
+      const { healthChecks } = await performHealthchecks(app, opts)
+      app.log.info({
+        message: 'Healthcheck results',
+        healthChecks,
+      })
+    })
+  }
 
   if (isRootRouteEnabled) {
     addRoute(app, opts, {
