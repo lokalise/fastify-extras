@@ -1,13 +1,13 @@
 import { buildClient, sendGet } from '@lokalise/backend-http-client'
-import {
-  type AbstractBackgroundJobProcessor,
-  type BackgroundJobProcessorDependencies,
-  type BaseJobPayload,
-  createSanitizedRedisClient,
+import type {
+  AbstractBackgroundJobProcessor,
+  BackgroundJobProcessorDependencies,
+  BaseJobPayload,
 } from '@lokalise/background-jobs-common'
 import { type RedisConfig, waitAndRetry } from '@lokalise/node-core'
 import type { FastifyInstance } from 'fastify'
 import fastify from 'fastify'
+import { Redis } from 'ioredis'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { z } from 'zod/v4'
 import { TestBackgroundJobProcessor } from '../../test/mocks/TestBackgroundJobProcessor.js'
@@ -71,7 +71,7 @@ describe('bullMqMetricsPlugin', () => {
     dependencies = new TestDependencies()
     redisConfig = dependencies.getRedisConfig()
 
-    const redis = createSanitizedRedisClient(redisConfig)
+    const redis = new Redis(redisConfig)
     await redis.flushall('SYNC')
     await redis.quit()
 

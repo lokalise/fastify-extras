@@ -1,9 +1,7 @@
-import {
-  backgroundJobProcessorGetActiveQueueIds,
-  createSanitizedRedisClient,
-} from '@lokalise/background-jobs-common'
+import { backgroundJobProcessorGetActiveQueueIds } from '@lokalise/background-jobs-common'
 import type { RedisConfig } from '@lokalise/node-core'
 import { PromisePool } from '@supercharge/promise-pool'
+import { Redis } from 'ioredis'
 
 export type QueueDiscoverer = {
   discoverQueues: () => Promise<RedisQueue[]>
@@ -48,7 +46,7 @@ export class RedisBasedQueueDiscoverer extends AbstractRedisBasedQueueDiscoverer
   }
 
   protected async discoverQueuesForInstance(redisConfig: RedisConfig): Promise<RedisQueue[]> {
-    const redis = createSanitizedRedisClient(redisConfig)
+    const redis = new Redis(redisConfig)
     const scanStream = redis.scanStream({
       match: `${this.queuesPrefix}:*:meta`,
     })
