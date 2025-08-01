@@ -60,6 +60,7 @@ export class RedisBasedQueueDiscoverer extends AbstractRedisBasedQueueDiscoverer
         // biome-ignore lint/style/noNonNullAssertion: undefined removed in previous filter
         .forEach((queue) => queues.add(queue!))
     }
+    await redis.quit()
 
     return Array.from(queues)
       .sort()
