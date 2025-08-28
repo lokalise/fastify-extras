@@ -33,8 +33,8 @@ export class TestDependencies {
   }
 
   getRedisConfig(): RedisConfig {
-    const db = process.env.REDIS_DB ? Number.parseInt(process.env.REDIS_DB) : undefined
     const host = process.env.REDIS_HOST
+    const keyPrefix = process.env.REDIS_KEY_PREFIX
     const port = process.env.REDIS_PORT ? Number(process.env.REDIS_PORT) : undefined
     const username = process.env.REDIS_USERNAME
     const password = process.env.REDIS_PASSWORD
@@ -55,7 +55,7 @@ export class TestDependencies {
 
     return {
       host,
-      db,
+      keyPrefix,
       port,
       username,
       password,

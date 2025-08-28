@@ -1,8 +1,8 @@
+import { sanitizeRedisConfig } from '@lokalise/background-jobs-common'
+import type { RedisConfig } from '@lokalise/node-core'
 import { Queue, QueueEvents } from 'bullmq'
 import type { FinishedStatus } from 'bullmq'
 import type { FastifyBaseLogger } from 'fastify'
-
-import type { RedisConfig } from '@lokalise/node-core'
 import type { Metrics } from './MetricsCollector.js'
 
 export class ObservableQueue {
@@ -34,8 +34,16 @@ export class ObservableQueue {
   }
 
   constructor(name: string, redisConfig: RedisConfig, metrics: Metrics, logger: FastifyBaseLogger) {
-    this.queue = new Queue(name, { connection: redisConfig })
-    this.events = new QueueEvents(name, { connection: redisConfig, autorun: true })
+    const sanitizedConfig = sanitizeRedisConfig(redisConfig)
+    this.queue = new Queue(name, {
+      connection: sanitizedConfig,
+      prefix: redisConfig.keyPrefix,
+    })
+    this.events = new QueueEvents(name, {
+      connection: sanitizedConfig,
+      prefix: redisConfig.keyPrefix,
+      autorun: true,
+    })
     this.metrics = metrics
     this.logger = logger
 
