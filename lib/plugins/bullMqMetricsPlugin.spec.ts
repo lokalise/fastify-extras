@@ -12,7 +12,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { z } from 'zod/v4'
 import { TestBackgroundJobProcessor } from '../../test/mocks/TestBackgroundJobProcessor.js'
 import { TestDependencies } from '../../test/mocks/TestDependencies.js'
-import { RedisBasedQueueDiscoverer } from './bull-mq-metrics/queueDiscoverers.js'
+import {
+  BackgroundJobsBasedQueueDiscoverer,
+  RedisBasedQueueDiscoverer,
+} from './bull-mq-metrics/queueDiscoverers.js'
 import type { BullMqMetricsPluginOptions } from './bullMqMetricsPlugin.js'
 import { bullMqMetricsPlugin } from './bullMqMetricsPlugin.js'
 import { metricsPlugin } from './metricsPlugin.js'
@@ -26,6 +29,7 @@ const UNKNOWN_RESPONSE_SCHEMA = z.unknown()
 const DEFAULT_TEST_OPTIONS = { enableMetricsPlugin: true }
 
 async function initAppWithBullMqMetrics(
+  useGenericRedisQueueDiscoverer: boolean,
   pluginOptions: BullMqMetricsPluginOptions,
   { enableMetricsPlugin }: TestOptions = DEFAULT_TEST_OPTIONS,
 ) {
@@ -40,7 +44,12 @@ async function initAppWithBullMqMetrics(
   }
 
   await app.register(bullMqMetricsPlugin, {
-    queueDiscoverer: new RedisBasedQueueDiscoverer(pluginOptions.redisConfigs, process.env.REDIS_KEY_PREFIX as string),
+    queueDiscoverer: useGenericRedisQueueDiscoverer
+      ? new RedisBasedQueueDiscoverer(
+          pluginOptions.redisConfigs,
+          process.env.REDIS_KEY_PREFIX as string,
+        )
+      : new BackgroundJobsBasedQueueDiscoverer(pluginOptions.redisConfigs),
     collectionOptions: { type: 'manual' },
     ...pluginOptions,
   })
@@ -60,7 +69,7 @@ async function getMetrics() {
   })
 }
 
-describe('bullMqMetricsPlugin', () => {
+describe.each([true, false])('bullMqMetricsPlugin', (useGenericRedisQueueDiscoverer) => {
   let app: FastifyInstance
   let dependencies: TestDependencies
   let bgDependencies: BackgroundJobProcessorDependencies<any, any>
@@ -94,12 +103,9 @@ describe('bullMqMetricsPlugin', () => {
   it('throws if fastify-metrics was not initialized', async () => {
     await expect(() => {
       return initAppWithBullMqMetrics(
-        {
-          redisConfigs: [redisConfig],
-        },
-        {
-          enableMetricsPlugin: false,
-        },
+        useGenericRedisQueueDiscoverer,
+        { redisConfigs: [redisConfig] },
+        { enableMetricsPlugin: false },
       )
     }).rejects.toThrowError(
       'No Prometheus Client found, BullMQ metrics plugin requires `fastify-metrics` plugin to be registered',
@@ -107,7 +113,7 @@ describe('bullMqMetricsPlugin', () => {
   })
 
   it('exposes metrics collect() function', async () => {
-    app = await initAppWithBullMqMetrics({
+    app = await initAppWithBullMqMetrics(useGenericRedisQueueDiscoverer, {
       redisConfigs: [redisConfig],
     })
 
@@ -143,7 +149,7 @@ describe('bullMqMetricsPlugin', () => {
       db: 1,
     }
 
-    app = await initAppWithBullMqMetrics({
+    app = await initAppWithBullMqMetrics(useGenericRedisQueueDiscoverer, {
       redisConfigs: [redisConfig, redisConfig2],
     })
 
