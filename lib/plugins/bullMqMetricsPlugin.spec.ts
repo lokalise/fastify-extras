@@ -40,7 +40,7 @@ async function initAppWithBullMqMetrics(
   }
 
   await app.register(bullMqMetricsPlugin, {
-    queueDiscoverer: new RedisBasedQueueDiscoverer(pluginOptions.redisConfigs, 'bull'),
+    queueDiscoverer: new RedisBasedQueueDiscoverer(pluginOptions.redisConfigs, process.env.REDIS_KEY_PREFIX as string),
     collectionOptions: { type: 'manual' },
     ...pluginOptions,
   })

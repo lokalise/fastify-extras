@@ -55,7 +55,11 @@ export class RedisBasedQueueDiscoverer extends AbstractRedisBasedQueueDiscoverer
     for await (const chunk of scanStream) {
       // biome-ignore lint/complexity/noForEach: <explanation>
       ;(chunk as string[])
-        .map((key) => key.split(':')[1])
+        .map((key) => {
+          const parts = key.split(':')
+          if (parts.length < 3) return undefined
+          return parts[parts.length - 2] // we need the part before to meta
+        })
         .filter((value) => !!value)
         // biome-ignore lint/style/noNonNullAssertion: undefined removed in previous filter
         .forEach((queue) => queues.add(queue!))
