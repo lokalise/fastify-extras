@@ -65,7 +65,7 @@
         "@lokalise/background-jobs-common": "^14.0.2",
         "@lokalise/biome-config": "^2.0.0",
         "@lokalise/node-core": "^14.4.1",
-        "@lokalise/tsconfig": "^2.0.0",
+        "@lokalise/tsconfig": "^3.0.0",
         "@types/newrelic": "^9.14.8",
         "@types/node": "^22.18.0",
         "@vitest/coverage-v8": "^3.2.4",
