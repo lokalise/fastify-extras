@@ -7,6 +7,8 @@ Reusable plugins for Fastify.
 
   - [RequestContext Provider Plugin](#requestcontext-provider-plugin)
   - [Public Healthcheck Plugin](#public-healthcheck-plugin)
+  - [Common Healthcheck Plugin](#common-healthcheck-plugin)
+  - [Common Sync Healthcheck Plugin](#common-sync-healthcheck-plugin)
   - [Split IO Plugin](#split-io-plugin)
   - [BugSnag Plugin](#bugsnag-plugin)
   - [Metrics Plugin](#metrics-plugin)
@@ -72,7 +74,7 @@ Your Fastify app will reply with the status of the app when hitting the `GET /` 
 
 ### Common Healthcheck Plugin
 
-Plugin to monitor app status through public and private healthchecks.
+Plugin to monitor app status through public and private healthchecks using asynchronous checks.
 
 Add the plugin to your Fastify instance by registering it with the following options:
 
@@ -89,8 +91,6 @@ Your Fastify app will reply with the status of the app when hitting the `GET /` 
 }
 ```
 
-
-
 Your Fastify app will reply with the status of the app when hitting the `GET /health` private route with detailed results from healthchecks provided, example:
 ```json
 {
@@ -102,6 +102,55 @@ Your Fastify app will reply with the status of the app when hitting the `GET /he
   }
 }
 ```
+
+### Common Sync Healthcheck Plugin
+
+Plugin to monitor app status through public and private healthchecks using synchronous checks. **This plugin is recommended when you have healthchecks that run synchronously or are executed in the background**, as it provides better performance for such use cases.
+
+Add the plugin to your Fastify instance by registering it with the following options:
+
+- `healthChecks`, an array of synchronous healthcheck objects, each containing:
+  - `name`, the identifier for the healthcheck;
+  - `isMandatory`, boolean indicating if this healthcheck is critical for service health;
+  - `checker`, a synchronous function that returns `null` on success or an `Error` on failure;
+- `responsePayload` (optional), the response payload that the healthcheck should return;
+- `logLevel` (optional), the log level for the healthcheck routes ('fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace' | 'silent'), defaults to 'info';
+- `infoProviders` (optional), an array of info providers to include additional metadata in the `/health` response;
+- `isRootRouteEnabled` (optional), whether to enable the public `/` route, defaults to `true`.
+
+Example usage:
+```typescript
+import { commonSyncHealthcheckPlugin } from '@lokalise/fastify-extras'
+
+app.register(commonSyncHealthcheckPlugin, {
+  healthChecks: [
+    {
+      name: 'database',
+      isMandatory: true,
+      checker: (app) => {
+        // Synchronous check - returns null if healthy, Error if not
+        return isDatabaseConnected() ? null : new Error('Database disconnected')
+      }
+    },
+    {
+      name: 'cache',
+      isMandatory: false,  // Optional dependency
+      checker: (app) => {
+        return isCacheAvailable() ? null : new Error('Cache unavailable')
+      }
+    }
+  ]
+})
+```
+
+The plugin exposes the same routes as the async Common Healthcheck Plugin:
+- `GET /` - Public route returning aggregated health status
+- `GET /health` - Private route with detailed healthcheck results
+
+The key differences from the async version:
+- Uses synchronous healthcheck functions instead of promises
+- Better suited for checks that are already running in the background or are inherently synchronous
+- Supports mandatory vs optional healthchecks (optional failures result in `PARTIALLY_HEALTHY` status)
 
 ### Split IO Plugin
 

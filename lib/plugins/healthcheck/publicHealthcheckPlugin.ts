@@ -97,6 +97,9 @@ function plugin(
   done()
 }
 
+/**
+ * @deprecated use commonSyncHealthcheckPlugin instead
+ */
 export const publicHealthcheckPlugin: FastifyPluginCallback<PublicHealthcheckPluginOptions> = fp(
   plugin,
   {
