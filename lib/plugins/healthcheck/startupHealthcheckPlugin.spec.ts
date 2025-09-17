@@ -34,7 +34,7 @@ describe('startupHealthcheckPlugin', () => {
     })
 
     it('throws an error if one mandatory healthcheck fails', async () => {
-      await expect(() =>
+      await expect(
         initApp({
           healthChecks: [
             {
