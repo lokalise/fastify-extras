@@ -152,6 +152,35 @@ The key differences from the async version:
 - Better suited for checks that are already running in the background or are inherently synchronous
 - Supports mandatory vs optional healthchecks (optional failures result in `PARTIALLY_HEALTHY` status)
 
+### Startup Healthcheck Plugin
+
+Plugin to monitor app startup status, doing potentially more expensive checks than what is reasonable through periodic healthchecks.
+
+Add the plugin to your Fastify instance by registering it with the following options:
+
+- `healthChecks`, a list of asynchronous healthchecks to run at the app startup;
+- `resultsLogLevel`, at what log level to report healthcheck results - default is INFO;
+
+This is the structure of the log:
+```json
+{
+  "heartbeat": "PARTIALLY_HEALTHY",
+  "checks": {
+    "check1": "HEALTHY",
+    "check2": "HEALTHY",
+    "check3": "FAIL"
+  }
+}
+```
+
+In case a non-optional healthcheck fails, an application startup will throw an error. In order to ensure that the error is thrown correctly, make sure to await the app startup:
+
+```ts
+  const app = fastify()
+  await app.register(startupHealthcheckPlugin, opts)
+  await app.ready()
+```
+
 ### Split IO Plugin
 
 Plugin to handle feature flags in Split IO.
