@@ -58,7 +58,7 @@ export type {
 } from './plugins/healthcheck/publicHealthcheckPlugin.js'
 
 export { wrapHealthCheck } from './plugins/healthcheck/healthcheckCommons.js'
-export type { HealthChecker } from './plugins/healthcheck/healthcheckCommons.js'
+export type { HealthChecker, HealthCheckerSync } from './plugins/healthcheck/healthcheckCommons.js'
 
 export { commonHealthcheckPlugin } from './plugins/healthcheck/commonHealthcheckPlugin.js'
 export type { CommonHealthcheckPluginOptions } from './plugins/healthcheck/commonHealthcheckPlugin.js'
