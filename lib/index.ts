@@ -63,6 +63,9 @@ export type { HealthChecker } from './plugins/healthcheck/healthcheckCommons.js'
 export { commonHealthcheckPlugin } from './plugins/healthcheck/commonHealthcheckPlugin.js'
 export type { CommonHealthcheckPluginOptions } from './plugins/healthcheck/commonHealthcheckPlugin.js'
 
+export { commonSyncHealthcheckPlugin } from './plugins/healthcheck/commonSyncHealthcheckPlugin.ts'
+export type { CommonSyncHealthcheckPluginOptions } from './plugins/healthcheck/commonSyncHealthcheckPlugin.ts'
+
 export {
   amplitudePlugin,
   type AmplitudeConfig,
