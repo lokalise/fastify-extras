@@ -40,7 +40,7 @@ export type HealthCheck = {
   checker: HealthChecker
 }
 
-function resolveHealthcheckResults(
+export function resolveHealthcheckResults(
   results: HealthcheckResult[],
   opts: CommonHealthcheckPluginOptions,
 ): ResolvedHealthcheckResponse {

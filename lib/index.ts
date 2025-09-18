@@ -63,6 +63,9 @@ export type { HealthChecker, HealthCheckerSync } from './plugins/healthcheck/hea
 export { commonHealthcheckPlugin } from './plugins/healthcheck/commonHealthcheckPlugin.js'
 export type { CommonHealthcheckPluginOptions } from './plugins/healthcheck/commonHealthcheckPlugin.js'
 
+export { startupHealthcheckPlugin } from './plugins/healthcheck/startupHealthcheckPlugin.js'
+export type { StartupHealthcheckPluginOptions } from './plugins/healthcheck/startupHealthcheckPlugin.js'
+
 export { commonSyncHealthcheckPlugin } from './plugins/healthcheck/commonSyncHealthcheckPlugin.ts'
 export type { CommonSyncHealthcheckPluginOptions } from './plugins/healthcheck/commonSyncHealthcheckPlugin.ts'
 
