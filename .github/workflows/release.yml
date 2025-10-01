@@ -22,7 +22,7 @@ jobs:
           token: ${{ secrets.BOT_ACCESS_TOKEN }}
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 18.x
           scope: '@lokalise'
