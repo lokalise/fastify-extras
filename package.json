@@ -55,7 +55,7 @@
         "fastify-type-provider-zod": ">=6.0.0",
         "ioredis": "^5.7.0",
         "newrelic": ">=11.13.0",
-        "pino": "^9.9.0",
+        "pino": "^10.0.0",
         "zod": ">=4.1.5"
     },
     "devDependencies": {
@@ -75,7 +75,7 @@
         "fastify-type-provider-zod": "^6.0.0",
         "ioredis": "^5.6.1",
         "newrelic": "13.3.3",
-        "pino": "^9.9.0",
+        "pino": "^10.0.0",
         "pino-pretty": "^13.1.1",
         "rimraf": "^6.0.1",
         "typescript": "^5.9.2",
