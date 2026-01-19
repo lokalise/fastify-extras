@@ -13,6 +13,19 @@ describe('openTelemetryTransactionManagerPlugin', () => {
 })
 
 describe('OpenTelemetryTransactionManager', () => {
+  describe('createDisabled', () => {
+    it('should create a disabled manager', () => {
+      const manager = OpenTelemetryTransactionManager.createDisabled()
+
+      expect(manager).toBeInstanceOf(OpenTelemetryTransactionManager)
+      expect(manager.getSpan('any-key')).toBeNull()
+
+      // Should not throw when used
+      manager.start('test', 'key1')
+      manager.stop('key1')
+    })
+  })
+
   describe('disabled mode', () => {
     it('should not throw errors when disabled', () => {
       const manager = new OpenTelemetryTransactionManager(false)

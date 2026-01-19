@@ -28,6 +28,10 @@ export class OpenTelemetryTransactionManager implements TransactionObservability
     this.spanMap = new FifoMap(2000)
   }
 
+  public static createDisabled(): OpenTelemetryTransactionManager {
+    return new OpenTelemetryTransactionManager(false)
+  }
+
   /**
    * @param transactionName - used for grouping similar transactions together
    * @param uniqueTransactionKey - used for identifying specific ongoing transaction. Must be reasonably unique to reduce possibility of collisions
