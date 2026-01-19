@@ -58,7 +58,7 @@ describe('OpenTelemetryTransactionManager', () => {
     let manager: OpenTelemetryTransactionManager
 
     beforeEach(() => {
-      manager = new OpenTelemetryTransactionManager(true, 'test-service', '1.0.0')
+      manager = new OpenTelemetryTransactionManager(true, 'test-tracer', '1.0.0')
     })
 
     it('should start and stop spans without error', () => {
@@ -131,6 +131,106 @@ describe('OpenTelemetryTransactionManager', () => {
     })
   })
 
+  describe('span eviction', () => {
+    it('should end evicted spans when capacity is exceeded', () => {
+      const mockSpans: Partial<Span>[] = []
+      const createMockSpan = () => {
+        const span: Partial<Span> = {
+          setAttribute: vi.fn(),
+          setStatus: vi.fn(),
+          end: vi.fn(),
+        }
+        mockSpans.push(span)
+        return span as Span
+      }
+
+      const mockTracer = {
+        startSpan: vi.fn().mockImplementation(createMockSpan),
+      } as unknown as ReturnType<typeof trace.getTracer>
+
+      vi.spyOn(trace, 'getTracer').mockReturnValue(mockTracer)
+
+      // Create manager with capacity of 3
+      const manager = new OpenTelemetryTransactionManager(true, 'test-tracer', '1.0.0', 3)
+
+      // Start 3 spans (at capacity)
+      manager.start('tx1', 'key1')
+      manager.start('tx2', 'key2')
+      manager.start('tx3', 'key3')
+
+      expect(mockSpans).toHaveLength(3)
+      expect(mockSpans[0]!.end).not.toHaveBeenCalled()
+
+      // Start a 4th span - should evict the oldest (key1)
+      manager.start('tx4', 'key4')
+
+      expect(mockSpans).toHaveLength(4)
+      // First span should have been ended with error status
+      expect(mockSpans[0]!.setStatus).toHaveBeenCalledWith({
+        code: SpanStatusCode.ERROR,
+        message: 'Span evicted due to capacity limits',
+      })
+      expect(mockSpans[0]!.end).toHaveBeenCalled()
+
+      // key1 should no longer be retrievable
+      expect(manager.getSpan('key1')).toBeNull()
+
+      // key4 should be retrievable
+      expect(manager.getSpan('key4')).toBe(mockSpans[3]!)
+
+      vi.restoreAllMocks()
+    })
+
+    it('should not evict when updating existing key', () => {
+      const mockSpans: Partial<Span>[] = []
+      const createMockSpan = () => {
+        const span: Partial<Span> = {
+          setAttribute: vi.fn(),
+          setStatus: vi.fn(),
+          end: vi.fn(),
+        }
+        mockSpans.push(span)
+        return span as Span
+      }
+
+      const mockTracer = {
+        startSpan: vi.fn().mockImplementation(createMockSpan),
+      } as unknown as ReturnType<typeof trace.getTracer>
+
+      vi.spyOn(trace, 'getTracer').mockReturnValue(mockTracer)
+
+      // Create manager with capacity of 2
+      const manager = new OpenTelemetryTransactionManager(true, 'test-tracer', '1.0.0', 2)
+
+      // Start 2 spans (at capacity)
+      manager.start('tx1', 'key1')
+      manager.start('tx2', 'key2')
+
+      // Update key1 with a new span (should not evict)
+      manager.start('tx1-updated', 'key1')
+
+      // No spans should have been evicted/ended
+      expect(mockSpans[0]!.end).not.toHaveBeenCalled()
+      expect(mockSpans[1]!.end).not.toHaveBeenCalled()
+
+      vi.restoreAllMocks()
+    })
+
+    it('should use custom maxConcurrentSpans', () => {
+      const manager = new OpenTelemetryTransactionManager(true, 'test-tracer', '1.0.0', 5)
+
+      // Should be able to store 5 spans
+      for (let i = 0; i < 5; i++) {
+        manager.start(`tx${i}`, `key${i}`)
+      }
+
+      // All 5 should be retrievable
+      for (let i = 0; i < 5; i++) {
+        expect(manager.getSpan(`key${i}`)).not.toBeNull()
+      }
+    })
+  })
+
   describe('enabled mode with mocks', () => {
     let manager: OpenTelemetryTransactionManager
     let mockSpan: Partial<Span>
@@ -150,15 +250,15 @@ describe('OpenTelemetryTransactionManager', () => {
       vi.spyOn(trace, 'getTracer').mockReturnValue(mockTracer)
       vi.spyOn(trace, 'getActiveSpan').mockReturnValue(mockSpan as Span)
 
-      manager = new OpenTelemetryTransactionManager(true, 'test-service', '1.0.0')
+      manager = new OpenTelemetryTransactionManager(true, 'test-tracer', '1.0.0')
     })
 
     afterEach(() => {
       vi.restoreAllMocks()
     })
 
-    it('should create a tracer with correct service name and version', () => {
-      expect(trace.getTracer).toHaveBeenCalledWith('test-service', '1.0.0')
+    it('should create a tracer with correct tracer name and version', () => {
+      expect(trace.getTracer).toHaveBeenCalledWith('test-tracer', '1.0.0')
     })
 
     it('should start a span with correct name and attributes', () => {

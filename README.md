@@ -303,8 +303,9 @@ Plugin to create custom OpenTelemetry spans for background jobs. This is an alte
 Add the plugin to your Fastify instance by registering it with the following options:
 
 - `isEnabled`, if `true` the plugin will create spans using OpenTelemetry;
-- `serviceName` (optional), the name of your service for the tracer. Defaults to `'unknown-service'`;
-- `serviceVersion` (optional), the version of your service. Defaults to `'1.0.0'`.
+- `tracerName` (optional), the instrumentation scope name for the tracer. This identifies the instrumentation library, not the service. For service identification, configure it via OpenTelemetry SDK resource attributes (e.g., `OTEL_SERVICE_NAME` environment variable). Defaults to `'unknown-tracer'`;
+- `tracerVersion` (optional), the instrumentation scope version for the tracer. Defaults to `'1.0.0'`;
+- `maxConcurrentSpans` (optional), maximum number of concurrent spans to track. When this limit is reached, the oldest spans will be evicted and automatically ended to prevent leaks. Defaults to `2000`.
 
 The plugin decorates your Fastify instance with an `OpenTelemetryTransactionManager`, which implements the `TransactionObservabilityManager` interface from `@lokalise/node-core`. You can inject and use the following methods:
 
@@ -330,8 +331,9 @@ import { openTelemetryTransactionManagerPlugin } from '@lokalise/fastify-extras'
 // Register the plugin
 await app.register(openTelemetryTransactionManagerPlugin, {
   isEnabled: true,
-  serviceName: 'my-service',
-  serviceVersion: '1.0.0',
+  tracerName: 'my-instrumentation',
+  tracerVersion: '1.0.0',
+  // maxConcurrentSpans: 2000, // optional
 })
 
 // Use in your application

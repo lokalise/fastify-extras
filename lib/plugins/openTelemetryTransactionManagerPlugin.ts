@@ -13,19 +13,119 @@ declare module 'fastify' {
 
 export interface OpenTelemetryTransactionManagerOptions {
   isEnabled: boolean
-  serviceName?: string
-  serviceVersion?: string
+  /**
+   * The name used to identify the tracer (instrumentation scope name).
+   * This is NOT the OpenTelemetry resource `service.name` attribute.
+   * To set the service name for your traces, configure it via the OpenTelemetry SDK
+   * resource configuration (e.g., OTEL_SERVICE_NAME environment variable or SDK Resource).
+   * @default 'unknown-tracer'
+   */
+  tracerName?: string
+  /**
+   * The version used to identify the tracer (instrumentation scope version).
+   * This is NOT the OpenTelemetry resource `service.version` attribute.
+   * To set the service version for your traces, configure it via the OpenTelemetry SDK
+   * resource configuration.
+   * @default '1.0.0'
+   */
+  tracerVersion?: string
+  /**
+   * Maximum number of concurrent spans to track. When this limit is reached,
+   * the oldest spans will be evicted and automatically ended to prevent leaks.
+   * @default 2000
+   */
+  maxConcurrentSpans?: number
+}
+
+/**
+ * A FIFO map that automatically ends spans when they are evicted due to capacity limits.
+ * This prevents span leaks when the map reaches its maximum size.
+ */
+class EvictingSpanMap {
+  private readonly map: FifoMap<Span>
+  private readonly maxSize: number
+
+  constructor(maxSize: number) {
+    this.maxSize = maxSize
+    this.map = new FifoMap(maxSize)
+  }
+
+  set(key: string, span: Span): void {
+    // Check if key already exists (update case - no eviction needed)
+    const existingSpan = this.map.get(key)
+    if (existingSpan !== undefined) {
+      this.map.set(key, span)
+      return
+    }
+
+    // Check if we're at capacity and will evict
+    if (this.map.size >= this.maxSize) {
+      // FifoMap evicts the oldest entry when at capacity
+      // We need to end that span before it gets evicted
+      const oldestKey = this.getOldestKey()
+      if (oldestKey) {
+        const evictedSpan = this.map.get(oldestKey)
+        if (evictedSpan) {
+          // End the span with an error status to indicate it was evicted
+          evictedSpan.setStatus({
+            code: SpanStatusCode.ERROR,
+            message: 'Span evicted due to capacity limits',
+          })
+          evictedSpan.end()
+        }
+      }
+    }
+    this.map.set(key, span)
+  }
+
+  get(key: string): Span | undefined {
+    return this.map.get(key)
+  }
+
+  delete(key: string): void {
+    this.map.delete(key)
+  }
+
+  /**
+   * Get the oldest key in the map (first to be evicted).
+   * FifoMap stores keys in insertion order, so we iterate to find the first one.
+   */
+  private getOldestKey(): string | undefined {
+    // FifoMap internally uses a linked list structure with first/last pointers
+    // We access the internal structure to find the oldest key
+    // biome-ignore lint/suspicious/noExplicitAny: Accessing internal FifoMap structure
+    const internal = this.map as any
+    if (internal.first) {
+      return internal.first.key
+    }
+    return undefined
+  }
 }
 
 export class OpenTelemetryTransactionManager implements TransactionObservabilityManager {
   private readonly isEnabled: boolean
   private readonly tracer: Tracer
-  private readonly spanMap: FifoMap<Span>
+  private readonly spanMap: EvictingSpanMap
 
-  constructor(isEnabled: boolean, serviceName = 'unknown-service', serviceVersion = '1.0.0') {
+  /**
+   * Creates a new OpenTelemetryTransactionManager.
+   *
+   * @param isEnabled - Whether tracing is enabled
+   * @param tracerName - The instrumentation scope name for the tracer. This identifies
+   *   the instrumentation library, not the service. Service identification should be
+   *   configured via OpenTelemetry SDK resource attributes (e.g., OTEL_SERVICE_NAME).
+   * @param tracerVersion - The instrumentation scope version for the tracer.
+   * @param maxConcurrentSpans - Maximum number of concurrent spans to track before eviction.
+   */
+  constructor(
+    isEnabled: boolean,
+    tracerName = 'unknown-tracer',
+    tracerVersion = '1.0.0',
+    maxConcurrentSpans = 2000,
+  ) {
     this.isEnabled = isEnabled
-    this.tracer = trace.getTracer(serviceName, serviceVersion)
-    this.spanMap = new FifoMap(2000)
+    this.tracer = trace.getTracer(tracerName, tracerVersion)
+    this.spanMap = new EvictingSpanMap(maxConcurrentSpans)
   }
 
   public static createDisabled(): OpenTelemetryTransactionManager {
@@ -159,8 +259,9 @@ export class OpenTelemetryTransactionManager implements TransactionObservability
 function plugin(fastify: FastifyInstance, opts: OpenTelemetryTransactionManagerOptions) {
   const manager = new OpenTelemetryTransactionManager(
     opts.isEnabled,
-    opts.serviceName,
-    opts.serviceVersion,
+    opts.tracerName,
+    opts.tracerVersion,
+    opts.maxConcurrentSpans,
   )
   fastify.decorate('openTelemetryTransactionManager', manager)
 }
