@@ -51,9 +51,14 @@ class EvictingSpanMap {
   }
 
   set(key: string, span: Span): void {
-    // Check if key already exists (update case - no eviction needed)
+    // Check if key already exists (update case - end existing span to prevent leaks)
     const existingSpan = this.map.get(key)
     if (existingSpan !== undefined) {
+      existingSpan.setStatus({
+        code: SpanStatusCode.OK,
+        message: 'Span replaced with new span for same key',
+      })
+      existingSpan.end()
       this.map.set(key, span)
       return
     }

@@ -181,7 +181,7 @@ describe('OpenTelemetryTransactionManager', () => {
       vi.restoreAllMocks()
     })
 
-    it('should not evict when updating existing key', () => {
+    it('should end existing span when updating with same key', () => {
       const mockSpans: Partial<Span>[] = []
       const createMockSpan = () => {
         const span: Partial<Span> = {
@@ -206,12 +206,21 @@ describe('OpenTelemetryTransactionManager', () => {
       manager.start('tx1', 'key1')
       manager.start('tx2', 'key2')
 
-      // Update key1 with a new span (should not evict)
+      // Update key1 with a new span - should end the existing span but not evict
       manager.start('tx1-updated', 'key1')
 
-      // No spans should have been evicted/ended
-      expect(mockSpans[0]!.end).not.toHaveBeenCalled()
+      // First span (key1) should have been ended with OK status (replaced)
+      expect(mockSpans[0]!.setStatus).toHaveBeenCalledWith({
+        code: SpanStatusCode.OK,
+        message: 'Span replaced with new span for same key',
+      })
+      expect(mockSpans[0]!.end).toHaveBeenCalled()
+
+      // Second span (key2) should not have been ended
       expect(mockSpans[1]!.end).not.toHaveBeenCalled()
+
+      // The new span (third one) should be retrievable via key1
+      expect(manager.getSpan('key1')).toBe(mockSpans[2]!)
 
       vi.restoreAllMocks()
     })
