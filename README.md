@@ -14,6 +14,7 @@ Reusable plugins for Fastify.
   - [Metrics Plugin](#metrics-plugin)
   - [Bull MQ Metrics Plugin](#bullmq-metrics-plugin)
   - [NewRelic Transaction Manager Plugin](#newrelic-transaction-manager-plugin)
+  - [OpenTelemetry Transaction Manager Plugin](#opentelemetry-transaction-manager-plugin)
   - [UnhandledException Plugin](#unhandledexception-plugin)
 
 ## Dependency Management
@@ -34,6 +35,7 @@ The following needs to be taken into consideration when adding new runtime depen
 ### Peer Dependencies
 
 - `@fastify/jwt`;
+- `@opentelemetry/api`;
 - `fastify`;
 - `newrelic`;
 - `pino`;
@@ -293,6 +295,68 @@ The plugin decorates your Fastify instance with a `NewRelicTransactionManager`, 
 - `stop()`, which takes a `jobId`, and ends the background transaction referenced by the ID;
 - `addCustomAttribute()`, which takes `attrName` and `attrValue` and adds the custom attribute to the current transaction. `attrValue` can be a string, a number, or a boolean.
 - `addCustomAttributes()`, which passes `atts` map of the custom attributes to the current transaction. `_uniqueTransactionKey` argument is not used (because New Relic doesn't support setting custom attributes directly on the transaction handle), any string can be passed.
+
+### OpenTelemetry Transaction Manager Plugin
+
+Plugin to create custom OpenTelemetry spans for background jobs. This is an alternative to the NewRelic Transaction Manager Plugin for applications using OpenTelemetry for observability.
+
+Add the plugin to your Fastify instance by registering it with the following options:
+
+- `isEnabled`, if `true` the plugin will create spans using OpenTelemetry;
+- `serviceName` (optional), the name of your service for the tracer. Defaults to `'unknown-service'`;
+- `serviceVersion` (optional), the version of your service. Defaults to `'1.0.0'`.
+
+The plugin decorates your Fastify instance with an `OpenTelemetryTransactionManager`, which implements the `TransactionObservabilityManager` interface from `@lokalise/node-core`. You can inject and use the following methods:
+
+- `start(transactionName, uniqueTransactionKey)`, starts a background span with the provided name and stores it by the unique key;
+- `startWithGroup(transactionName, uniqueTransactionKey, transactionGroup)`, starts a background span with an additional `transaction.group` attribute;
+- `stop(uniqueTransactionKey, wasSuccessful?)`, ends the span referenced by the unique key. Sets status to `OK` if successful (default), or `ERROR` if not;
+- `addCustomAttribute(attrName, attrValue)`, adds a custom attribute to the currently active span. `attrValue` can be a string, number, or boolean;
+- `addCustomAttributes(uniqueTransactionKey, atts)`, adds multiple custom attributes to the span identified by the unique key;
+- `setUserID(userId)`, sets the `enduser.id` attribute on the active span;
+- `setControllerName(name, action)`, sets `code.namespace` and `code.function` attributes on the active span.
+
+Additional OpenTelemetry-specific methods:
+
+- `getSpan(uniqueTransactionKey)`, returns the span for advanced manipulation, or `null` if not found;
+- `getTracer()`, returns the underlying OpenTelemetry tracer;
+- `runInSpanContext(uniqueTransactionKey, fn)`, executes a function within the context of a specific span, useful for automatic parent-child span linking.
+
+Example usage:
+
+```typescript
+import { openTelemetryTransactionManagerPlugin } from '@lokalise/fastify-extras'
+
+// Register the plugin
+await app.register(openTelemetryTransactionManagerPlugin, {
+  isEnabled: true,
+  serviceName: 'my-service',
+  serviceVersion: '1.0.0',
+})
+
+// Use in your application
+const manager = app.openTelemetryTransactionManager
+
+// Start a transaction
+manager.start('process-email-job', 'job-123')
+
+// Add custom attributes
+manager.addCustomAttributes('job-123', {
+  jobType: 'email',
+  recipient: 'user@example.com',
+})
+
+// Execute nested operations within the span context
+manager.runInSpanContext('job-123', () => {
+  // Child spans created here will be linked to the parent
+  doSomeWork()
+})
+
+// End the transaction
+manager.stop('job-123', true) // true = successful
+```
+
+> **Note:** This plugin requires `@opentelemetry/api` as a peer dependency. Make sure your application has OpenTelemetry configured with appropriate exporters (e.g., OTLP exporter) to send traces to your observability backend.
 
 ### Amplitude Plugin
 
