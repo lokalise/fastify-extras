@@ -19,6 +19,12 @@ export {
 export type { NewRelicTransactionManagerOptions } from './plugins/newrelicTransactionManagerPlugin.js'
 
 export {
+  openTelemetryTransactionManagerPlugin,
+  OpenTelemetryTransactionManager,
+} from './plugins/openTelemetryTransactionManagerPlugin.js'
+export type { OpenTelemetryTransactionManagerOptions } from './plugins/openTelemetryTransactionManagerPlugin.js'
+
+export {
   splitIOFeatureManagerPlugin,
   SplitIOFeatureManager,
 } from './plugins/splitIOFeatureManagerPlugin.js'
