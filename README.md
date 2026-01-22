@@ -48,7 +48,11 @@ The following needs to be taken into consideration when adding new runtime depen
 Plugin to:
 
 - extend existing `FastifyRequest` with request context by setting the following:
-  - `logger`, a child logger of app.log, with prepopulated header `x-request-id`;
+  - `logger`, a child logger of app.log, with prepopulated properties:
+    - `x-request-id`: the request ID;
+    - `api-endpoint`: the route URL pattern (e.g., `/`, `/:userId`);
+    - `api-method`: the HTTP method (e.g., `GET`, `POST`);
+    - `api-endpoint-param-{paramName}`: for each route parameter (e.g., `api-endpoint-param-userId` for `:userId` parameter);
   - `reqId`, the request-id;
 
 No options are required to register the plugin.
