@@ -1,5 +1,4 @@
 import { randomUUID } from 'node:crypto'
-
 import type { CommonLogger } from '@lokalise/node-core'
 import type {
   FastifyInstance,
@@ -47,8 +46,18 @@ function plugin(fastify: FastifyInstance, _opts: unknown, done: () => void) {
       _res: FastifyReply,
       next: HookHandlerDoneFunction,
     ) {
+      const endpointParams: Record<string, unknown> = {}
+      if (req.params && typeof req.params === 'object') {
+        for (const [key, value] of Object.entries(req.params)) {
+          endpointParams[`api-endpoint-param-${key}`] = value
+        }
+      }
+
       req.reqContext = {
         logger: (req.log as CommonLogger).child({
+          'api-endpoint': req.routeOptions.url,
+          'api-method': req.method,
+          ...endpointParams,
           'x-request-id': req.id,
         }),
         reqId: req.id,
