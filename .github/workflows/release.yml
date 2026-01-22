@@ -13,6 +13,9 @@ jobs:
     if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'skip-release') == false
     name: release
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # Required for OIDC trusted publishing
+      contents: write  # Required for git operations
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -24,9 +27,8 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
-          node-version: 18.x
+          node-version: 24.x
           scope: '@lokalise'
-          always-auth: true
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install Dependencies
@@ -58,6 +60,4 @@ jobs:
         run: git push origin main && git push --tags
 
       - name: Release Package
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish
