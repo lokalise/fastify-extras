@@ -67,7 +67,7 @@ Which can be passed to Fastify during instantiation.
 The `getFastifyAppLoggingConfig(appLogLevel, requestLoggingLevels?)` method is exported and returns Fastify configuration for request logging. It accepts:
 
 - `appLogLevel`, the application log level from your app configuration;
-- `requestLoggingLevels` (optional), an array of log levels that should enable request logging. Defaults to `['debug', 'trace']`.
+- `requestLoggingLevels` (optional), an array of log levels that should enable request logging. Defaults to `['debug', 'trace', 'info']`.
 
 This method returns a `disableRequestLogging` configuration that:
 - Enables request logging only when the app log level is in `requestLoggingLevels`;
