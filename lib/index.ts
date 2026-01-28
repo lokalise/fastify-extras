@@ -104,4 +104,8 @@ export type { ErrorHandlerParams, FreeformRecord } from './errors/errorHandler.j
 export { generateJwtToken, decodeJwtToken } from './jwt-utils/tokenUtils.js'
 
 export { createStaticTokenAuthPreHandler } from './route-utils/authPreHandlers.js'
-export type { AnyFastifyInstance, CommonFastifyInstance } from './plugins/pluginsCommon.js'
+export {
+  getFastifyAppLoggingConfig,
+  type AnyFastifyInstance,
+  type CommonFastifyInstance,
+} from './plugins/pluginsCommon.js'
