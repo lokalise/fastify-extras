@@ -487,6 +487,31 @@ When an uncaught exception occurs, the plugin:
 
 ## Utilities
 
+### amplitude
+
+#### FakeAmplitude
+
+`FakeAmplitude` is a utility class that extends `Amplitude` but doesn't send any events to Amplitude. This is useful for
+testing environments or when you want to disable event tracking without changing your application code.
+
+Example usage:
+
+```typescript
+import { FakeAmplitude } from '@lokalise/fastify-extras'
+
+// In your test or development environment
+const amplitude = new FakeAmplitude()
+
+// track() will not send any events
+amplitude.track({
+  event_type: 'button_clicked',
+  user_id: 'user-123',
+})
+```
+
+The `track()` method returns a promise that resolves to `null` immediately, maintaining the same interface as the real 
+`Amplitude` class without actually sending data.
+
 ### route-utilities
 
 #### authPreHandlers
