@@ -402,9 +402,11 @@ The plugin decorates your Fastify instance with a `Amplitude`, which you can inj
 > "@amplitude/analytics-types": "*"
 > ```
 
-Additionally, you have the option to enhance the safety and accuracy of your events and properties by wrapping your `Amplitude` instance with `AmplitudeAdapter`.
+**Related utilities:**
 
-> 📘Check [`AmplitudeAdapter.spec.ts](./lib/plugins/amplitude/amplitudePlugin.spec.ts) for a practical example
+- `AmplitudeAdapter` - A type-safe wrapper that validates events using Zod schemas before sending them to Amplitude
+- `FakeAmplitude` - A utility class for testing environments that doesn't send events to Amplitude
+See the [Amplitude utilities section](#amplitude) for detailed documentation and examples.
 
 ### Strip Trailing Slash Plugin
 
