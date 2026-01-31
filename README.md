@@ -402,9 +402,11 @@ The plugin decorates your Fastify instance with a `Amplitude`, which you can inj
 > "@amplitude/analytics-types": "*"
 > ```
 
-Additionally, you have the option to enhance the safety and accuracy of your events and properties by wrapping your `Amplitude` instance with `AmplitudeAdapter`.
+**Related utilities:**
 
-> 📘Check [`AmplitudeAdapter.spec.ts](./lib/plugins/amplitude/amplitudePlugin.spec.ts) for a practical example
+- `AmplitudeAdapter` - A type-safe wrapper that validates events using Zod schemas before sending them to Amplitude
+- `FakeAmplitude` - A utility class for testing environments that doesn't send events to Amplitude
+See the [Amplitude utilities section](#amplitude) for detailed documentation and examples.
 
 ### Strip Trailing Slash Plugin
 
@@ -486,6 +488,119 @@ When an uncaught exception occurs, the plugin:
 > 🚨 It's critical to note that this plugin listens to the process's 'uncaughtException' event. Multiple listeners on this event can introduce unpredictable behavior in your application. Ensure that this is the sole listener for this event or handle interactions between multiple listeners carefully.
 
 ## Utilities
+
+### amplitude
+
+#### FakeAmplitude
+
+`FakeAmplitude` is a utility class that extends `Amplitude` but doesn't send any events to Amplitude. This is useful for
+testing environments or when you want to disable event tracking without changing your application code.
+
+Example usage:
+
+```typescript
+import { FakeAmplitude } from '@lokalise/fastify-extras'
+
+// In your test or development environment
+const amplitude = new FakeAmplitude()
+
+// track() will not send any events
+amplitude.track({
+  event_type: 'button_clicked',
+  user_id: 'user-123',
+})
+```
+
+The `track()` method returns a promise that resolves to `null` immediately, maintaining the same interface as the real
+`Amplitude` class without actually sending data.
+
+#### AmplitudeAdapter
+
+`AmplitudeAdapter` is a type-safe wrapper around `Amplitude` that uses Zod schemas to validate events before sending them.
+This ensures that all events sent to Amplitude conform to predefined schemas, catching errors at compile-time and runtime.
+
+**Key features:**
+
+- Type-safe event tracking with TypeScript
+- Automatic validation using Zod schemas
+- Prevents sending malformed events to Amplitude
+
+**Example usage:**
+
+```typescript
+import { z } from 'zod'
+import { AmplitudeAdapter, AMPLITUDE_BASE_MESSAGE_SCHEMA, Amplitude } from '@lokalise/fastify-extras'
+import type { AmplitudeMessage } from '@lokalise/fastify-extras'
+
+// Define your event schemas
+const eventSchemas = {
+  buttonClicked: {
+    schema: AMPLITUDE_BASE_MESSAGE_SCHEMA.extend({
+      event_type: z.literal('button_clicked'),
+      event_properties: z.object({
+        button_id: z.string(),
+        page: z.string(),
+      }),
+    }),
+  },
+  userSignedUp: {
+    schema: AMPLITUDE_BASE_MESSAGE_SCHEMA.extend({
+      event_type: z.literal('user_signed_up'),
+      event_properties: z.object({
+        plan: z.enum(['free', 'premium']),
+      }),
+    }),
+  },
+} as const satisfies Record<string, AmplitudeMessage>
+
+const eventSchemaValues = Object.values(eventSchemas)
+type SupportedEvents = typeof eventSchemaValues
+
+// Create the adapter
+const amplitude = new Amplitude(true)
+const amplitudeAdapter = new AmplitudeAdapter<SupportedEvents>({ amplitude })
+
+// Track events with type safety
+amplitudeAdapter.track(eventSchemas.buttonClicked, {
+  user_id: 'user-123',
+  event_properties: {
+    button_id: 'submit-btn',
+    page: '/checkout',
+  },
+})
+
+// With groups
+amplitudeAdapter.track(eventSchemas.userSignedUp, {
+  user_id: 'user-456',
+  groups: { company: 'acme-corp' },
+  event_properties: {
+    plan: 'premium',
+  },
+})
+```
+
+**Schema validation:**
+
+The `AMPLITUDE_BASE_MESSAGE_SCHEMA` provides the base schema that all events must extend. It requires:
+
+- `event_type`: A literal string identifying the event
+- `user_id`: A non-empty string or the literal `'SYSTEM'`
+- `groups` (optional): A record of group names to values
+
+When defining custom events, extend this base schema with your specific `event_type` and `event_properties`:
+
+```typescript
+const myEventSchema = AMPLITUDE_BASE_MESSAGE_SCHEMA.extend({
+  event_type: z.literal('my_custom_event'),
+  event_properties: z.object({
+    // Your custom properties with validation
+    count: z.number().int().positive(),
+    status: z.enum(['active', 'inactive']),
+  }),
+})
+```
+
+If validation fails, a `ZodError` will be thrown, preventing invalid data from being sent to Amplitude.
 
 ### route-utilities
 

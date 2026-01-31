@@ -81,6 +81,7 @@ export {
   type CreateApiTrackingEventFn,
 } from './plugins/amplitude/amplitudePlugin.js'
 export { Amplitude } from './plugins/amplitude/Amplitude.js'
+export { FakeAmplitude } from './plugins/amplitude/FakeAmplitude.js'
 export {
   AmplitudeAdapter,
   AMPLITUDE_BASE_MESSAGE_SCHEMA,
