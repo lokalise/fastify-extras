@@ -76,7 +76,7 @@
         "fastify": "^5.7.2",
         "fastify-type-provider-zod": "^6.0.0",
         "ioredis": "^5.6.1",
-        "newrelic": "13.10.0",
+        "newrelic": "13.11.0",
         "pino": "^10.0.0",
         "pino-pretty": "^13.1.1",
         "rimraf": "^6.0.1",
