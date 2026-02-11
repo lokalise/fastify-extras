@@ -15,6 +15,7 @@ Reusable plugins for Fastify.
   - [Bull MQ Metrics Plugin](#bullmq-metrics-plugin)
   - [NewRelic Transaction Manager Plugin](#newrelic-transaction-manager-plugin)
   - [OpenTelemetry Transaction Manager Plugin](#opentelemetry-transaction-manager-plugin)
+  - [Datadog Transaction Manager Plugin](#datadog-transaction-manager-plugin)
   - [UnhandledException Plugin](#unhandledexception-plugin)
 
 ## Dependency Management
@@ -36,6 +37,7 @@ The following needs to be taken into consideration when adding new runtime depen
 
 - `@fastify/jwt`;
 - `@opentelemetry/api`;
+- `dd-trace`;
 - `fastify`;
 - `newrelic`;
 - `pino`;
@@ -381,6 +383,60 @@ manager.stop('job-123', true) // true = successful
 ```
 
 > **Note:** This plugin requires `@opentelemetry/api` as a peer dependency. Make sure your application has OpenTelemetry configured with appropriate exporters (e.g., OTLP exporter) to send traces to your observability backend.
+
+### Datadog Transaction Manager Plugin
+
+Plugin to create custom Datadog APM spans for background jobs using `dd-trace`. This is an alternative to the NewRelic and OpenTelemetry Transaction Manager plugins for applications using Datadog for observability.
+
+**Important:** The Datadog tracer must be pre-initialized before your application starts. Use the `--import` flag to load the tracer:
+
+```bash
+node --import dd-trace/initialize.mjs app.js
+```
+
+The plugin does **not** call `tracer.init()` — it expects the tracer to already be running when the plugin loads.
+
+Add the plugin to your Fastify instance by registering it with the following options:
+
+- `isEnabled`, if `true` the plugin will create spans using the Datadog tracer.
+
+The plugin decorates your Fastify instance with a `DatadogTransactionManager`, which implements the `TransactionObservabilityManager` interface from `@lokalise/node-core`. You can inject and use the following methods:
+
+- `start(transactionName, uniqueTransactionKey)`, starts a background span with the provided name and stores it by the unique key;
+- `startWithGroup(transactionName, uniqueTransactionKey, transactionGroup)`, starts a background span with an additional `transaction.group` tag;
+- `stop(uniqueTransactionKey)`, ends the span referenced by the unique key;
+- `addCustomAttribute(attrName, attrValue)`, adds a custom tag to the currently active span. `attrValue` can be a string, number, or boolean;
+- `addCustomAttributes(uniqueTransactionKey, atts)`, adds multiple tags to the span identified by the unique key;
+- `setUserID(userId)`, sets the `usr.id` tag on the active span (Datadog convention);
+- `setControllerName(name, action)`, sets `code.namespace` and `code.function` tags on the active span.
+
+Example usage:
+
+```typescript
+import { datadogTransactionManagerPlugin } from '@lokalise/fastify-extras'
+
+// Register the plugin
+await app.register(datadogTransactionManagerPlugin, {
+  isEnabled: true,
+})
+
+// Use in your application
+const manager = app.datadogTransactionManager
+
+// Start a transaction
+manager.start('process-email-job', 'job-123')
+
+// Add custom attributes
+manager.addCustomAttributes('job-123', {
+  jobType: 'email',
+  recipient: 'user@example.com',
+})
+
+// End the transaction
+manager.stop('job-123')
+```
+
+> **Note:** This plugin requires `dd-trace` as a peer dependency (`>=5.0.0`). The tracer must be initialized externally via `node --import dd-trace/initialize.mjs app.js` — the plugin only obtains the already-running tracer singleton.
 
 ### Amplitude Plugin
 

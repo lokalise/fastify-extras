@@ -25,6 +25,12 @@ export {
 export type { OpenTelemetryTransactionManagerOptions } from './plugins/openTelemetryTransactionManagerPlugin.js'
 
 export {
+  datadogTransactionManagerPlugin,
+  DatadogTransactionManager,
+} from './plugins/datadogTransactionManagerPlugin.js'
+export type { DatadogTransactionManagerOptions } from './plugins/datadogTransactionManagerPlugin.js'
+
+export {
   splitIOFeatureManagerPlugin,
   SplitIOFeatureManager,
 } from './plugins/splitIOFeatureManagerPlugin.js'
