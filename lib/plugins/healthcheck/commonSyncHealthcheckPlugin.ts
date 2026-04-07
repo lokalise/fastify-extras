@@ -1,3 +1,4 @@
+import { isError } from '@lokalise/node-core'
 import type { FastifyPluginCallback } from 'fastify'
 import fp from 'fastify-plugin'
 import type { AnyFastifyInstance } from '../pluginsCommon.js'
@@ -95,7 +96,12 @@ function addRoute(
 
       if (opts.healthChecks.length) {
         const results = opts.healthChecks.map((healthcheck) => {
-          const healthcheckError = healthcheck.checker(app)
+          let healthcheckError: Error | null
+          try {
+            healthcheckError = healthcheck.checker(app)
+          } catch (err) {
+            healthcheckError = isError(err) ? err : new Error(String(err))
+          }
           if (healthcheckError) {
             app.log.error(healthcheckError, `${healthcheck.name} healthcheck has failed`)
           }

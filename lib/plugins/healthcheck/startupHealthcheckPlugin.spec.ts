@@ -14,6 +14,9 @@ const positiveHealthcheckChecker: HealthChecker = () => {
 const negativeHealthcheckChecker: HealthChecker = () => {
   return Promise.resolve({ error: new Error('Something exploded') })
 }
+const throwingHealthcheckChecker: HealthChecker = () => {
+  throw new Error('Connection refused')
+}
 
 async function initApp(opts: StartupHealthcheckPluginOptions) {
   const app = fastify()
@@ -76,6 +79,37 @@ describe('startupHealthcheckPlugin', () => {
             name: 'check1',
             isMandatory: true,
             checker: positiveHealthcheckChecker,
+          },
+          {
+            name: 'check2',
+            isMandatory: true,
+            checker: positiveHealthcheckChecker,
+          },
+        ],
+      })
+    })
+
+    it('handles checker that throws as a failed healthcheck', async () => {
+      await expect(
+        initApp({
+          healthChecks: [
+            {
+              name: 'check1',
+              isMandatory: true,
+              checker: throwingHealthcheckChecker,
+            },
+          ],
+        }),
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Healthchecks failed: ["check1"]]`)
+    })
+
+    it('app starts if throwing checker is optional', async () => {
+      app = await initApp({
+        healthChecks: [
+          {
+            name: 'check1',
+            isMandatory: false,
+            checker: throwingHealthcheckChecker,
           },
           {
             name: 'check2',
