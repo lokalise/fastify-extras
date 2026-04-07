@@ -1,3 +1,4 @@
+import { type Either, isError } from '@lokalise/node-core'
 import type { FastifyPluginCallback } from 'fastify'
 import fp from 'fastify-plugin'
 import type { AnyFastifyInstance } from '../pluginsCommon.js'
@@ -45,17 +46,21 @@ function plugin(
 
       if (opts.healthChecks.length) {
         const results = await Promise.all(
-          opts.healthChecks.map((healthcheck) => {
-            return healthcheck.checker(app).then((result) => {
-              if (result.error) {
-                app.log.error(result.error, `${healthcheck.name} healthcheck has failed`)
-              }
-              return {
-                name: healthcheck.name,
-                result,
-                isMandatory: healthcheck.isMandatory,
-              }
-            })
+          opts.healthChecks.map(async (healthcheck) => {
+            let result: Either<Error, true>
+            try {
+              result = await healthcheck.checker(app)
+            } catch (err) {
+              result = { error: isError(err) ? err : new Error(String(err)) }
+            }
+            if (result.error) {
+              app.log.error(result.error, `${healthcheck.name} healthcheck has failed`)
+            }
+            return {
+              name: healthcheck.name,
+              result,
+              isMandatory: healthcheck.isMandatory,
+            }
           }),
         )
 

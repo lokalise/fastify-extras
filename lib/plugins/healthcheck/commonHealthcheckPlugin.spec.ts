@@ -14,6 +14,9 @@ const positiveHealthcheckChecker: HealthChecker = () => {
 const negativeHealthcheckChecker: HealthChecker = () => {
   return Promise.resolve({ error: new Error('Something exploded') })
 }
+const throwingHealthcheckChecker: HealthChecker = () => {
+  throw new Error('Connection refused')
+}
 
 async function initApp(opts: CommonHealthcheckPluginOptions) {
   const app = fastify()
@@ -315,6 +318,35 @@ describe('commonHealthcheckPlugin', () => {
             },
           },
         ],
+      })
+    })
+
+    it('handles checker that throws an error as a failed healthcheck', async () => {
+      app = await initApp({
+        responsePayload: { version: 1 },
+        healthChecks: [
+          {
+            name: 'check1',
+            isMandatory: false,
+            checker: throwingHealthcheckChecker,
+          },
+          {
+            name: 'check2',
+            isMandatory: true,
+            checker: positiveHealthcheckChecker,
+          },
+        ],
+      })
+
+      const response = await app.inject().get(PRIVATE_ENDPOINT).end()
+      expect(response.statusCode).toBe(200)
+      expect(response.json()).toEqual({
+        heartbeat: 'PARTIALLY_HEALTHY',
+        version: 1,
+        checks: {
+          check1: 'FAIL',
+          check2: 'HEALTHY',
+        },
       })
     })
   })

@@ -1,7 +1,20 @@
+import { type Either, isError } from '@lokalise/node-core'
 import type { FastifyPluginCallback } from 'fastify'
 import fp from 'fastify-plugin'
 import { stdSerializers } from 'pino'
 import { type HealthCheck, resolveHealthcheckResults } from './commonHealthcheckPlugin.js'
+import type { HealthChecker } from './healthcheckCommons.js'
+
+async function executeHealthCheck(
+  checker: HealthChecker,
+  app: Parameters<HealthChecker>[0],
+): Promise<Either<Error, true>> {
+  try {
+    return await checker(app)
+  } catch (err) {
+    return { error: isError(err) ? err : new Error(String(err)) }
+  }
+}
 
 export interface StartupHealthcheckPluginOptions {
   resultsLogLevel?: 'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace' | 'silent'
@@ -18,7 +31,7 @@ const plugin: FastifyPluginCallback<StartupHealthcheckPluginOptions> = (app, opt
     if (opts.healthChecks.length) {
       const results = await Promise.all(
         opts.healthChecks.map(async (healthcheck) => {
-          const result = await healthcheck.checker(app)
+          const result = await executeHealthCheck(healthcheck.checker, app)
           if (result.error) {
             app.log.error(
               {

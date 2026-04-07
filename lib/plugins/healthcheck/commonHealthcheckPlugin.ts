@@ -1,4 +1,4 @@
-import type { Either } from '@lokalise/node-core'
+import { type Either, isError } from '@lokalise/node-core'
 import type { FastifyPluginCallback } from 'fastify'
 import fp from 'fastify-plugin'
 import type { AnyFastifyInstance } from '../pluginsCommon.js'
@@ -97,7 +97,12 @@ function addRoute(
       if (opts.healthChecks.length) {
         const results = await Promise.all(
           opts.healthChecks.map(async (healthcheck) => {
-            const result = await healthcheck.checker(app)
+            let result: Either<Error, true>
+            try {
+              result = await healthcheck.checker(app)
+            } catch (err) {
+              result = { error: isError(err) ? err : new Error(String(err)) }
+            }
             if (result.error) {
               app.log.error(result.error, `${healthcheck.name} healthcheck has failed`)
             }
