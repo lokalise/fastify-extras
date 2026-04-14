@@ -120,7 +120,7 @@ function resolveResponseObject(error: FreeformRecord): ErrorResponseObject {
       return {
         statusCode: error.statusCode ?? 500,
         payload: {
-          message: error.message,
+          message: 'Internal server error',
           errorCode: 'INTERNAL_SERVER_ERROR',
         },
       }
