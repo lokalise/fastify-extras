@@ -247,6 +247,33 @@ describe('errorHandler', () => {
     })
   })
 
+  it('responds with 400 for body parsing fastify error', async () => {
+    app = await initApp(() => {}, undefined, false)
+
+    app.route({
+      method: 'POST',
+      url: '/',
+      handler: () => ({}),
+    })
+
+    await app.ready()
+
+    const response = await app
+      .inject()
+      .post('/')
+      .headers({
+        'Content-Type': 'application/json',
+      })
+      .body('{"invalid}')
+      .end()
+
+    expect(response.statusCode).toBe(400)
+    expect(response.json()).toEqual({
+      message: "Body is not valid JSON but content-type is set to 'application/json'",
+      errorCode: 'FST_ERR_CTP_INVALID_JSON_BODY',
+    })
+  })
+
   it('responds with 401 for standardized token error with invalid token', async () => {
     app = await initApp(() => {
       const err = new Error('Auth failed')
