@@ -1,3 +1,4 @@
+import { FastifyError } from '@fastify/error'
 import type { ErrorReporter } from '@lokalise/node-core'
 import {
   isError,
@@ -111,6 +112,26 @@ function resolveResponseObject(error: FreeformRecord): ErrorResponseObject {
           errorCode: 'AUTH_FAILED',
         },
       }
+    }
+  }
+
+  if (error instanceof FastifyError) {
+    if (error.statusCode === undefined || error.statusCode >= 500) {
+      return {
+        statusCode: error.statusCode ?? 500,
+        payload: {
+          message: 'Internal server error',
+          errorCode: 'INTERNAL_SERVER_ERROR',
+        },
+      }
+    }
+
+    return {
+      statusCode: error.statusCode,
+      payload: {
+        message: error.message,
+        errorCode: error.code,
+      },
     }
   }
 
