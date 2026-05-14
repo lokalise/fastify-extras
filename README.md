@@ -13,7 +13,6 @@ Reusable plugins for Fastify.
   - [BugSnag Plugin](#bugsnag-plugin)
   - [Metrics Plugin](#metrics-plugin)
   - [Bull MQ Metrics Plugin](#bullmq-metrics-plugin)
-  - [NewRelic Transaction Manager Plugin](#newrelic-transaction-manager-plugin)
   - [OpenTelemetry Transaction Manager Plugin](#opentelemetry-transaction-manager-plugin)
   - [Datadog Transaction Manager Plugin](#datadog-transaction-manager-plugin)
   - [UnhandledException Plugin](#unhandledexception-plugin)
@@ -39,7 +38,6 @@ The following needs to be taken into consideration when adding new runtime depen
 - `@opentelemetry/api`;
 - `dd-trace`;
 - `fastify`;
-- `newrelic`;
 - `pino`;
 - `bullmq`;
 
@@ -305,24 +303,9 @@ This plugin exposes `bullMqMetrics.collect()` method on the Fastify instance to 
 
 If something goes wrong while starting the BullMQ metrics plugin, an `Error` is thrown.
 
-### NewRelic Transaction Manager Plugin
-
-Plugin to create custom NewRelic spans for background jobs.
-
-Add the plugin to your Fastify instance by registering it with the following options:
-
-- `isEnabled`.
-
-The plugin decorates your Fastify instance with a `NewRelicTransactionManager`, which you can inject and use to leverage the following methods:
-
-- `start()`, which takes a `jobName`, and starts a background transaction with the provided name;
-- `stop()`, which takes a `jobId`, and ends the background transaction referenced by the ID;
-- `addCustomAttribute()`, which takes `attrName` and `attrValue` and adds the custom attribute to the current transaction. `attrValue` can be a string, a number, or a boolean.
-- `addCustomAttributes()`, which passes `atts` map of the custom attributes to the current transaction. `_uniqueTransactionKey` argument is not used (because New Relic doesn't support setting custom attributes directly on the transaction handle), any string can be passed.
-
 ### OpenTelemetry Transaction Manager Plugin
 
-Plugin to create custom OpenTelemetry spans for background jobs. This is an alternative to the NewRelic Transaction Manager Plugin for applications using OpenTelemetry for observability.
+Plugin to create custom OpenTelemetry spans for background jobs.
 
 Add the plugin to your Fastify instance by registering it with the following options:
 
@@ -386,7 +369,7 @@ manager.stop('job-123', true) // true = successful
 
 ### Datadog Transaction Manager Plugin
 
-Plugin to create custom Datadog APM spans for background jobs using `dd-trace`. This is an alternative to the NewRelic and OpenTelemetry Transaction Manager plugins for applications using Datadog for observability.
+Plugin to create custom Datadog APM spans for background jobs using `dd-trace`. This is an alternative to the OpenTelemetry Transaction Manager plugin for applications using Datadog for observability.
 
 **Important:** The Datadog tracer must be pre-initialized before your application starts. Use the `--import` flag to load the tracer:
 

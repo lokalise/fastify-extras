@@ -13,12 +13,6 @@ export {
 export type { BaseRequestContext as RequestContext } from './plugins/requestContextProviderPlugin.js'
 
 export {
-  newrelicTransactionManagerPlugin,
-  NewRelicTransactionManager,
-} from './plugins/newrelicTransactionManagerPlugin.js'
-export type { NewRelicTransactionManagerOptions } from './plugins/newrelicTransactionManagerPlugin.js'
-
-export {
   openTelemetryTransactionManagerPlugin,
   OpenTelemetryTransactionManager,
 } from './plugins/openTelemetryTransactionManagerPlugin.js'
