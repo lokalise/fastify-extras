@@ -74,7 +74,7 @@
         "bullmq": "^5.67.1",
         "dd-trace": "^5.85.0",
         "fastify": "^5.7.2",
-        "fastify-type-provider-zod": "^6.0.0",
+        "fastify-type-provider-zod": "^7.0.0",
         "ioredis": "^5.6.1",
         "pino": "^10.0.0",
         "pino-pretty": "^13.1.1",
