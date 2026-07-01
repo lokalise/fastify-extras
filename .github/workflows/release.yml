@@ -18,7 +18,7 @@ jobs:
       contents: write  # Required for git operations
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: main
           fetch-depth: 0 # fetch all commits so auto-changelog is correctly generating
