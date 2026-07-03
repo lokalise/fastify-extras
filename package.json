@@ -43,7 +43,7 @@
         "@splitsoftware/splitio": "^11.6.0",
         "@supercharge/promise-pool": "^3.2.0",
         "fastify-metrics": "^13.2.0",
-        "fastify-plugin": "^5.0.1",
+        "fastify-plugin": "^6.0.0",
         "prom-client": "^15.1.3",
         "toad-cache": "^3.7.4"
     },
