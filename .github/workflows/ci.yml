@@ -14,28 +14,32 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
 
       - name: Install
         run: |
-          npm install
+          pnpm install --frozen-lockfile
 
       - name: Start Docker
-        run: npm run docker:start
+        run: pnpm run docker:start
 
       - name: Build TS
         run: |
-          npm run build
+          pnpm run build
 
       - name: Run Tests
         run: |
-          npm run test:ci
+          pnpm run test:ci
 
       - name: Stop Docker
-        run: npm run docker:stop
+        run: pnpm run docker:stop
 
   automerge:
     needs: build

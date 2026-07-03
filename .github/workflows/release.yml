@@ -23,18 +23,22 @@ jobs:
           ref: main
           fetch-depth: 0 # fetch all commits so auto-changelog is correctly generating
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
           node-version: 24.x
           scope: '@lokalise'
           registry-url: 'https://registry.npmjs.org'
+          cache: 'pnpm'
 
       - name: Install Dependencies
-        run: npm install
+        run: pnpm install --frozen-lockfile
 
       - name: Build Package
-        run: npm run build
+        run: pnpm run build
 
       - name: Setup git config
         run: |
