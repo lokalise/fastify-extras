@@ -86,7 +86,7 @@
         "zod": "^4.1.12"
     },
     "engines": {
-        "node": ">=20"
+        "node": ">=22"
     },
     "packageManager": "pnpm@11.9.0"
 }
