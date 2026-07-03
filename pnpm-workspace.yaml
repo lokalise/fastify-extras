@@ -1,0 +1,16 @@
+allowBuilds:
+  '@biomejs/biome': true
+  '@datadog/native-appsec': true
+  '@datadog/native-iast-taint-tracking': true
+  '@datadog/native-metrics': true
+  '@datadog/pprof': true
+  msgpackr-extract: true
+# Packages that were still within pnpm's default minimumReleaseAge window when
+# this lockfile was generated. Exempted so installs (incl. CI) don't fail the
+# supply-chain age check on these freshly published versions.
+minimumReleaseAgeExclude:
+  - '@opentelemetry/api-logs@0.220.0'
+  - dd-trace@5.111.0
+  - import-in-the-middle@3.3.0
+  - picomatch@4.0.5
+  - toad-cache@3.7.4

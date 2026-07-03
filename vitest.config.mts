@@ -6,12 +6,9 @@ export default defineConfig({
     globals: true,
     watch: false,
     setupFiles: ['./test/setup.ts'],
-    poolOptions: {
-      threads: {
-        singleThread: true,
-      },
-    },
     pool: 'threads',
+    maxWorkers: 1,
+    isolate: false,
     environment: 'node',
     reporters: ['verbose'],
     restoreMocks: true,

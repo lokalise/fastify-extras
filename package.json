@@ -27,7 +27,7 @@
         "build": "rimraf dist && tsc --project tsconfig.build.json",
         "test": "vitest",
         "test:coverage": "vitest --coverage",
-        "test:ci": "npm run lint && npm run test:coverage",
+        "test:ci": "pnpm run lint && pnpm run test:coverage",
         "lint": "biome check . && tsc",
         "lint:fix": "biome check --write",
         "docker:start": "docker compose -f docker-compose.yml up --build -d redis && docker compose -f docker-compose.yml up --build -d wait_for_redis",
@@ -37,13 +37,15 @@
     "dependencies": {
         "@amplitude/analytics-node": "^1.5.7",
         "@bugsnag/js": "^8.4.0",
+        "@bugsnag/node": "^8.4.0",
+        "@fastify/error": "^4.2.0",
         "@lokalise/error-utils": "^3.0.0",
         "@splitsoftware/splitio": "^11.6.0",
         "@supercharge/promise-pool": "^3.2.0",
         "fastify-metrics": "^13.2.0",
         "fastify-plugin": "^5.0.1",
         "prom-client": "^15.1.3",
-        "toad-cache": "^3.7.0"
+        "toad-cache": "^3.7.4"
     },
     "peerDependencies": {
         "@fastify/jwt": ">=9.1.0",
@@ -52,10 +54,10 @@
         "@lokalise/node-core": ">=14.0.0",
         "@opentelemetry/api": ">=1.9.0",
         "bullmq": "^5.19.0",
+        "dd-trace": ">=5.0.0",
         "fastify": "^5.7.1",
         "fastify-type-provider-zod": ">=6.0.0",
         "ioredis": "^5.7.0",
-        "dd-trace": ">=5.0.0",
         "pino": ">=9.9.0",
         "zod": ">=4.1.5"
     },
@@ -63,13 +65,13 @@
         "@amplitude/analytics-types": "^2.10.0",
         "@biomejs/biome": "^1.9.4",
         "@lokalise/backend-http-client": "10.1.0",
-        "@opentelemetry/api": "^1.9.0",
         "@lokalise/background-jobs-common": "^14.0.2",
         "@lokalise/biome-config": "^2.0.0",
         "@lokalise/node-core": "^14.4.2",
         "@lokalise/tsconfig": "^3.0.0",
+        "@opentelemetry/api": "^1.9.0",
         "@types/node": "^24.7.0",
-        "@vitest/coverage-v8": "^3.2.4",
+        "@vitest/coverage-v8": "^4.1.9",
         "auto-changelog": "^2.4.0",
         "bullmq": "^5.67.1",
         "dd-trace": "^5.85.0",
@@ -80,10 +82,11 @@
         "pino-pretty": "^13.1.1",
         "rimraf": "^6.0.1",
         "typescript": "^5.9.3",
-        "vitest": "^3.2.4",
+        "vitest": "^4.1.9",
         "zod": "^4.1.12"
     },
     "engines": {
-        "node": ">=20"
-    }
+        "node": ">=22"
+    },
+    "packageManager": "pnpm@11.9.0"
 }
