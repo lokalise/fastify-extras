@@ -16,7 +16,7 @@ importers:
         version: 8.10.0
       '@bugsnag/node':
         specifier: ^8.4.0
-        version: 8.9.0
+        version: 8.10.0
       '@fastify/error':
         specifier: ^4.2.0
         version: 4.2.0
@@ -221,9 +221,6 @@ packages:
 
   '@bugsnag/node@8.10.0':
     resolution: {integrity: sha512-xLDSk3EBUDIAwYyECxzdEpsgZv6Mwn/WAV57vQBiKsTgia7cnjE83VeR9O6uu4oAUhye160LAVzRCvmJNac+nw==}
-
-  '@bugsnag/node@8.9.0':
-    resolution: {integrity: sha512-WpogbMCY8/Rmg+1nsetp3GcPnXj5rpK1YxSmgEfiBM8B2nr/riYqrzuXIkrb1FZN1ti+Hfn1IecRAyGx3rUBBA==}
 
   '@bugsnag/safe-json-stringify@6.1.0':
     resolution: {integrity: sha512-ImA35rnM7bGr+J30R979FQ95BhRB4UO1KfJA0J2sVqc8nwnrS9hhE5mkTmQWMs8Vh1Da+hkLKs5jJB4JjNZp4A==}
@@ -1759,15 +1756,6 @@ snapshots:
       '@bugsnag/node': 8.10.0
 
   '@bugsnag/node@8.10.0':
-    dependencies:
-      '@bugsnag/core': 8.9.0
-      byline: 5.0.0
-      error-stack-parser: 2.1.4
-      iserror: 0.0.2
-      pump: 3.0.4
-      stack-generator: 2.0.10
-
-  '@bugsnag/node@8.9.0':
     dependencies:
       '@bugsnag/core': 8.9.0
       byline: 5.0.0
