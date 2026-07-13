@@ -59,7 +59,7 @@ importers:
         version: 10.1.0(@lokalise/api-contracts@6.15.0(zod@4.4.3))(@lokalise/node-core@14.8.1(zod@4.4.3))(zod@4.4.3)
       '@lokalise/background-jobs-common':
         specifier: ^14.0.2
-        version: 14.4.1(bullmq@5.79.2)(ioredis@5.11.1)(pino@10.3.1)(toad-scheduler@4.0.1)(zod@4.4.3)
+        version: 14.4.1(bullmq@5.80.2)(ioredis@5.11.1)(pino@10.3.1)(toad-scheduler@4.0.1)(zod@4.4.3)
       '@lokalise/biome-config':
         specifier: ^2.0.0
         version: 2.0.0
@@ -83,7 +83,7 @@ importers:
         version: 2.6.0
       bullmq:
         specifier: ^5.67.1
-        version: 5.79.2
+        version: 5.80.2
       dd-trace:
         specifier: ^6.0.0
         version: 6.2.0(@openfeature/server-sdk@1.22.0(@openfeature/core@1.11.0))
@@ -790,8 +790,8 @@ packages:
     resolution: {integrity: sha512-7oFy703dxfY3/NLxC1fh2SUCQ0H9rmAY+5EpDVfXjUTTs+HEwR2nYaqLv+GWcTsumwxPfiz6CzCNkwXwBUwqCA==}
     engines: {node: 18 || 20 || >=22}
 
-  bullmq@5.79.2:
-    resolution: {integrity: sha512-FebD+8XCZl/hnS1R4to24L4EAN70XSndKZO0776M36vGRk5MKVhKlNFM8/34zXLXKyYB4QaeIPFhVXSYYGTHpQ==}
+  bullmq@5.80.2:
+    resolution: {integrity: sha512-IobIZd0xFtpnw9W9RdqDX45nfdI2QSmq8rudMj99p3V5mIm9v4I3uPObqKj7i+6Xfd8Lzs3n1p+YNB7s6ykF4Q==}
     engines: {node: '>=12.22.0'}
     peerDependencies:
       redis: '>=5.0.0'
@@ -1921,11 +1921,11 @@ snapshots:
       undici-retry: 7.0.0(undici@7.28.0)
       zod: 4.4.3
 
-  '@lokalise/background-jobs-common@14.4.1(bullmq@5.79.2)(ioredis@5.11.1)(pino@10.3.1)(toad-scheduler@4.0.1)(zod@4.4.3)':
+  '@lokalise/background-jobs-common@14.4.1(bullmq@5.80.2)(ioredis@5.11.1)(pino@10.3.1)(toad-scheduler@4.0.1)(zod@4.4.3)':
     dependencies:
       '@lokalise/id-utils': 3.0.1
       '@lokalise/node-core': 14.8.1(zod@4.4.3)
-      bullmq: 5.79.2
+      bullmq: 5.80.2
       ioredis: 5.11.1
       pino: 10.3.1
       redis-semaphore: 5.7.0(ioredis@5.11.1)
@@ -2302,7 +2302,7 @@ snapshots:
     dependencies:
       balanced-match: 4.0.4
 
-  bullmq@5.79.2:
+  bullmq@5.80.2:
     dependencies:
       cron-parser: 4.9.0
       ioredis: 5.10.1
