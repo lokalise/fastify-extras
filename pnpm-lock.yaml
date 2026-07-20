@@ -55,8 +55,8 @@ importers:
         specifier: ^1.9.4
         version: 1.9.4
       '@lokalise/backend-http-client':
-        specifier: 10.1.0
-        version: 10.1.0(@lokalise/api-contracts@6.15.0(zod@4.4.3))(@lokalise/node-core@14.8.1(zod@4.4.3))(zod@4.4.3)
+        specifier: 12.0.0
+        version: 12.0.0(@lokalise/api-contracts@6.15.0(zod@4.4.3))(@lokalise/node-core@14.8.1(zod@4.4.3))(zod@4.4.3)
       '@lokalise/background-jobs-common':
         specifier: ^14.0.2
         version: 14.4.2(bullmq@5.80.9)(ioredis@5.11.1)(pino@10.3.1)(toad-scheduler@4.0.1)(zod@4.4.3)
@@ -316,10 +316,10 @@ packages:
     peerDependencies:
       zod: '>=3.25.56'
 
-  '@lokalise/backend-http-client@10.1.0':
-    resolution: {integrity: sha512-NthacVVnuLA8U5ckOlp6jjQM/CNa+VKLQU9ErAiAK/gGx9h4ZkAXW3pbkyHMqoaTEZPxVXAnke2f8phmIpBigg==}
+  '@lokalise/backend-http-client@12.0.0':
+    resolution: {integrity: sha512-JKhyW27ndRq8z27FxWH4VCr7yq1y7hlNJI/jjwIxoU8KT8R9vQed1UdycoyshVldUciMh+ERAZvBEMcw8rAMTA==}
     peerDependencies:
-      '@lokalise/api-contracts': '>=6.0.0'
+      '@lokalise/api-contracts': '>=6.9.0'
       '@lokalise/node-core': '>=13.1.0'
       zod: '>=3.25.56'
 
@@ -1269,6 +1269,10 @@ packages:
     engines: {node: '>= 0.10'}
     hasBin: true
 
+  parse-sse@0.1.0:
+    resolution: {integrity: sha512-8bObUwtEuLp2Z1gP6iRVMBzmEqaU5ohmofa3WmZVFfFZFKRP/+c03y8NVYzzXmQMotQ6mDS5Mnyk6tT1gKOTcQ==}
+    engines: {node: '>=20'}
+
   path-scurry@2.0.2:
     resolution: {integrity: sha512-3O/iVVsJAPsOnpwWIeD+d6z/7PmqApyQePUtCndjatj/9I5LylHvt5qluFaBT3I5h3r1ejfR056c+FCv+NnNXg==}
     engines: {node: 18 || 20 || >=22}
@@ -1514,18 +1518,12 @@ packages:
     resolution: {integrity: sha512-xY7c8LPyzvhvew0Fn+Ek3wBC9STZAuDI/Y5andCKi9AX6/jvfaX45PhsDX8oxgPL0YFp0Jhr8qWMbS/p9375Xg==}
     engines: {node: '>=16'}
 
-  undici-retry@7.0.0:
-    resolution: {integrity: sha512-YNgxsPG6AmESygWFP62Gxb1I5qVQfadylYIWUoiJ9U7yqP8oeLXu1QY+NhoTc+ROTOqG6brF+6z2R1J4fBO+iw==}
-    engines: {node: '>=20'}
-    peerDependencies:
-      undici: '>=7.0.0'
-
   undici-types@7.18.2:
     resolution: {integrity: sha512-AsuCzffGHJybSaRrmr5eHr81mwJU3kjw6M+uprWvCXiNeN9SOGwQ3Jn8jb8m3Z6izVgknn1R0FTCEAP2QrLY/w==}
 
-  undici@7.28.0:
-    resolution: {integrity: sha512-cRZYrTDwWznlnRiPjggAGxZXanty6M8RV1ff8Wm4LWXBp7/IG8v5DnOm74DtUBp9OONpK75YlPnIjQqX0dBDtA==}
-    engines: {node: '>=20.18.1'}
+  undici@8.7.0:
+    resolution: {integrity: sha512-N7iQtfyLhIMOFgQubvmLV26svHpO0bqKnAiWotTQCVKCmWrcGbBotPuW1x+xwYZ2VHdSTVUfPQQnlEt1/LouTQ==}
+    engines: {node: '>=22.19.0'}
 
   unfetch@4.2.0:
     resolution: {integrity: sha512-F9p7yYCn6cIW9El1zi0HI6vqpeIvBsr3dSuRO6Xuppb1u5rXpCPmMvLSyECLhybr9isec8Ohl0hPekMVrEinDA==}
@@ -1885,12 +1883,12 @@ snapshots:
     dependencies:
       zod: 4.4.3
 
-  '@lokalise/backend-http-client@10.1.0(@lokalise/api-contracts@6.15.0(zod@4.4.3))(@lokalise/node-core@14.8.1(zod@4.4.3))(zod@4.4.3)':
+  '@lokalise/backend-http-client@12.0.0(@lokalise/api-contracts@6.15.0(zod@4.4.3))(@lokalise/node-core@14.8.1(zod@4.4.3))(zod@4.4.3)':
     dependencies:
       '@lokalise/api-contracts': 6.15.0(zod@4.4.3)
       '@lokalise/node-core': 14.8.1(zod@4.4.3)
-      undici: 7.28.0
-      undici-retry: 7.0.0(undici@7.28.0)
+      parse-sse: 0.1.0
+      undici: 8.7.0
       zod: 4.4.3
 
   '@lokalise/background-jobs-common@14.4.2(bullmq@5.80.9)(ioredis@5.11.1)(pino@10.3.1)(toad-scheduler@4.0.1)(zod@4.4.3)':
@@ -2744,6 +2742,8 @@ snapshots:
 
   parse-github-url@1.0.4: {}
 
+  parse-sse@0.1.0: {}
+
   path-scurry@2.0.2:
     dependencies:
       lru-cache: 11.5.1
@@ -2978,13 +2978,9 @@ snapshots:
     dependencies:
       layerr: 3.0.0
 
-  undici-retry@7.0.0(undici@7.28.0):
-    dependencies:
-      undici: 7.28.0
-
   undici-types@7.18.2: {}
 
-  undici@7.28.0: {}
+  undici@8.7.0: {}
 
   unfetch@4.2.0: {}
 
