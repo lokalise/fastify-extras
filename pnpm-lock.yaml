@@ -10,7 +10,7 @@ importers:
     dependencies:
       '@amplitude/analytics-node':
         specifier: ^1.5.7
-        version: 1.5.63
+        version: 1.5.66
       '@bugsnag/js':
         specifier: ^8.4.0
         version: 8.10.0
@@ -120,11 +120,11 @@ packages:
   '@amplitude/analytics-connector@1.6.5':
     resolution: {integrity: sha512-EcDT+E4vliT7WAeOCbyE4rNkTUdLMR9dGCETX+36U7gAROr8jARG6ObhW7TTWdoYDlUe25IllZnRKdXHRKlWJQ==}
 
-  '@amplitude/analytics-core@2.52.1':
-    resolution: {integrity: sha512-1gYgylvL/SODKuzKNLq3G5xhp5giEWap9OwWbBsCwlBgTmt9nk0TlmuuadJj80u9CwBDFLLpmHuHimD8nPnX2Q==}
+  '@amplitude/analytics-core@2.53.1':
+    resolution: {integrity: sha512-YU5fyCm23N6d5dw+Y1KIXUe5x74qoplYaW9n/CErBEFBitBzgiaxctKrKrdsTbDTpKiwU8dGW19zbbTBnFs9aw==}
 
-  '@amplitude/analytics-node@1.5.63':
-    resolution: {integrity: sha512-grRVGjDIQG2+mkFEkkAgXTAe6ybd/IhnQi7aqH5XffEa3PI8VQxKRyWDafQqs80VNwmxj5c1BRZddd1ChxpyLA==}
+  '@amplitude/analytics-node@1.5.66':
+    resolution: {integrity: sha512-JwUBGcB3Xwps2az1v7BEs4B5/DEKB2LdJpAzs9umwH4uFLnDCaxiswgbFdwPmc1yUCnrYWTiv21eZxhUKZFwoA==}
 
   '@amplitude/analytics-types@2.11.1':
     resolution: {integrity: sha512-wFEgb0t99ly2uJKm5oZ28Lti0Kh5RecR5XBkwfUpDzn84IoCIZ8GJTsMw/nThu8FZFc7xFDA4UAt76zhZKrs9A==}
@@ -923,6 +923,9 @@ packages:
   fast-uri@3.1.3:
     resolution: {integrity: sha512-i70LwGWUduXqzicKXWshooq+sWL1K3WUU5rKZNG/0i3a1OSoX3HqhH5WbWwTmqWfor4urUakGPiRQcleRZTwOg==}
 
+  fast-uri@3.1.4:
+    resolution: {integrity: sha512-8JnbkQ4juDyvYs4mgFGQqg4yCYtFDtUtmp2QIQq11ZZe5CFQ5wcqm1rqDgAh/QdMySuBnPzMUiJUNZG5N/AiQw==}
+
   fastfall@1.5.1:
     resolution: {integrity: sha512-KH6p+Z8AKPXnmA7+Iz2Lh8ARCMr+8WNPVludm1LGkZoD2MjY6LVnRMtTKhkdzI+jr0RzQWXKzKyBJm1zoHEL4Q==}
     engines: {node: '>=0.10.0'}
@@ -1311,8 +1314,8 @@ packages:
     resolution: {integrity: sha512-r34yH/GlQpKZbU1BvFFqOjhISRo1MNx1tWYsYvmj6KIRHSPMT2+yHOEb1SG6NMvRoHRF0a07kCOox/9yakl1vg==}
     hasBin: true
 
-  postcss@8.5.17:
-    resolution: {integrity: sha512-J7EF+8X+CzRPaJPOv9Ck2wNWJvGnnl3PcNPAdGg6GTLjyVpyQ0yATMSXRFRV01BviT/9Gwuc3rjEyJbDJG9a4w==}
+  postcss@8.5.20:
+    resolution: {integrity: sha512-lW616l85ucIQL+FocMmL7pQFPqBmwejrCMg+iPxyImlrANNJG9NHq/RkyCZopDhd8C3LA03PHRJDjkbGu8vvug==}
     engines: {node: ^10 || ^12 || >=14}
 
   pprof-format@2.2.2:
@@ -1671,7 +1674,7 @@ snapshots:
 
   '@amplitude/analytics-connector@1.6.5': {}
 
-  '@amplitude/analytics-core@2.52.1':
+  '@amplitude/analytics-core@2.53.1':
     dependencies:
       '@amplitude/analytics-connector': 1.6.5
       '@types/zen-observable': 0.8.3
@@ -1679,9 +1682,9 @@ snapshots:
       tslib: 2.8.1
       zen-observable: 0.10.0
 
-  '@amplitude/analytics-node@1.5.63':
+  '@amplitude/analytics-node@1.5.66':
     dependencies:
-      '@amplitude/analytics-core': 2.52.1
+      '@amplitude/analytics-core': 2.53.1
       tslib: 2.8.1
 
   '@amplitude/analytics-types@2.11.1': {}
@@ -2417,6 +2420,8 @@ snapshots:
 
   fast-uri@3.1.3: {}
 
+  fast-uri@3.1.4: {}
+
   fastfall@1.5.1:
     dependencies:
       reusify: 1.1.0
@@ -2583,7 +2588,7 @@ snapshots:
   json-schema-resolver@3.0.0:
     dependencies:
       debug: 4.4.3
-      fast-uri: 3.1.3
+      fast-uri: 3.1.4
       rfdc: 1.4.1
     transitivePeerDependencies:
       - supports-color
@@ -2825,7 +2830,7 @@ snapshots:
       sonic-boom: 4.2.1
       thread-stream: 4.2.0
 
-  postcss@8.5.17:
+  postcss@8.5.20:
     dependencies:
       nanoid: 3.3.16
       picocolors: 1.1.1
@@ -3028,7 +3033,7 @@ snapshots:
     dependencies:
       lightningcss: 1.32.0
       picomatch: 4.0.5
-      postcss: 8.5.17
+      postcss: 8.5.20
       rolldown: 1.1.5
       tinyglobby: 0.2.17
     optionalDependencies:
