@@ -86,7 +86,7 @@ importers:
         version: 5.80.2
       dd-trace:
         specifier: ^6.0.0
-        version: 6.2.0(@openfeature/server-sdk@1.22.0(@openfeature/core@1.11.0))
+        version: 6.4.0(@openfeature/server-sdk@1.22.0(@openfeature/core@1.11.0))
       fastify:
         specifier: ^5.7.2
         version: 5.10.0
@@ -847,8 +847,8 @@ packages:
     resolution: {integrity: sha512-TyyeGcjx0YeThAI9fTFtgsvj5qd4R+aGfVmXiUhevbgzWFDr7IK4tv4YjE6jaGzLHQTchk4h7DHdr5q4WGgaZw==}
     engines: {node: '>=12.17'}
 
-  dd-trace@6.2.0:
-    resolution: {integrity: sha512-lRsv5AvV0QUi45uFbVVi//8aS2OLk9kAC/XoAhuOnx8/GHA6Z6bYgS0u55IspW7Hz0LAGC8IwiqklrF8Keqk4g==}
+  dd-trace@6.4.0:
+    resolution: {integrity: sha512-aRcf+OXejmPmOz5mTg5zkBTAONv+JwHeszdu/sxPEuZvkBYfjHod5XChgSV0rEDwOWvSbe0kaLPdWM/umIftsw==}
     engines: {node: '>=22'}
 
   debug@4.4.3:
@@ -922,6 +922,9 @@ packages:
 
   fast-uri@3.1.3:
     resolution: {integrity: sha512-i70LwGWUduXqzicKXWshooq+sWL1K3WUU5rKZNG/0i3a1OSoX3HqhH5WbWwTmqWfor4urUakGPiRQcleRZTwOg==}
+
+  fast-uri@3.1.4:
+    resolution: {integrity: sha512-8JnbkQ4juDyvYs4mgFGQqg4yCYtFDtUtmp2QIQq11ZZe5CFQ5wcqm1rqDgAh/QdMySuBnPzMUiJUNZG5N/AiQw==}
 
   fastfall@1.5.1:
     resolution: {integrity: sha512-KH6p+Z8AKPXnmA7+Iz2Lh8ARCMr+8WNPVludm1LGkZoD2MjY6LVnRMtTKhkdzI+jr0RzQWXKzKyBJm1zoHEL4Q==}
@@ -1311,8 +1314,8 @@ packages:
     resolution: {integrity: sha512-r34yH/GlQpKZbU1BvFFqOjhISRo1MNx1tWYsYvmj6KIRHSPMT2+yHOEb1SG6NMvRoHRF0a07kCOox/9yakl1vg==}
     hasBin: true
 
-  postcss@8.5.17:
-    resolution: {integrity: sha512-J7EF+8X+CzRPaJPOv9Ck2wNWJvGnnl3PcNPAdGg6GTLjyVpyQ0yATMSXRFRV01BviT/9Gwuc3rjEyJbDJG9a4w==}
+  postcss@8.5.20:
+    resolution: {integrity: sha512-lW616l85ucIQL+FocMmL7pQFPqBmwejrCMg+iPxyImlrANNJG9NHq/RkyCZopDhd8C3LA03PHRJDjkbGu8vvug==}
     engines: {node: ^10 || ^12 || >=14}
 
   pprof-format@2.2.2:
@@ -2331,7 +2334,7 @@ snapshots:
 
   dc-polyfill@0.1.11: {}
 
-  dd-trace@6.2.0(@openfeature/server-sdk@1.22.0(@openfeature/core@1.11.0)):
+  dd-trace@6.4.0(@openfeature/server-sdk@1.22.0(@openfeature/core@1.11.0)):
     dependencies:
       dc-polyfill: 0.1.11
       import-in-the-middle: 3.3.1
@@ -2416,6 +2419,8 @@ snapshots:
   fast-safe-stringify@2.1.1: {}
 
   fast-uri@3.1.3: {}
+
+  fast-uri@3.1.4: {}
 
   fastfall@1.5.1:
     dependencies:
@@ -2583,7 +2588,7 @@ snapshots:
   json-schema-resolver@3.0.0:
     dependencies:
       debug: 4.4.3
-      fast-uri: 3.1.3
+      fast-uri: 3.1.4
       rfdc: 1.4.1
     transitivePeerDependencies:
       - supports-color
@@ -2825,7 +2830,7 @@ snapshots:
       sonic-boom: 4.2.1
       thread-stream: 4.2.0
 
-  postcss@8.5.17:
+  postcss@8.5.20:
     dependencies:
       nanoid: 3.3.16
       picocolors: 1.1.1
@@ -3028,7 +3033,7 @@ snapshots:
     dependencies:
       lightningcss: 1.32.0
       picomatch: 4.0.5
-      postcss: 8.5.17
+      postcss: 8.5.20
       rolldown: 1.1.5
       tinyglobby: 0.2.17
     optionalDependencies:
