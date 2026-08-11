@@ -1,5 +1,5 @@
 import type { FastifyInstance, FastifyPluginCallback } from 'fastify'
-import fastify from 'fastify'
+import fastify, { LogController } from 'fastify'
 import fastifyMetrics from 'fastify-metrics'
 import fp from 'fastify-plugin'
 import type { Logger } from 'pino'
@@ -28,7 +28,9 @@ function plugin(app: FastifyInstance, opts: MetricsPluginOptions, done: (err?: E
     const promServer = fastify({
       loggerInstance: opts.logger ? opts.logger : undefined,
       logger: opts.logger === false ? false : undefined,
-      disableRequestLogging: opts.disablePrometheusRequestLogging ?? true,
+      logController: new LogController({
+        disableRequestLogging: opts.disablePrometheusRequestLogging ?? true,
+      }),
     })
 
     promServer.route({
