@@ -641,6 +641,50 @@ const myEventSchema = AMPLITUDE_BASE_MESSAGE_SCHEMA.extend({
 
 If validation fails, a `ZodError` will be thrown, preventing invalid data from being sent to Amplitude.
 
+### errors
+
+#### createErrorHandler
+
+`createErrorHandler` creates a shared error handler to be passed to `fastify.setErrorHandler`. It resolves any thrown
+error to a standardized `{ message, errorCode, details? }` payload, reports 5xx errors via the provided `errorReporter`
+and logs them.
+
+Example usage:
+
+```typescript
+import { createErrorHandler } from '@lokalise/fastify-extras'
+
+app.setErrorHandler(
+  createErrorHandler({
+    errorReporter,
+    // optional overrides:
+    // resolveResponseObject: (error) => ({ statusCode, payload }) | undefined,
+    // resolveLogObject: (error) => logObject | undefined,
+  }),
+)
+```
+
+**Server-Sent Events support:**
+
+The error handler is aware of routes streaming Server-Sent Events via `@fastify/sse` (including SSE contract routes
+built with `@lokalise/fastify-api-contracts` >= 6). When an error reaches the handler while an SSE stream is live —
+detected as `reply.sse?.isConnected && reply.raw.headersSent` — the status line and headers are already committed, so a
+regular error response is impossible. Instead, the resolved error payload (the status code is ignored) is sent as a
+terminal event before closing the stream:
+
+```
+event: error
+data: {"message":"Internal server error","errorCode":"INTERNAL_SERVER_ERROR"}
+```
+
+Error reporting and logging happen for stream errors too. Both detection conditions are required: `@fastify/sse` sets
+`isConnected` in its context constructor, before the route handler runs, so the flag alone is true on every SSE-capable
+request — including ones that fail before any stream started (e.g. a response-serialization failure on the JSON
+representation of a dual JSON/SSE route). Those are still answered as regular error responses; only `headersSent`
+distinguishes an actually started stream.
+
+`@fastify/sse` is not a dependency of this package — apps without the plugin registered are completely unaffected.
+
 ### route-utilities
 
 #### authPreHandlers
