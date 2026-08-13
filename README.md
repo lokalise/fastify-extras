@@ -69,7 +69,7 @@ The `getFastifyAppLoggingConfig(appLogLevel, requestLoggingLevels?)` method is e
 - `appLogLevel`, the application log level from your app configuration;
 - `requestLoggingLevels` (optional), an array of log levels that should enable request logging. Defaults to `['debug', 'trace', 'info']`.
 
-This method returns a `disableRequestLogging` configuration that:
+This method returns a `logController` configuration that:
 - Enables request logging only when the app log level is in `requestLoggingLevels`;
 - Automatically skips logging for service utility endpoints (`/`, `/health`, `/ready`, `/live`, `/metrics`).
 
