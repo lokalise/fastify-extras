@@ -27,7 +27,7 @@ const REQUEST_LOGGING_LEVELS = ['debug', 'trace', 'info']
 export function getFastifyAppLoggingConfig(
   appLogLevel: AppConfig['logLevel'],
   requestLoggingLevels = REQUEST_LOGGING_LEVELS,
-): Pick<FastifyServerOptions, 'logController'> {
+): Pick<FastifyServerOptions, 'logController' | 'disableRequestLogging'> {
   const enableRequestLogging = requestLoggingLevels.includes(appLogLevel)
   return {
     logController: new LogController({
