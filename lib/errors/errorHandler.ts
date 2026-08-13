@@ -1,4 +1,5 @@
 import { FastifyError } from '@fastify/error'
+import type { SSEReplyInterface } from '@fastify/sse'
 import type { ErrorReporter } from '@lokalise/node-core'
 import {
   isError,
@@ -195,14 +196,17 @@ export function createErrorHandler(
       }
     }
 
+    // reply.sse is only decorated when the app registers @fastify/sse
+    const sse: SSEReplyInterface | undefined = reply.sse
+
     // headersSent distinguishes an actually started SSE stream
-    if (reply.sse?.isConnected && reply.raw.headersSent) {
+    if (sse?.isConnected && reply.raw.headersSent) {
       try {
-        await reply.sse.send({ event: 'error', data: responseObject.payload })
+        await sse.send({ event: 'error', data: responseObject.payload })
       } catch (err) {
         request.reqContext.logger.error(err, 'Failed to send SSE error')
       } finally {
-        reply.sse.close()
+        sse.close()
       }
 
       return
