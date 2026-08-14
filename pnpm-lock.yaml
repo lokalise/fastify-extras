@@ -54,6 +54,9 @@ importers:
       '@biomejs/biome':
         specifier: ^1.9.4
         version: 1.9.4
+      '@fastify/sse':
+        specifier: ^0.6.0
+        version: 0.6.0(fastify@5.11.3)
       '@lokalise/backend-http-client':
         specifier: 12.0.0
         version: 12.0.0(@lokalise/api-contracts@7.1.0(zod@4.4.3))(@lokalise/node-core@14.8.1(zod@4.4.3))(zod@4.4.3)
@@ -96,6 +99,9 @@ importers:
       ioredis:
         specifier: ^5.6.1
         version: 5.11.1
+      parse-sse:
+        specifier: ^0.1.0
+        version: 0.1.0
       pino:
         specifier: ^10.0.0
         version: 10.3.1
@@ -285,6 +291,12 @@ packages:
 
   '@fastify/proxy-addr@5.1.0':
     resolution: {integrity: sha512-INS+6gh91cLUjB+PVHfu1UqcB76Sqtpyp7bnL+FYojhjygvOPA9ctiD/JDKsyD9Xgu4hUhCSJBPig/w7duNajw==}
+
+  '@fastify/sse@0.6.0':
+    resolution: {integrity: sha512-+5g8zBbSN8ioKEfll2p6TXe75peq3uJ3/z44SakK5gNr9u6YqbOAHfTSRfXfvnUFzG97+3E055l360ruzsvgcQ==}
+    engines: {node: '>=20.20.2'}
+    peerDependencies:
+      fastify: ^5.x
 
   '@fastify/swagger@9.8.1':
     resolution: {integrity: sha512-VpHMnqZTY8iBZYJE8WWkbKPrXIYWy2rDfIf5qLr6DzZSpQYZ+KxQVcJFiq/AMlvNwI4gCBd66++iUlxXXGT0IQ==}
@@ -1823,6 +1835,12 @@ snapshots:
     dependencies:
       '@fastify/forwarded': 3.0.2
       ipaddr.js: 2.5.0
+
+  '@fastify/sse@0.6.0(fastify@5.11.3)':
+    dependencies:
+      '@fastify/error': 4.2.0
+      fastify: 5.11.3
+      fastify-plugin: 6.0.0
 
   '@fastify/swagger@9.8.1':
     dependencies:

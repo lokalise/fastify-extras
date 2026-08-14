@@ -1,4 +1,5 @@
 import { FastifyError } from '@fastify/error'
+import type { SSEReplyInterface } from '@fastify/sse'
 import type { ErrorReporter } from '@lokalise/node-core'
 import {
   isError,
@@ -158,15 +159,15 @@ export function createErrorHandler(
   request: FastifyRequest,
   reply: FastifyReply,
 ) => void {
-  return function errorHandler(
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: This fn is quite readable
+  return async function errorHandler(
     this: AnyFastifyInstance,
     error: FreeformRecord,
     request: FastifyRequest,
     reply: FastifyReply,
-  ): void {
-    const logObject = params.resolveLogObject?.(error) ?? resolveLogObject(error)
-
+  ): Promise<void> {
     const responseObject = params.resolveResponseObject?.(error) ?? resolveResponseObject(error)
+
     if (responseObject.statusCode >= 500) {
       params.errorReporter.report({
         error: isError(error) ? error : new Error('Unhandled error'),
@@ -184,6 +185,8 @@ export function createErrorHandler(
         },
       })
 
+      const logObject = params.resolveLogObject?.(error) ?? resolveLogObject(error)
+
       // Potentially request can break before we resolved the context
       if (request.reqContext) {
         // this preserves correct request id field
@@ -191,6 +194,22 @@ export function createErrorHandler(
       } else {
         request.log.error(logObject)
       }
+    }
+
+    // reply.sse is only decorated when the app registers @fastify/sse
+    const sse: SSEReplyInterface | undefined = reply.sse
+
+    // headersSent distinguishes an actually started SSE stream
+    if (sse?.isConnected && reply.raw.headersSent) {
+      try {
+        await sse.send({ event: 'error', data: responseObject.payload })
+      } catch (err) {
+        request.reqContext.logger.error(err, 'Failed to send SSE error')
+      } finally {
+        sse.close()
+      }
+
+      return
     }
 
     void reply.status(responseObject.statusCode).send(responseObject.payload)

@@ -1,7 +1,9 @@
+import fastifySSE from '@fastify/sse'
 import type { ErrorReport } from '@lokalise/node-core'
 import { InternalError, PublicNonRecoverableError } from '@lokalise/node-core'
 import { type FastifyInstance, type RouteHandlerMethod, fastify } from 'fastify'
-import { type MockInstance, afterAll, describe, expect, it, vitest } from 'vitest'
+import { type ServerSentEvent, parseServerSentEvents } from 'parse-sse'
+import { type MockInstance, afterAll, afterEach, describe, expect, it, vitest } from 'vitest'
 import { type ZodSchema, z } from 'zod/v4'
 
 import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod'
@@ -376,5 +378,151 @@ describe('errorHandler', () => {
         "message": "Invalid params",
       }
     `)
+  })
+})
+
+describe('errorHandler on SSE routes', () => {
+  async function initSseApp(
+    routeHandler: RouteHandlerMethod,
+    errorHandlerParams: Partial<ErrorHandlerParams> = {},
+  ) {
+    const app = fastify({
+      logger: true,
+      forceCloseConnections: true,
+    })
+    await app.register(fastifySSE.default)
+
+    app.setErrorHandler(
+      createErrorHandler({
+        errorReporter: {
+          report: () => {},
+        },
+        ...errorHandlerParams,
+      }),
+    )
+
+    app.route({
+      method: 'GET',
+      url: '/sse',
+      sse: 'only',
+      handler: routeHandler,
+    })
+    await app.listen({ port: 0, host: '127.0.0.1' })
+
+    return app
+  }
+
+  let app: FastifyInstance
+  afterEach(async () => {
+    await app.close()
+  })
+
+  const sseRequest = () =>
+    fetch(`${app.listeningOrigin}/sse`, {
+      headers: { accept: 'text/event-stream' },
+    })
+
+  // resolves only once the server closes the stream, so it also guards against hanging connections
+  const readSseEvents = async (response: Response) => {
+    const events: ServerSentEvent[] = []
+    for await (const event of parseServerSentEvents(response)) {
+      events.push(event)
+    }
+    return events
+  }
+
+  it('sends the resolved error payload as a terminal SSE event on a live stream', async () => {
+    const logs: ErrorReport[] = []
+    app = await initSseApp(
+      async (_, reply) => {
+        await reply.sse.send({ event: 'start', data: 'started' })
+        reply.sse.keepAlive()
+        throw new InternalError({
+          message: 'Internal error',
+          errorCode: 'INTERNAL',
+        })
+      },
+      {
+        errorReporter: {
+          report: (err) => {
+            logs.push(err)
+          },
+        },
+      },
+    )
+
+    const response = await sseRequest()
+    const events = await readSseEvents(response)
+
+    expect(response.status).toBe(200)
+    expect(response.headers.get('content-type')).toBe('text/event-stream')
+    expect(events).toEqual([
+      expect.objectContaining({ type: 'start' }),
+      expect.objectContaining({
+        type: 'error',
+        data: JSON.stringify({
+          message: 'Internal server error',
+          errorCode: 'INTERNAL_SERVER_ERROR',
+        }),
+      }),
+    ])
+    expect(logs).toEqual([
+      expect.objectContaining({
+        error: expect.objectContaining({
+          message: 'Internal error',
+          errorCode: 'INTERNAL',
+        }),
+      }),
+    ])
+  })
+
+  it('answers pre-stream errors on an SSE route as a regular error response', async () => {
+    app = await initSseApp(() => {
+      throw new Error('Generic error')
+    })
+
+    const response = await sseRequest()
+
+    expect(response.status).toBe(500)
+    expect(response.headers.get('content-type')).toContain('application/json')
+    expect(await response.json()).toEqual({
+      errorCode: 'INTERNAL_SERVER_ERROR',
+      message: 'Internal server error',
+    })
+  })
+
+  it('answers pre-stream errors on a keepAlive SSE route as a regular error response', async () => {
+    app = await initSseApp((_, reply) => {
+      // isConnected is already true here (set by the plugin before the handler ran) and keepAlive
+      // prevents the plugin from closing the context on throw, so only headersSent tells the
+      // error handler that no stream has actually started
+      reply.sse.keepAlive()
+      throw new Error('Generic error')
+    })
+
+    const response = await sseRequest()
+
+    expect(response.status).toBe(500)
+    expect(response.headers.get('content-type')).toContain('application/json')
+    expect(await response.json()).toEqual({
+      errorCode: 'INTERNAL_SERVER_ERROR',
+      message: 'Internal server error',
+    })
+  })
+
+  it('closes the stream without crashing when sending the terminal event fails', async () => {
+    app = await initSseApp(async (_, reply) => {
+      await reply.sse.send({ event: 'start', data: 'started' })
+      reply.sse.keepAlive()
+      // simulate the client being gone by the time the error handler sends the terminal event
+      reply.sse.send = () => Promise.reject(new Error('client already gone'))
+      throw new Error('Generic error')
+    })
+
+    const response = await sseRequest()
+    const events = await readSseEvents(response)
+
+    expect(response.status).toBe(200)
+    expect(events).toEqual([expect.objectContaining({ type: 'start' })])
   })
 })
