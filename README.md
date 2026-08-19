@@ -658,11 +658,23 @@ app.setErrorHandler(
   createErrorHandler({
     errorReporter,
     // optional overrides:
-    // resolveResponseObject: (error) => ({ statusCode, payload }) | undefined,
+    // resolveResponseObject: (error) => ({ statusCode, headers?, payload }) | undefined,
     // resolveLogObject: (error) => logObject | undefined,
   }),
 )
 ```
+
+**Optional hooks:**
+
+- `resolveResponseObject` — maps an error to the response; return `undefined` to fall back to the default mapping.
+  The returned object may include `headers`, which are applied to the response, e.g.
+  `resolveResponseObject: (error) => error instanceof CapacityError ? { statusCode: 503, headers: { 'retry-after': '30' }, payload } : undefined`.
+- `resolveLogObject` — builds the object logged for 5xx errors; return `undefined` to fall back to the default log
+  object.
+
+The default error-to-response mapping is exported as `defaultResolveResponseObject`, so services can reuse it
+outside the fastify handler and only prepend their own branches, e.g.
+`const responseObject = myBranches(error) ?? defaultResolveResponseObject(error)`.
 
 **Server-Sent Events support:**
 

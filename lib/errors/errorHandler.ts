@@ -28,6 +28,7 @@ const knownAuthErrors = new Set([
 
 export type ErrorResponseObject = {
   statusCode: number
+  headers?: Record<string, string>
   payload: {
     message: string
     errorCode: string
@@ -59,7 +60,7 @@ function resolveLogObject(error: unknown): FreeformRecord {
   }
 }
 
-function resolveResponseObject(error: FreeformRecord): ErrorResponseObject {
+export function defaultResolveResponseObject(error: FreeformRecord): ErrorResponseObject {
   if (isPublicNonRecoverableError(error)) {
     return {
       statusCode: error.httpStatusCode ?? 500,
@@ -166,7 +167,8 @@ export function createErrorHandler(
     request: FastifyRequest,
     reply: FastifyReply,
   ): Promise<void> {
-    const responseObject = params.resolveResponseObject?.(error) ?? resolveResponseObject(error)
+    const responseObject =
+      params.resolveResponseObject?.(error) ?? defaultResolveResponseObject(error)
 
     if (responseObject.statusCode >= 500) {
       params.errorReporter.report({
@@ -175,7 +177,7 @@ export function createErrorHandler(
           request: {
             url: request.url,
             params: request.params,
-            x: request.method,
+            method: request.method,
             routerPath: request.routeOptions.url,
           },
           'x-request-id': request.id,
@@ -187,13 +189,10 @@ export function createErrorHandler(
 
       const logObject = params.resolveLogObject?.(error) ?? resolveLogObject(error)
 
-      // Potentially request can break before we resolved the context
-      if (request.reqContext) {
-        // this preserves correct request id field
-        request.reqContext.logger.error(logObject)
-      } else {
-        request.log.error(logObject)
-      }
+      // Potentially, request can break before we resolved the context
+      const reqLogger = request.reqContext?.logger ?? request.log
+
+      reqLogger.error(logObject)
     }
 
     // reply.sse is only decorated when the app registers @fastify/sse
@@ -204,7 +203,10 @@ export function createErrorHandler(
       try {
         await sse.send({ event: 'error', data: responseObject.payload })
       } catch (err) {
-        request.reqContext.logger.error(err, 'Failed to send SSE error')
+        // Potentially, request can break before we resolved the context
+        const reqLogger = request.reqContext?.logger ?? request.log
+
+        reqLogger.error(err, 'Failed to send SSE error')
       } finally {
         sse.close()
       }
@@ -212,6 +214,9 @@ export function createErrorHandler(
       return
     }
 
-    void reply.status(responseObject.statusCode).send(responseObject.payload)
+    void reply
+      .headers(responseObject.headers ?? {})
+      .status(responseObject.statusCode)
+      .send(responseObject.payload)
   }
 }
