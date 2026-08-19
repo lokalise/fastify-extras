@@ -99,7 +99,12 @@ export {
 } from './plugins/unhandledExceptionPlugin.js'
 export type { UnhandledExceptionPluginOptions } from './plugins/unhandledExceptionPlugin.js'
 
-export { createErrorHandler, isZodError, type ErrorResponseObject } from './errors/errorHandler.js'
+export {
+  createErrorHandler,
+  isZodError,
+  defaultResolveResponseObject,
+  type ErrorResponseObject,
+} from './errors/errorHandler.js'
 export type { ErrorHandlerParams, FreeformRecord } from './errors/errorHandler.js'
 
 export { generateJwtToken, decodeJwtToken } from './jwt-utils/tokenUtils.js'

@@ -1,3 +1,4 @@
+import createError from '@fastify/error'
 import fastifySSE from '@fastify/sse'
 import type { ErrorReport } from '@lokalise/node-core'
 import { InternalError, PublicNonRecoverableError } from '@lokalise/node-core'
@@ -8,7 +9,7 @@ import { type ZodSchema, z } from 'zod/v4'
 
 import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod'
 import type { ErrorHandlerParams, FreeformRecord } from './errorHandler.js'
-import { createErrorHandler } from './errorHandler.js'
+import { createErrorHandler, defaultResolveResponseObject } from './errorHandler.js'
 
 async function initApp(
   routeHandler: RouteHandlerMethod,
@@ -104,6 +105,67 @@ describe('errorHandler', () => {
     })
   })
 
+  it('applies headers returned by the response object resolver', async () => {
+    app = await initApp(
+      () => {
+        throw new Error('Capacity exceeded')
+      },
+      {
+        resolveResponseObject: () => {
+          return {
+            statusCode: 503,
+            headers: { 'retry-after': '30' },
+            payload: {
+              message: 'Capacity exceeded',
+              errorCode: 'PROVIDER_CAPACITY_EXCEEDED',
+            },
+          }
+        },
+      },
+    )
+
+    const response = await app.inject().get('/').end()
+
+    expect(response.statusCode).toBe(503)
+    expect(response.headers['retry-after']).toBe('30')
+    expect(response.json()).toEqual({
+      message: 'Capacity exceeded',
+      errorCode: 'PROVIDER_CAPACITY_EXCEEDED',
+    })
+  })
+
+  it('does not log or report non-5xx errors by default', async () => {
+    const reports: ErrorReport[] = []
+    let warnSpy: MockInstance | undefined
+    let errorSpy: MockInstance | undefined
+
+    app = await initApp(
+      (req) => {
+        warnSpy = vitest.spyOn(req.log, 'warn')
+        errorSpy = vitest.spyOn(req.log, 'error')
+        throw new PublicNonRecoverableError({
+          message: 'Payload too large',
+          errorCode: 'PAYLOAD_TOO_LARGE',
+          httpStatusCode: 413,
+        })
+      },
+      {
+        errorReporter: {
+          report: (report) => {
+            reports.push(report)
+          },
+        },
+      },
+    )
+
+    const response = await app.inject().get('/').end()
+
+    expect(response.statusCode).toBe(413)
+    expect(warnSpy!.mock.calls).toHaveLength(0)
+    expect(errorSpy!.mock.calls).toHaveLength(0)
+    expect(reports).toHaveLength(0)
+  })
+
   it('can override logged object resolution', async () => {
     let logSpy: MockInstance | undefined
     app = await initApp(
@@ -165,10 +227,10 @@ describe('errorHandler', () => {
     expect(logEntry!.context).toMatchInlineSnapshot(`
       {
         "request": {
+          "method": "GET",
           "params": {},
           "routerPath": "/",
           "url": "/",
-          "x": "GET",
         },
         "x-request-id": "req-1",
       }
@@ -524,5 +586,84 @@ describe('errorHandler on SSE routes', () => {
 
     expect(response.status).toBe(200)
     expect(events).toEqual([expect.objectContaining({ type: 'start' })])
+  })
+})
+
+describe('defaultResolveResponseObject', () => {
+  it('maps PublicNonRecoverableError to its own status code and payload', () => {
+    const error = new PublicNonRecoverableError({
+      message: 'Conflicting state',
+      errorCode: 'CONFLICT',
+      httpStatusCode: 409,
+      details: { entityId: '1' },
+    })
+
+    expect(defaultResolveResponseObject(error)).toEqual({
+      statusCode: 409,
+      payload: {
+        message: 'Conflicting state',
+        errorCode: 'CONFLICT',
+        details: { entityId: '1' },
+      },
+    })
+  })
+
+  it('maps Zod schema validation errors to a 400 VALIDATION_ERROR', () => {
+    const validation = [
+      {
+        [Symbol.for('ZodFastifySchemaValidationError')]: true,
+        keyword: 'invalid_type',
+        instancePath: '/name',
+        schemaPath: '#/name/invalid_type',
+        message: 'Invalid input: expected string, received undefined',
+        params: { expected: 'string' },
+      },
+    ]
+    const error = Object.assign(new Error('params validation failed'), { validation })
+
+    expect(defaultResolveResponseObject(error)).toEqual({
+      statusCode: 400,
+      payload: {
+        message: 'Invalid params',
+        errorCode: 'VALIDATION_ERROR',
+        details: { error: validation },
+      },
+    })
+  })
+
+  it('maps known auth error codes to a 401 AUTH_FAILED', () => {
+    const error = Object.assign(new Error('Auth failed'), {
+      code: 'FST_JWT_AUTHORIZATION_TOKEN_INVALID',
+    })
+
+    expect(defaultResolveResponseObject(error)).toEqual({
+      statusCode: 401,
+      payload: {
+        message: 'Authorization token is invalid',
+        errorCode: 'AUTH_FAILED',
+      },
+    })
+  })
+
+  it('maps 4xx FastifyErrors to their own status code and code', () => {
+    const TeapotError = createError('ERR_TEAPOT', 'I am a teapot', 418)
+
+    expect(defaultResolveResponseObject(new TeapotError())).toEqual({
+      statusCode: 418,
+      payload: {
+        message: 'I am a teapot',
+        errorCode: 'ERR_TEAPOT',
+      },
+    })
+  })
+
+  it('falls back to a 500 for unknown values', () => {
+    expect(defaultResolveResponseObject({ foo: 'bar' })).toEqual({
+      statusCode: 500,
+      payload: {
+        message: 'Internal server error',
+        errorCode: 'INTERNAL_SERVER_ERROR',
+      },
+    })
   })
 })
