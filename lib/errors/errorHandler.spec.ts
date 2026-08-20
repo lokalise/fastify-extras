@@ -8,7 +8,7 @@ import { type MockInstance, afterAll, afterEach, describe, expect, it, vitest } 
 import { type ZodSchema, z } from 'zod/v4'
 
 import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod'
-import type { ErrorHandlerParams, FreeformRecord } from './errorHandler.js'
+import type { ErrorHandlerParams } from './errorHandler.js'
 import { createErrorHandler, defaultResolveResponseObject } from './errorHandler.js'
 
 async function initApp(
@@ -78,11 +78,11 @@ describe('errorHandler', () => {
         })
       },
       {
-        resolveResponseObject: (error: FreeformRecord) => {
+        resolveResponseObject: (error: unknown) => {
           return {
             statusCode: 502,
             payload: {
-              message: `${error.message}1`,
+              message: `${(error as Error).message}1`,
               errorCode: 'TEST_ERR',
               details: {
                 someValues: 1,

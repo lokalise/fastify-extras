@@ -60,7 +60,7 @@ function resolveLogObject(error: unknown): FreeformRecord {
   }
 }
 
-export function defaultResolveResponseObject(error: FreeformRecord): ErrorResponseObject {
+export function defaultResolveResponseObject(error: unknown): ErrorResponseObject {
   if (isPublicNonRecoverableError(error)) {
     return {
       statusCode: error.httpStatusCode ?? 500,
@@ -148,7 +148,7 @@ export function defaultResolveResponseObject(error: FreeformRecord): ErrorRespon
 
 export type ErrorHandlerParams = {
   errorReporter: ErrorReporter
-  resolveResponseObject?: (error: FreeformRecord) => ErrorResponseObject | undefined
+  resolveResponseObject?: (error: unknown) => ErrorResponseObject | undefined
   resolveLogObject?: (error: unknown) => FreeformRecord | undefined
 }
 
