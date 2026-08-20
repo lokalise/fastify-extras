@@ -61,8 +61,8 @@ importers:
         specifier: 12.0.0
         version: 12.0.0(@lokalise/api-contracts@7.1.0(zod@4.4.3))(@lokalise/node-core@14.8.1(zod@4.4.3))(zod@4.4.3)
       '@lokalise/background-jobs-common':
-        specifier: ^14.0.2
-        version: 14.4.2(bullmq@5.81.3)(ioredis@5.11.1)(pino@10.3.1)(toad-scheduler@4.1.0)(zod@4.4.3)
+        specifier: ^15.0.0
+        version: 15.0.0(bullmq@5.81.3)(ioredis@5.11.1)(pino@10.3.1)(toad-scheduler@4.1.0)(zod@4.4.3)
       '@lokalise/biome-config':
         specifier: ^2.0.0
         version: 2.0.0
@@ -332,8 +332,8 @@ packages:
       '@lokalise/node-core': '>=13.1.0'
       zod: '>=3.25.56'
 
-  '@lokalise/background-jobs-common@14.4.2':
-    resolution: {integrity: sha512-tGcTBa94qAQOVDtirTx0xXpwbGGnLVVzXJSCSHZdg59SEnCb8Tp33M9LitMBq40BPcAk8rF7ggNDiewRsc9H7g==}
+  '@lokalise/background-jobs-common@15.0.0':
+    resolution: {integrity: sha512-VmI/7SQ39Jhgueinoo06zvQ5GlJIch0r73OywiG94Mar4YF8unxxOZWUFnxBn66zGFZAexnThuZTZWWa1ncRLQ==}
     peerDependencies:
       bullmq: ^5.28.2
       ioredis: ^5.4.1
@@ -1915,7 +1915,7 @@ snapshots:
       undici: 8.10.0
       zod: 4.4.3
 
-  '@lokalise/background-jobs-common@14.4.2(bullmq@5.81.3)(ioredis@5.11.1)(pino@10.3.1)(toad-scheduler@4.1.0)(zod@4.4.3)':
+  '@lokalise/background-jobs-common@15.0.0(bullmq@5.81.3)(ioredis@5.11.1)(pino@10.3.1)(toad-scheduler@4.1.0)(zod@4.4.3)':
     dependencies:
       '@lokalise/id-utils': 3.0.1
       '@lokalise/node-core': 14.8.1(zod@4.4.3)
