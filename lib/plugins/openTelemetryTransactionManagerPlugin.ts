@@ -5,6 +5,12 @@ import type { FastifyInstance, FastifyPluginCallback } from 'fastify'
 import fp from 'fastify-plugin'
 import { FifoMap } from 'toad-cache'
 
+/**
+ * Instrumentation scope name reported for spans produced by this plugin. Apps that want
+ * their own scope can override it with the `tracerName` option.
+ */
+const DEFAULT_TRACER_NAME = '@lokalise/fastify-extras'
+
 declare module 'fastify' {
   interface FastifyInstance {
     openTelemetryTransactionManager: OpenTelemetryTransactionManager
@@ -18,7 +24,7 @@ export interface OpenTelemetryTransactionManagerOptions {
    * This is NOT the OpenTelemetry resource `service.name` attribute.
    * To set the service name for your traces, configure it via the OpenTelemetry SDK
    * resource configuration (e.g., OTEL_SERVICE_NAME environment variable or SDK Resource).
-   * @default 'unknown-tracer'
+   * @default '@lokalise/fastify-extras'
    */
   tracerName?: string
   /**
@@ -124,7 +130,7 @@ export class OpenTelemetryTransactionManager implements TransactionObservability
    */
   constructor(
     isEnabled: boolean,
-    tracerName = 'unknown-tracer',
+    tracerName = DEFAULT_TRACER_NAME,
     tracerVersion = '1.0.0',
     maxConcurrentSpans = 2000,
   ) {
@@ -145,6 +151,15 @@ export class OpenTelemetryTransactionManager implements TransactionObservability
     if (!this.isEnabled) return
 
     const span = this.tracer.startSpan(transactionName, {
+      /**
+       * A background transaction is a trace of its own, so it must not inherit whatever
+       * context happens to be active on the caller's async stack. Long-lived background
+       * workers (e.g. a BullMQ worker loop) keep the context they were started in for
+       * their entire lifetime, which would otherwise bury every transaction inside one
+       * unrelated trace - or drop them entirely, since a non-sampled ambient parent makes
+       * the default parent-based sampler discard the child.
+       */
+      root: true,
       attributes: {
         'transaction.type': 'background',
       },
@@ -165,6 +180,8 @@ export class OpenTelemetryTransactionManager implements TransactionObservability
     if (!this.isEnabled) return
 
     const span = this.tracer.startSpan(transactionName, {
+      // a background transaction is always a trace of its own, see `start`
+      root: true,
       attributes: {
         'transaction.type': 'background',
         'transaction.group': transactionGroup,

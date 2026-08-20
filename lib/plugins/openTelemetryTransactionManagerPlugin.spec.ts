@@ -270,10 +270,18 @@ describe('OpenTelemetryTransactionManager', () => {
       expect(trace.getTracer).toHaveBeenCalledWith('test-tracer', '1.0.0')
     })
 
+    it('should fall back to the library scope as tracer name', () => {
+      const defaultManager = new OpenTelemetryTransactionManager(true)
+
+      expect(defaultManager.getTracer()).toBe(mockTracer)
+      expect(trace.getTracer).toHaveBeenLastCalledWith('@lokalise/fastify-extras', '1.0.0')
+    })
+
     it('should start a span with correct name and attributes', () => {
       manager.start('my-transaction', 'unique-key')
 
       expect(mockTracer.startSpan).toHaveBeenCalledWith('my-transaction', {
+        root: true,
         attributes: {
           'transaction.type': 'background',
         },
@@ -284,6 +292,7 @@ describe('OpenTelemetryTransactionManager', () => {
       manager.startWithGroup('my-transaction', 'unique-key', 'my-group')
 
       expect(mockTracer.startSpan).toHaveBeenCalledWith('my-transaction', {
+        root: true,
         attributes: {
           'transaction.type': 'background',
           'transaction.group': 'my-group',
