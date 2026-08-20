@@ -1,6 +1,6 @@
 import type { TransactionObservabilityManager } from '@lokalise/node-core'
-import type { Span, Tracer } from '@opentelemetry/api'
-import { SpanStatusCode, context, trace } from '@opentelemetry/api'
+import type { Link, Span, Tracer } from '@opentelemetry/api'
+import { SpanStatusCode, context, isSpanContextValid, trace } from '@opentelemetry/api'
 import type { FastifyInstance, FastifyPluginCallback } from 'fastify'
 import fp from 'fastify-plugin'
 import { FifoMap } from 'toad-cache'
@@ -161,6 +161,7 @@ export class OpenTelemetryTransactionManager implements TransactionObservability
        * the default parent-based sampler discard the child.
        */
       root: true,
+      links: this.getActiveSpanLinks(),
       attributes: {
         'transaction.type': 'background',
       },
@@ -183,12 +184,28 @@ export class OpenTelemetryTransactionManager implements TransactionObservability
     const span = this.tracer.startSpan(transactionName, {
       // a background transaction is always a trace of its own, see `start`
       root: true,
+      links: this.getActiveSpanLinks(),
       attributes: {
         'transaction.type': 'background',
         'transaction.group': transactionGroup,
       },
     })
     this.spanMap.set(uniqueTransactionKey, span)
+  }
+
+  /**
+   * Rooting the transaction throws away the ambient parent, which is the point when that
+   * parent is a context leaked from app boot or from an unrelated HTTP request. Some
+   * callers, though, activate a genuinely propagated parent around the job - e.g. a
+   * producer traceparent carried in the job payload by BullMQ telemetry. Recording it as
+   * a span link keeps the enqueue -> process relation navigable from either trace, while
+   * the transaction still gets its own trace id and its own sampling decision.
+   */
+  private getActiveSpanLinks(): Link[] {
+    const spanContext = trace.getActiveSpan()?.spanContext()
+    if (!spanContext || !isSpanContextValid(spanContext)) return []
+
+    return [{ context: spanContext }]
   }
 
   public stop(uniqueTransactionKey: string, wasSuccessful = true): void {
