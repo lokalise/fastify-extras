@@ -69,7 +69,7 @@
         "@lokalise/background-jobs-common": "^14.0.2",
         "@lokalise/biome-config": "^2.0.0",
         "@lokalise/node-core": "^14.4.2",
-        "@lokalise/tsconfig": "^3.0.0",
+        "@lokalise/tsconfig": "^5.0.0",
         "@opentelemetry/api": "^1.9.0",
         "@opentelemetry/context-async-hooks": "^2.10.0",
         "@opentelemetry/sdk-trace-base": "^2.10.0",
