@@ -310,13 +310,13 @@ Plugin to create custom OpenTelemetry spans for background jobs.
 Add the plugin to your Fastify instance by registering it with the following options:
 
 - `isEnabled`, if `true` the plugin will create spans using OpenTelemetry;
-- `tracerName` (optional), the instrumentation scope name for the tracer. This identifies the instrumentation library, not the service. For service identification, configure it via OpenTelemetry SDK resource attributes (e.g., `OTEL_SERVICE_NAME` environment variable). Defaults to `'unknown-tracer'`;
+- `tracerName` (optional), the instrumentation scope name for the tracer. This identifies the instrumentation library, not the service. For service identification, configure it via OpenTelemetry SDK resource attributes (e.g., `OTEL_SERVICE_NAME` environment variable). Defaults to `'opentelemetry-transaction-manager-plugin'`;
 - `tracerVersion` (optional), the instrumentation scope version for the tracer. Defaults to `'1.0.0'`;
 - `maxConcurrentSpans` (optional), maximum number of concurrent spans to track. When this limit is reached, the oldest spans will be evicted and automatically ended to prevent leaks. Defaults to `2000`.
 
 The plugin decorates your Fastify instance with an `OpenTelemetryTransactionManager`, which implements the `TransactionObservabilityManager` interface from `@lokalise/node-core`. You can inject and use the following methods:
 
-- `start(transactionName, uniqueTransactionKey)`, starts a background span with the provided name and stores it by the unique key;
+- `start(transactionName, uniqueTransactionKey)`, starts a background span with the provided name and stores it by the unique key. Background spans are always started as root spans, so they never inherit whatever context is active on the caller's async stack. If a span is active when the transaction starts (e.g. a producer traceparent propagated together with a queue job), it is recorded as a span link, so the enqueue -> process relation stays navigable while the transaction keeps its own trace id and its own sampling decision;
 - `startWithGroup(transactionName, uniqueTransactionKey, transactionGroup)`, starts a background span with an additional `transaction.group` attribute;
 - `stop(uniqueTransactionKey, wasSuccessful?)`, ends the span referenced by the unique key. Sets status to `OK` if successful (default), or `ERROR` if not;
 - `addCustomAttribute(attrName, attrValue)`, adds a custom attribute to the currently active span. `attrValue` can be a string, number, or boolean;

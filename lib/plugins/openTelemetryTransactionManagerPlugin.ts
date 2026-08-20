@@ -1,9 +1,16 @@
 import type { TransactionObservabilityManager } from '@lokalise/node-core'
-import type { Span, Tracer } from '@opentelemetry/api'
-import { SpanStatusCode, context, trace } from '@opentelemetry/api'
+import type { Link, Span, Tracer } from '@opentelemetry/api'
+import { SpanStatusCode, context, isSpanContextValid, trace } from '@opentelemetry/api'
 import type { FastifyInstance, FastifyPluginCallback } from 'fastify'
 import fp from 'fastify-plugin'
 import { FifoMap } from 'toad-cache'
+
+/**
+ * Plugin name, also used as the default instrumentation scope name reported for spans
+ * produced by this plugin. Apps that want their own scope can override it with the
+ * `tracerName` option.
+ */
+const PLUGIN_NAME = 'opentelemetry-transaction-manager-plugin'
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -18,7 +25,7 @@ export interface OpenTelemetryTransactionManagerOptions {
    * This is NOT the OpenTelemetry resource `service.name` attribute.
    * To set the service name for your traces, configure it via the OpenTelemetry SDK
    * resource configuration (e.g., OTEL_SERVICE_NAME environment variable or SDK Resource).
-   * @default 'unknown-tracer'
+   * @default 'opentelemetry-transaction-manager-plugin'
    */
   tracerName?: string
   /**
@@ -124,7 +131,7 @@ export class OpenTelemetryTransactionManager implements TransactionObservability
    */
   constructor(
     isEnabled: boolean,
-    tracerName = 'unknown-tracer',
+    tracerName = PLUGIN_NAME,
     tracerVersion = '1.0.0',
     maxConcurrentSpans = 2000,
   ) {
@@ -145,6 +152,16 @@ export class OpenTelemetryTransactionManager implements TransactionObservability
     if (!this.isEnabled) return
 
     const span = this.tracer.startSpan(transactionName, {
+      /**
+       * A background transaction is a trace of its own, so it must not inherit whatever
+       * context happens to be active on the caller's async stack. Long-lived background
+       * workers (e.g. a BullMQ worker loop) keep the context they were started in for
+       * their entire lifetime, which would otherwise bury every transaction inside one
+       * unrelated trace - or drop them entirely, since a non-sampled ambient parent makes
+       * the default parent-based sampler discard the child.
+       */
+      root: true,
+      links: this.getActiveSpanLinks(),
       attributes: {
         'transaction.type': 'background',
       },
@@ -165,12 +182,30 @@ export class OpenTelemetryTransactionManager implements TransactionObservability
     if (!this.isEnabled) return
 
     const span = this.tracer.startSpan(transactionName, {
+      // a background transaction is always a trace of its own, see `start`
+      root: true,
+      links: this.getActiveSpanLinks(),
       attributes: {
         'transaction.type': 'background',
         'transaction.group': transactionGroup,
       },
     })
     this.spanMap.set(uniqueTransactionKey, span)
+  }
+
+  /**
+   * Rooting the transaction throws away the ambient parent, which is the point when that
+   * parent is a context leaked from app boot or from an unrelated HTTP request. Some
+   * callers, though, activate a genuinely propagated parent around the job - e.g. a
+   * producer traceparent carried in the job payload by BullMQ telemetry. Recording it as
+   * a span link keeps the enqueue -> process relation navigable from either trace, while
+   * the transaction still gets its own trace id and its own sampling decision.
+   */
+  private getActiveSpanLinks(): Link[] {
+    const spanContext = trace.getActiveSpan()?.spanContext()
+    if (!spanContext || !isSpanContextValid(spanContext)) return []
+
+    return [{ context: spanContext }]
   }
 
   public stop(uniqueTransactionKey: string, wasSuccessful = true): void {
@@ -274,5 +309,5 @@ function plugin(fastify: FastifyInstance, opts: OpenTelemetryTransactionManagerO
 export const openTelemetryTransactionManagerPlugin: FastifyPluginCallback<OpenTelemetryTransactionManagerOptions> =
   fp(plugin, {
     fastify: '5.x',
-    name: 'opentelemetry-transaction-manager-plugin',
+    name: PLUGIN_NAME,
   })

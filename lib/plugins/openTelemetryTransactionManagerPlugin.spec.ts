@@ -1,9 +1,21 @@
-import { type Span, SpanStatusCode, trace } from '@opentelemetry/api'
+import { type Span, SpanStatusCode, TraceFlags, context, trace } from '@opentelemetry/api'
+import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks'
+import {
+  BasicTracerProvider,
+  InMemorySpanExporter,
+  SimpleSpanProcessor,
+} from '@opentelemetry/sdk-trace-base'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   OpenTelemetryTransactionManager,
   openTelemetryTransactionManagerPlugin,
 } from './openTelemetryTransactionManagerPlugin.js'
+
+const AMBIENT_SPAN_CONTEXT = {
+  traceId: 'a'.repeat(32),
+  spanId: 'b'.repeat(16),
+  traceFlags: TraceFlags.SAMPLED,
+}
 
 describe('openTelemetryTransactionManagerPlugin', () => {
   it('should be a valid fastify plugin', () => {
@@ -250,6 +262,7 @@ describe('OpenTelemetryTransactionManager', () => {
         setAttribute: vi.fn(),
         setStatus: vi.fn(),
         end: vi.fn(),
+        spanContext: vi.fn().mockReturnValue(AMBIENT_SPAN_CONTEXT),
       }
 
       mockTracer = {
@@ -270,10 +283,57 @@ describe('OpenTelemetryTransactionManager', () => {
       expect(trace.getTracer).toHaveBeenCalledWith('test-tracer', '1.0.0')
     })
 
+    it('should fall back to the plugin name as tracer name', () => {
+      const defaultManager = new OpenTelemetryTransactionManager(true)
+
+      expect(defaultManager.getTracer()).toBe(mockTracer)
+      expect(trace.getTracer).toHaveBeenLastCalledWith(
+        'opentelemetry-transaction-manager-plugin',
+        '1.0.0',
+      )
+    })
+
     it('should start a span with correct name and attributes', () => {
       manager.start('my-transaction', 'unique-key')
 
       expect(mockTracer.startSpan).toHaveBeenCalledWith('my-transaction', {
+        root: true,
+        links: [{ context: AMBIENT_SPAN_CONTEXT }],
+        attributes: {
+          'transaction.type': 'background',
+        },
+      })
+    })
+
+    it('should not link anything when no span is active', () => {
+      vi.spyOn(trace, 'getActiveSpan').mockReturnValue(undefined)
+
+      manager.start('my-transaction', 'unique-key')
+
+      expect(mockTracer.startSpan).toHaveBeenCalledWith('my-transaction', {
+        root: true,
+        links: [],
+        attributes: {
+          'transaction.type': 'background',
+        },
+      })
+    })
+
+    it('should not link an invalid span context', () => {
+      vi.spyOn(trace, 'getActiveSpan').mockReturnValue({
+        ...mockSpan,
+        spanContext: vi.fn().mockReturnValue({
+          traceId: '0'.repeat(32),
+          spanId: '0'.repeat(16),
+          traceFlags: TraceFlags.NONE,
+        }),
+      } as Span)
+
+      manager.start('my-transaction', 'unique-key')
+
+      expect(mockTracer.startSpan).toHaveBeenCalledWith('my-transaction', {
+        root: true,
+        links: [],
         attributes: {
           'transaction.type': 'background',
         },
@@ -284,6 +344,8 @@ describe('OpenTelemetryTransactionManager', () => {
       manager.startWithGroup('my-transaction', 'unique-key', 'my-group')
 
       expect(mockTracer.startSpan).toHaveBeenCalledWith('my-transaction', {
+        root: true,
+        links: [{ context: AMBIENT_SPAN_CONTEXT }],
         attributes: {
           'transaction.type': 'background',
           'transaction.group': 'my-group',
@@ -382,5 +444,90 @@ describe('OpenTelemetryTransactionManager', () => {
       expect(() => manager.setUserID('user-123')).not.toThrow()
       expect(() => manager.setControllerName('Controller', 'action')).not.toThrow()
     })
+  })
+})
+
+describe('OpenTelemetryTransactionManager with a real tracer provider', () => {
+  let exporter: InMemorySpanExporter
+  let provider: BasicTracerProvider
+  let contextManager: AsyncLocalStorageContextManager
+  let manager: OpenTelemetryTransactionManager
+
+  beforeEach(() => {
+    exporter = new InMemorySpanExporter()
+    provider = new BasicTracerProvider({ spanProcessors: [new SimpleSpanProcessor(exporter)] })
+    contextManager = new AsyncLocalStorageContextManager().enable()
+
+    context.setGlobalContextManager(contextManager)
+    trace.setGlobalTracerProvider(provider)
+
+    manager = new OpenTelemetryTransactionManager(true)
+  })
+
+  afterEach(async () => {
+    trace.disable()
+    context.disable()
+    contextManager.disable()
+    await provider.shutdown()
+  })
+
+  const getTransaction = (name: string) =>
+    exporter.getFinishedSpans().find((span) => span.name === name)
+
+  it('should start the transaction as its own trace when a context is active', () => {
+    const ambientSpan = trace.getTracer('ambient').startSpan('ambient-request')
+
+    context.with(trace.setSpan(context.active(), ambientSpan), () => {
+      manager.start('my-transaction', 'unique-key')
+    })
+    manager.stop('unique-key')
+    ambientSpan.end()
+
+    const transaction = getTransaction('my-transaction')
+    expect(transaction).toBeDefined()
+    expect(transaction?.parentSpanContext).toBeUndefined()
+    expect(transaction?.spanContext().traceId).not.toBe(ambientSpan.spanContext().traceId)
+  })
+
+  it('should link the active span so the relation stays navigable', () => {
+    const ambientSpan = trace.getTracer('ambient').startSpan('ambient-request')
+
+    context.with(trace.setSpan(context.active(), ambientSpan), () => {
+      manager.startWithGroup('my-transaction', 'unique-key', 'my-group')
+    })
+    manager.stop('unique-key')
+    ambientSpan.end()
+
+    const transaction = getTransaction('my-transaction')
+    expect(transaction?.parentSpanContext).toBeUndefined()
+    expect(transaction?.links).toEqual([{ context: ambientSpan.spanContext() }])
+    expect(transaction?.attributes).toMatchObject({ 'transaction.group': 'my-group' })
+  })
+
+  it('should still record the transaction when the active span is not sampled', () => {
+    const unsampledSpan = trace.wrapSpanContext({
+      traceId: 'c'.repeat(32),
+      spanId: 'd'.repeat(16),
+      traceFlags: TraceFlags.NONE,
+    })
+
+    context.with(trace.setSpan(context.active(), unsampledSpan), () => {
+      manager.start('my-transaction', 'unique-key')
+      // a non-rooted span would be dropped by the default parent-based sampler
+      trace.getTracer('ambient').startSpan('inherited-child').end()
+    })
+    manager.stop('unique-key')
+
+    expect(getTransaction('my-transaction')).toBeDefined()
+    expect(getTransaction('inherited-child')).toBeUndefined()
+  })
+
+  it('should not link anything when no context is active', () => {
+    manager.start('my-transaction', 'unique-key')
+    manager.stop('unique-key')
+
+    const transaction = getTransaction('my-transaction')
+    expect(transaction?.parentSpanContext).toBeUndefined()
+    expect(transaction?.links).toEqual([])
   })
 })
