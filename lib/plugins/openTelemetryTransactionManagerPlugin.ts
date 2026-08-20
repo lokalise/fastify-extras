@@ -6,10 +6,11 @@ import fp from 'fastify-plugin'
 import { FifoMap } from 'toad-cache'
 
 /**
- * Instrumentation scope name reported for spans produced by this plugin. Apps that want
- * their own scope can override it with the `tracerName` option.
+ * Plugin name, also used as the default instrumentation scope name reported for spans
+ * produced by this plugin. Apps that want their own scope can override it with the
+ * `tracerName` option.
  */
-const DEFAULT_TRACER_NAME = '@lokalise/fastify-extras'
+const PLUGIN_NAME = 'opentelemetry-transaction-manager-plugin'
 
 declare module 'fastify' {
   interface FastifyInstance {
@@ -24,7 +25,7 @@ export interface OpenTelemetryTransactionManagerOptions {
    * This is NOT the OpenTelemetry resource `service.name` attribute.
    * To set the service name for your traces, configure it via the OpenTelemetry SDK
    * resource configuration (e.g., OTEL_SERVICE_NAME environment variable or SDK Resource).
-   * @default '@lokalise/fastify-extras'
+   * @default 'opentelemetry-transaction-manager-plugin'
    */
   tracerName?: string
   /**
@@ -130,7 +131,7 @@ export class OpenTelemetryTransactionManager implements TransactionObservability
    */
   constructor(
     isEnabled: boolean,
-    tracerName = DEFAULT_TRACER_NAME,
+    tracerName = PLUGIN_NAME,
     tracerVersion = '1.0.0',
     maxConcurrentSpans = 2000,
   ) {
@@ -291,5 +292,5 @@ function plugin(fastify: FastifyInstance, opts: OpenTelemetryTransactionManagerO
 export const openTelemetryTransactionManagerPlugin: FastifyPluginCallback<OpenTelemetryTransactionManagerOptions> =
   fp(plugin, {
     fastify: '5.x',
-    name: 'opentelemetry-transaction-manager-plugin',
+    name: PLUGIN_NAME,
   })

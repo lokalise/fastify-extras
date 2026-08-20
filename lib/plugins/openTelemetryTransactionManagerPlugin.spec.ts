@@ -270,11 +270,14 @@ describe('OpenTelemetryTransactionManager', () => {
       expect(trace.getTracer).toHaveBeenCalledWith('test-tracer', '1.0.0')
     })
 
-    it('should fall back to the library scope as tracer name', () => {
+    it('should fall back to the plugin name as tracer name', () => {
       const defaultManager = new OpenTelemetryTransactionManager(true)
 
       expect(defaultManager.getTracer()).toBe(mockTracer)
-      expect(trace.getTracer).toHaveBeenLastCalledWith('@lokalise/fastify-extras', '1.0.0')
+      expect(trace.getTracer).toHaveBeenLastCalledWith(
+        'opentelemetry-transaction-manager-plugin',
+        '1.0.0',
+      )
     })
 
     it('should start a span with correct name and attributes', () => {
