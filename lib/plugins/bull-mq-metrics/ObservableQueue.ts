@@ -73,6 +73,10 @@ export class ObservableQueue {
     })
   }
 
+  get name() {
+    return this.queue.name
+  }
+
   async collect() {
     const countByStatus = await this.queue.getJobCounts(...(COUNTED_JOB_STATES as JobType[]))
 

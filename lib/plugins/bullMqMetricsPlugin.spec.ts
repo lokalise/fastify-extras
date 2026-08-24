@@ -12,6 +12,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { z } from 'zod/v4'
 import { TestBackgroundJobProcessor } from '../../test/mocks/TestBackgroundJobProcessor.js'
 import { TestDependencies } from '../../test/mocks/TestDependencies.js'
+import { ObservableQueue } from './bull-mq-metrics/ObservableQueue.js'
 import {
   BackgroundJobsBasedQueueDiscoverer,
   RedisBasedQueueDiscoverer,
@@ -153,15 +154,34 @@ describe.each([true, false])('bullMqMetricsPlugin', (useGenericRedisQueueDiscove
     await redis.rpush(`${redisConfig.keyPrefix}:test_job:paused`, 'legacy-job-id')
     await redis.quit()
 
-    const found = await waitAndRetry(async () => {
-      await app.bullMqMetrics.collect()
-      const metrics = await getMetrics()
-      return (metrics.result.body as string).includes(
-        'bullmq_jobs_count{status="paused",queue="test_job"} 1',
-      )
+    // A single awaited collect() has to be enough - the call only resolves once every
+    // discovered queue has finished updating its gauges.
+    await app.bullMqMetrics.collect()
+
+    const metrics = await getMetrics()
+    expect(metrics.result.body).toContain('bullmq_jobs_count{status="paused",queue="test_job"} 1')
+  })
+
+  it('warns and keeps going when a queue fails to report', async () => {
+    app = await initAppWithBullMqMetrics(useGenericRedisQueueDiscoverer, {
+      redisConfigs: [redisConfig],
     })
 
-    expect(found).toBe(true)
+    // Let one real round run first so the queues are discovered and their connections are
+    // established - otherwise teardown races the still-connecting clients.
+    await app.bullMqMetrics.collect()
+
+    const warnSpy = vi.spyOn(app.log, 'warn')
+    vi.spyOn(ObservableQueue.prototype, 'collect').mockRejectedValue(new Error('redis is down'))
+
+    // Before the per-queue promise was awaited this rejection escaped the pool entirely and
+    // took the process down as an unhandled rejection.
+    await expect(app.bullMqMetrics.collect()).resolves.toBeUndefined()
+
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'redis is down' }),
+      'Failed to collect metrics for queue test_job',
+    )
   })
 
   // This is failing in CI, we don't know why, our attempts at fixing it are failing,

@@ -71,9 +71,16 @@ export class MetricsCollector {
         )
     }
 
-    await PromisePool.for(this.observedQueues).process((queue: ObservableQueue) => {
-      queue.collect()
-    })
+    // The callback has to *return* the promise - otherwise the pool resolves immediately and
+    // collect() reports success before a single gauge has been updated, while any rejection
+    // escapes as an unhandled rejection instead of being surfaced here.
+    const { errors } = await PromisePool.for(this.observedQueues).process(
+      (queue: ObservableQueue) => queue.collect(),
+    )
+
+    for (const error of errors) {
+      this.logger.warn(error, `Failed to collect metrics for queue ${error.item.name}`)
+    }
   }
 
   /**
