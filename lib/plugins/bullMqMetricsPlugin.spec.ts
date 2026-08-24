@@ -140,6 +140,30 @@ describe.each([true, false])('bullMqMetricsPlugin', (useGenericRedisQueueDiscove
     expect(found).toBe(true)
   })
 
+  it('keeps counting jobs stranded in a legacy bullmq v5 paused list', async () => {
+    app = await initAppWithBullMqMetrics(useGenericRedisQueueDiscoverer, {
+      redisConfigs: [redisConfig],
+    })
+
+    // bullmq v6 stopped moving jobs into the `paused` list when a queue is paused - they stay
+    // in `wait` and are reported as `waiting`. A queue paused under v5 still leaves that list
+    // behind though, and v6 only drains it on resume (7000 jobs at a time), so the backlog can
+    // outlive the upgrade. Seed the list the way bullmq keys it to prove we keep surfacing it.
+    const redis = new Redis({ ...redisConfig, keyPrefix: undefined })
+    await redis.rpush(`${redisConfig.keyPrefix}:test_job:paused`, 'legacy-job-id')
+    await redis.quit()
+
+    const found = await waitAndRetry(async () => {
+      await app.bullMqMetrics.collect()
+      const metrics = await getMetrics()
+      return (metrics.result.body as string).includes(
+        'bullmq_jobs_count{status="paused",queue="test_job"} 1',
+      )
+    })
+
+    expect(found).toBe(true)
+  })
+
   // This is failing in CI, we don't know why, our attempts at fixing it are failing,
   // this is not related to the changes in the PR where we started skipping the test.
   // This is working in production.

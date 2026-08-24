@@ -6,10 +6,12 @@ import type { FastifyBaseLogger } from 'fastify'
 import type { Metrics } from './MetricsCollector.js'
 
 /**
- * bullmq v6 dropped the `paused` job state (paused queues now report their backlog as
- * `waiting`), so it is no longer part of the exported `JobType` union. v5 still tracks it
- * separately, and asking v6 for it is harmless (it always resolves to 0), so we keep
- * requesting it and widen the type to stay accurate on both majors.
+ * bullmq v6 dropped the `paused` job state - pausing no longer moves jobs onto a separate
+ * list, they stay in `waiting` - so it is gone from the exported `JobType` union. We keep
+ * asking for it on both majors anyway: v5 tracks it natively, and a queue paused under v5
+ * leaves a `paused` list behind that v6 only drains once the queue is resumed, so dropping
+ * the state would silently hide that backlog mid-upgrade. The two counts read different
+ * Redis keys, so nothing is counted twice.
  */
 const COUNTED_JOB_STATES: string[] = [
   'active',
