@@ -40,6 +40,7 @@ The following needs to be taken into consideration when adding new runtime depen
 - `fastify`;
 - `pino`;
 - `bullmq`;
+- `ioredis`;
 
 ## Plugins
 
@@ -282,8 +283,14 @@ Plugin to auto-discover BullMQ queues which can regularly collect metrics for th
 
 This plugin depends on the following peer-installed packages:
 
-- `bullmq`
-- `ioredis`
+- `bullmq` (`^5.19.0` or `^6.0.0`)
+- `ioredis` (`^5.7.0` or `^6.0.0`)
+
+Note that `bullmq` v6 no longer bundles `ioredis`, so it always has to be installed explicitly. It also dropped the `paused` job state: pausing a queue leaves its jobs in `waiting` rather than moving them onto a separate list, so for a queue paused under v6 the backlog shows up as `bullmq_jobs_count{status="waiting"}` and `status="paused"` reads `0`.
+
+The plugin still reports `status="paused"` on both majors, because a queue paused under v5 leaves a `paused` list behind that v6 only drains once the queue is resumed — until then those jobs are real and stay visible under that label. The two counts read different Redis keys, so no job is counted twice.
+
+If you rely on the default `BackgroundJobsBasedQueueDiscoverer`, pairing `bullmq` v6 with `@lokalise/background-jobs-common` requires that package to be on `>=15.2.0` — earlier versions only accept `bullmq` v5.
 
 Add the plugin to your Fastify instance by registering it with the following possible options:
 

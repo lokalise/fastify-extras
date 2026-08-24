@@ -14,3 +14,4 @@ minimumReleaseAgeExclude:
   - import-in-the-middle@3.3.0
   - picomatch@4.0.5
   - toad-cache@3.7.4
+  - '@lokalise/background-jobs-common@15.2.0'
