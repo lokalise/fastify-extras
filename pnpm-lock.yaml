@@ -37,7 +37,7 @@ importers:
         version: 3.3.0
       fastify-metrics:
         specifier: ^13.2.0
-        version: 13.2.1(fastify@5.12.0)
+        version: 13.2.1(fastify@5.12.1)
       fastify-plugin:
         specifier: ^6.0.0
         version: 6.0.0
@@ -56,7 +56,7 @@ importers:
         version: 1.9.4
       '@fastify/sse':
         specifier: ^0.6.0
-        version: 0.6.0(fastify@5.12.0)
+        version: 0.6.0(fastify@5.12.1)
       '@lokalise/backend-http-client':
         specifier: 12.0.0
         version: 12.0.0(@lokalise/api-contracts@7.1.0(zod@4.4.3))(@lokalise/node-core@14.9.1(zod@4.4.3))(zod@4.4.3)
@@ -98,10 +98,10 @@ importers:
         version: 6.11.0
       fastify:
         specifier: ^5.10.0
-        version: 5.12.0
+        version: 5.12.1
       fastify-type-provider-zod:
         specifier: ^7.0.0
-        version: 7.0.0(@fastify/swagger@9.8.1)(fastify@5.12.0)(openapi-types@12.1.3)(zod@4.4.3)
+        version: 7.0.0(@fastify/swagger@9.8.1)(fastify@5.12.1)(openapi-types@12.1.3)(zod@4.4.3)
       ioredis:
         specifier: ^5.6.1
         version: 5.11.1
@@ -977,8 +977,8 @@ packages:
       openapi-types: ^12.1.3
       zod: '>=4.1.5'
 
-  fastify@5.12.0:
-    resolution: {integrity: sha512-A3RNEaDIHWaxFW8n8rNJaW1wQ+XAXuoU71llfUQJjuh5WaYLmKfRhhanaJBOx8m2EBPQkR6sDBovYdHNe9F6rA==}
+  fastify@5.12.1:
+    resolution: {integrity: sha512-FWi+tQvwxR/PeRX7Z2mhfEF5ozJ3jn9asiiclzKXNSzJRHAYcU924aIOKAdHFJ+YIKieh3cqr1IwCOvTr41B3Q==}
 
   fastparallel@2.4.1:
     resolution: {integrity: sha512-qUmhxPgNHmvRjZKBFUNI0oZuuH9OlSIOXmJ98lhKPxMZZ7zS/Fi0wRHOihDSz0R1YiIOjxzOY4bq65YTcdBi2Q==}
@@ -1858,10 +1858,10 @@ snapshots:
       '@fastify/forwarded': 3.0.2
       ipaddr.js: 2.5.0
 
-  '@fastify/sse@0.6.0(fastify@5.12.0)':
+  '@fastify/sse@0.6.0(fastify@5.12.1)':
     dependencies:
       '@fastify/error': 4.2.0
-      fastify: 5.12.0
+      fastify: 5.12.1
       fastify-plugin: 6.0.0
 
   '@fastify/swagger@9.8.1':
@@ -2427,23 +2427,23 @@ snapshots:
     dependencies:
       reusify: 1.1.0
 
-  fastify-metrics@13.2.1(fastify@5.12.0):
+  fastify-metrics@13.2.1(fastify@5.12.1):
     dependencies:
-      fastify: 5.12.0
+      fastify: 5.12.1
       fastify-plugin: 6.0.0
       prom-client: 15.1.3
 
   fastify-plugin@6.0.0: {}
 
-  fastify-type-provider-zod@7.0.0(@fastify/swagger@9.8.1)(fastify@5.12.0)(openapi-types@12.1.3)(zod@4.4.3):
+  fastify-type-provider-zod@7.0.0(@fastify/swagger@9.8.1)(fastify@5.12.1)(openapi-types@12.1.3)(zod@4.4.3):
     dependencies:
       '@fastify/error': 4.2.0
       '@fastify/swagger': 9.8.1
-      fastify: 5.12.0
+      fastify: 5.12.1
       openapi-types: 12.1.3
       zod: 4.4.3
 
-  fastify@5.12.0:
+  fastify@5.12.1:
     dependencies:
       '@fastify/ajv-compiler': 4.0.6
       '@fastify/error': 4.2.0
