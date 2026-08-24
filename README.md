@@ -288,6 +288,8 @@ This plugin depends on the following peer-installed packages:
 
 Note that `bullmq` v6 no longer bundles `ioredis`, so it always has to be installed explicitly. It also dropped the `paused` job state: a paused queue reports its backlog as `waiting` instead, which means the `bullmq_jobs_count{status="paused"}` gauge stays at `0` on v6.
 
+If you rely on the default `BackgroundJobsBasedQueueDiscoverer`, pairing `bullmq` v6 with `@lokalise/background-jobs-common` requires that package to be on `>=15.2.0` — earlier versions only accept `bullmq` v5.
+
 Add the plugin to your Fastify instance by registering it with the following possible options:
 
 - `redisConfigs`, Redis configurations used for BullMQ. Plugin uses them to discover the queues.
