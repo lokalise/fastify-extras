@@ -12,6 +12,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { z } from 'zod/v4'
 import { TestBackgroundJobProcessor } from '../../test/mocks/TestBackgroundJobProcessor.js'
 import { TestDependencies } from '../../test/mocks/TestDependencies.js'
+import { ObservableQueue } from './bull-mq-metrics/ObservableQueue.js'
 import {
   BackgroundJobsBasedQueueDiscoverer,
   RedisBasedQueueDiscoverer,
@@ -153,15 +154,64 @@ describe.each([true, false])('bullMqMetricsPlugin', (useGenericRedisQueueDiscove
     await redis.rpush(`${redisConfig.keyPrefix}:test_job:paused`, 'legacy-job-id')
     await redis.quit()
 
-    const found = await waitAndRetry(async () => {
-      await app.bullMqMetrics.collect()
-      const metrics = await getMetrics()
-      return (metrics.result.body as string).includes(
-        'bullmq_jobs_count{status="paused",queue="test_job"} 1',
-      )
-    })
+    // A single awaited collect() has to be enough - the call only resolves once every
+    // discovered queue has finished updating its gauges.
+    await app.bullMqMetrics.collect()
 
-    expect(found).toBe(true)
+    const metrics = await getMetrics()
+    expect(metrics.result.body).toContain('bullmq_jobs_count{status="paused",queue="test_job"} 1')
+  })
+
+  it('warns about a failing queue and still collects the healthy ones', async () => {
+    const processor2 = new TestBackgroundJobProcessor<BaseJobPayload, JobReturn>(
+      bgDependencies,
+      { result: 'done' },
+      'test_job2',
+      redisConfig,
+    )
+    await processor2.start()
+
+    try {
+      app = await initAppWithBullMqMetrics(useGenericRedisQueueDiscoverer, {
+        redisConfigs: [redisConfig],
+      })
+
+      // Let one real round run first so both queues are discovered and their connections are
+      // established - otherwise teardown races the still-connecting clients. It also leaves
+      // every gauge at 0, so the assertion below can only pass if the healthy queue is
+      // collected again *after* the other one starts failing.
+      await app.bullMqMetrics.collect()
+
+      const redis = new Redis({ ...redisConfig, keyPrefix: undefined })
+      await redis.rpush(`${redisConfig.keyPrefix}:test_job2:paused`, 'legacy-job-id')
+      await redis.quit()
+
+      const warnSpy = vi.spyOn(app.log, 'warn')
+      const collect = ObservableQueue.prototype.collect
+      vi.spyOn(ObservableQueue.prototype, 'collect').mockImplementation(function (
+        this: ObservableQueue,
+      ) {
+        return this.name === 'test_job'
+          ? Promise.reject(new Error('redis is down'))
+          : collect.call(this)
+      })
+
+      // Before the per-queue promise was awaited this rejection escaped the pool entirely and
+      // took the process down as an unhandled rejection.
+      await expect(app.bullMqMetrics.collect()).resolves.toBeUndefined()
+
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ message: 'redis is down' }),
+        'Failed to collect metrics for queue test_job',
+      )
+
+      const metrics = await getMetrics()
+      expect(metrics.result.body).toContain(
+        'bullmq_jobs_count{status="paused",queue="test_job2"} 1',
+      )
+    } finally {
+      await processor2.dispose()
+    }
   })
 
   // This is failing in CI, we don't know why, our attempts at fixing it are failing,
