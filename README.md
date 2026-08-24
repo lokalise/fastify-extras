@@ -40,6 +40,7 @@ The following needs to be taken into consideration when adding new runtime depen
 - `fastify`;
 - `pino`;
 - `bullmq`;
+- `ioredis`;
 
 ## Plugins
 
@@ -282,8 +283,10 @@ Plugin to auto-discover BullMQ queues which can regularly collect metrics for th
 
 This plugin depends on the following peer-installed packages:
 
-- `bullmq`
-- `ioredis`
+- `bullmq` (`^5.19.0` or `^6.0.0`)
+- `ioredis` (`^5.7.0` or `^6.0.0`)
+
+Note that `bullmq` v6 no longer bundles `ioredis`, so it always has to be installed explicitly. It also dropped the `paused` job state: a paused queue reports its backlog as `waiting` instead, which means the `bullmq_jobs_count{status="paused"}` gauge stays at `0` on v6.
 
 Add the plugin to your Fastify instance by registering it with the following possible options:
 

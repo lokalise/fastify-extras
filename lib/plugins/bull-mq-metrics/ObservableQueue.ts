@@ -1,9 +1,24 @@
 import { sanitizeRedisConfig } from '@lokalise/background-jobs-common'
 import type { RedisConfig } from '@lokalise/node-core'
 import { Queue, QueueEvents } from 'bullmq'
-import type { FinishedStatus } from 'bullmq'
+import type { FinishedStatus, JobType } from 'bullmq'
 import type { FastifyBaseLogger } from 'fastify'
 import type { Metrics } from './MetricsCollector.js'
+
+/**
+ * bullmq v6 dropped the `paused` job state (paused queues now report their backlog as
+ * `waiting`), so it is no longer part of the exported `JobType` union. v5 still tracks it
+ * separately, and asking v6 for it is harmless (it always resolves to 0), so we keep
+ * requesting it and widen the type to stay accurate on both majors.
+ */
+const COUNTED_JOB_STATES: string[] = [
+  'active',
+  'delayed',
+  'paused',
+  'prioritized',
+  'waiting',
+  'waiting-children',
+]
 
 export class ObservableQueue {
   private readonly queue: Queue
@@ -57,14 +72,7 @@ export class ObservableQueue {
   }
 
   async collect() {
-    const countByStatus = await this.queue.getJobCounts(
-      'active',
-      'delayed',
-      'paused',
-      'prioritized',
-      'waiting',
-      'waiting-children',
-    )
+    const countByStatus = await this.queue.getJobCounts(...(COUNTED_JOB_STATES as JobType[]))
 
     for (const [status, count] of Object.entries(countByStatus)) {
       this.metrics.countGauge.set({ status, queue: this.queue.name }, count)
