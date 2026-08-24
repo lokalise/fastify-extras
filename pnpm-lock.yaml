@@ -28,7 +28,7 @@ importers:
         version: 7.1.0(zod@4.4.3)
       '@lokalise/error-utils':
         specifier: ^3.0.0
-        version: 3.0.0(@lokalise/node-core@14.8.1(zod@4.4.3))
+        version: 3.0.0(@lokalise/node-core@14.9.1(zod@4.4.3))
       '@splitsoftware/splitio':
         specifier: ^11.6.0
         version: 11.11.2
@@ -59,7 +59,7 @@ importers:
         version: 0.6.0(fastify@5.12.0)
       '@lokalise/backend-http-client':
         specifier: 12.0.0
-        version: 12.0.0(@lokalise/api-contracts@7.1.0(zod@4.4.3))(@lokalise/node-core@14.8.1(zod@4.4.3))(zod@4.4.3)
+        version: 12.0.0(@lokalise/api-contracts@7.1.0(zod@4.4.3))(@lokalise/node-core@14.9.1(zod@4.4.3))(zod@4.4.3)
       '@lokalise/background-jobs-common':
         specifier: ^15.1.0
         version: 15.1.0(bullmq@5.81.3)(ioredis@5.11.1)(pino@10.3.1)(toad-scheduler@4.1.0)(zod@4.4.3)
@@ -68,7 +68,7 @@ importers:
         version: 2.0.0
       '@lokalise/node-core':
         specifier: ^14.4.2
-        version: 14.8.1(zod@4.4.3)
+        version: 14.9.1(zod@4.4.3)
       '@lokalise/tsconfig':
         specifier: ^3.0.0
         version: 3.1.0
@@ -343,8 +343,8 @@ packages:
   '@lokalise/id-utils@3.0.1':
     resolution: {integrity: sha512-XgqjroAQi1RAEi2bRvC/7Fc/jM9UpFL1i+Wi1dJLJ0RwwJU/5lNtqv6XnkcHEWIwMTwbGulqvp0yHaZ8biEsaA==}
 
-  '@lokalise/node-core@14.8.1':
-    resolution: {integrity: sha512-Oaf1CqtcyV2pkdNXH//umnWcsyj8SFASQxsNV0h5QVOdq/N8PIETg6H/qp5Ovi2+Vh+YmK2t/Lg8tn5C8EeXsw==}
+  '@lokalise/node-core@14.9.1':
+    resolution: {integrity: sha512-gI8pcmRXytPLbc6fBWJwhBB7IW8XxcGBz9ozhf1lneR9SrosWto/2GAQdCFVSiiRm9GLdrhfC+M7OuxKOvbvSQ==}
     peerDependencies:
       zod: '>=3.25.76 <5.0.0'
 
@@ -1889,10 +1889,10 @@ snapshots:
     dependencies:
       zod: 4.4.3
 
-  '@lokalise/backend-http-client@12.0.0(@lokalise/api-contracts@7.1.0(zod@4.4.3))(@lokalise/node-core@14.8.1(zod@4.4.3))(zod@4.4.3)':
+  '@lokalise/backend-http-client@12.0.0(@lokalise/api-contracts@7.1.0(zod@4.4.3))(@lokalise/node-core@14.9.1(zod@4.4.3))(zod@4.4.3)':
     dependencies:
       '@lokalise/api-contracts': 7.1.0(zod@4.4.3)
-      '@lokalise/node-core': 14.8.1(zod@4.4.3)
+      '@lokalise/node-core': 14.9.1(zod@4.4.3)
       parse-sse: 0.1.0
       undici: 8.10.0
       zod: 4.4.3
@@ -1913,10 +1913,10 @@ snapshots:
 
   '@lokalise/biome-config@2.0.0': {}
 
-  '@lokalise/error-utils@3.0.0(@lokalise/node-core@14.8.1(zod@4.4.3))':
+  '@lokalise/error-utils@3.0.0(@lokalise/node-core@14.9.1(zod@4.4.3))':
     dependencies:
       '@bugsnag/js': 8.10.0
-      '@lokalise/node-core': 14.8.1(zod@4.4.3)
+      '@lokalise/node-core': 14.9.1(zod@4.4.3)
 
   '@lokalise/id-utils@3.0.1':
     dependencies:
@@ -1924,7 +1924,7 @@ snapshots:
       ulidx: 2.4.1
       uuidv7: 1.2.1
 
-  '@lokalise/node-core@14.8.1(zod@4.4.3)':
+  '@lokalise/node-core@14.9.1(zod@4.4.3)':
     dependencies:
       dot-prop: 6.0.1
       pino: 10.3.1
