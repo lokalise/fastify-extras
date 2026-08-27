@@ -625,8 +625,9 @@ describe('apiDocumentationPlugin', () => {
     })
 
     it('keeps its own routes out of both documents', () => {
-      // `/` is not read as a prefix of every url, so the reference routes are
-      // kept out by the urls they registered under rather than by the prefix.
+      // The reference sits at the root, so these are top-level urls with
+      // nothing in common to match on. Only the set of urls it registered
+      // covers them.
       for (const path of ['/openapi.json', '/openapi.yaml', '/js/scalar.js']) {
         expect(documentedPaths(publicDocument(app))).not.toContain(path)
         expect(documentedPaths(internalDocument(app))).not.toContain(path)
