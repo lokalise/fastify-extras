@@ -106,9 +106,6 @@ export type ApiDocumentationTransformOptions = {
    */
   hiddenRoutes?: readonly DocumentationRouteMatcher[]
 
-  /** Routes published in the public document even though they are hidden. */
-  publicRoutes?: readonly DocumentationRouteMatcher[]
-
   /**
    * Routes kept out of the public document even though they are not hidden.
    * They still appear in the internal one.
@@ -139,10 +136,9 @@ type RouteAudience = 'public' | 'internal' | 'hidden'
 
 /**
  * Overrides win over the `hide` flag, and the more restrictive override wins
- * over the more permissive one: `hiddenRoutes` beats `internalRoutes`, which
- * beats `publicRoutes`. A route listed in two places is a configuration
- * mistake, and the way it resolves keeps that mistake out of the public
- * document rather than in it.
+ * over the more permissive one: `hiddenRoutes` beats `internalRoutes`. A route
+ * listed in both is a configuration mistake, and the way it resolves keeps that
+ * mistake out of the public document rather than in it.
  */
 function resolveRouteAudience(
   route: DocumentedRoute,
@@ -150,7 +146,6 @@ function resolveRouteAudience(
 ): RouteAudience {
   if (matchesAnyRoute(route, options.hiddenRoutes)) return 'hidden'
   if (matchesAnyRoute(route, options.internalRoutes)) return 'internal'
-  if (matchesAnyRoute(route, options.publicRoutes)) return 'public'
 
   return route.schema?.hide === true ? 'internal' : 'public'
 }

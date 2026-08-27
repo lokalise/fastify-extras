@@ -12,6 +12,7 @@ import {
   DEFAULT_HIDDEN_ROUTES,
   type DocumentationRouteMatcher,
 } from './documentationRouteMatchers.js'
+import { importOptionalPeer } from './optionalPeerImport.js'
 
 const DEFAULT_PUBLIC_ROUTE_PREFIX = '/documentation'
 const DEFAULT_INTERNAL_ROUTE_PREFIX = '/documentation/internal'
@@ -101,12 +102,6 @@ export type ApiDocumentationPluginOptions = {
    * documentation.
    */
   hiddenRoutes?: readonly DocumentationRouteMatcher[]
-
-  /**
-   * Routes published in the public document even though the route builder
-   * hid them.
-   */
-  publicRoutes?: readonly DocumentationRouteMatcher[]
 
   /**
    * Routes kept out of the public document even though the route builder did
@@ -258,8 +253,8 @@ function readDocument(app: AnyFastifyInstance, decorator: string): unknown {
  *
  * Endpoints that carry no contract visibility, such as the healthchecks and
  * the Prometheus scrape endpoint, are hidden from both documents by default,
- * see {@link DEFAULT_HIDDEN_ROUTES}. `publicRoutes` and `internalRoutes`
- * override the flag either way for the routes they match.
+ * see {@link DEFAULT_HIDDEN_ROUTES}. `internalRoutes` keeps a route out of
+ * the public document even when the route builder did not hide it.
  *
  * Register the plugin before the routes it should document. `@fastify/swagger`
  * collects routes through an `onRoute` hook, and a hook only sees what is
@@ -296,8 +291,11 @@ const plugin: FastifyPluginAsync<ApiDocumentationPluginOptions> = async (
   } = options
 
   const [{ default: fastifySwagger }, { default: fastifyApiReference }] = await Promise.all([
-    import('@fastify/swagger'),
-    import('@scalar/fastify-api-reference'),
+    importOptionalPeer('@fastify/swagger', () => import('@fastify/swagger')),
+    importOptionalPeer(
+      '@scalar/fastify-api-reference',
+      () => import('@scalar/fastify-api-reference'),
+    ),
   ])
 
   /**
@@ -337,7 +335,6 @@ const plugin: FastifyPluginAsync<ApiDocumentationPluginOptions> = async (
     apiDocumentationTransform({
       audience,
       hiddenRoutes: allHiddenRoutes,
-      publicRoutes: options.publicRoutes,
       internalRoutes: options.internalRoutes,
       internalMarkerKey: options.internalMarkerKey,
       transform: options.transform,

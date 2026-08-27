@@ -60,6 +60,14 @@ describe('documentationRouteMatchers', () => {
       expect(matchesAnyRoute(route('/metrics'), [])).toBe(false)
     })
 
+    it('treats a trailing "*" as a literal character rather than a wildcard', () => {
+      // A string matcher is exact-or-prefix, so the glob form matches nothing
+      // at all and would silently disable the entry. `/documentation` already
+      // covers the whole subtree, and a RegExp is the escape hatch beyond that.
+      expect(matchesAnyRoute(route('/documentation/openapi.json'), ['/documentation*'])).toBe(false)
+      expect(matchesAnyRoute(route('/documentation'), ['/documentation*'])).toBe(false)
+    })
+
     it('hides the service utility endpoints by default', () => {
       const hidden = ['/', '/health', '/health/ready', '/metrics', '/documentation/openapi.json']
       const documented = ['/users', '/healthy-habits', '/metrics-explained']

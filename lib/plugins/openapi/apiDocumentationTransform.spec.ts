@@ -81,15 +81,6 @@ describe('apiDocumentationTransform', () => {
       ).toBe(true)
     })
 
-    it('publishes a route listed as public even though it is hidden', () => {
-      const transform = apiDocumentationTransform({
-        audience: 'public',
-        publicRoutes: ['/legacy'],
-      })
-
-      expect(transform(input('/legacy', { hide: true })).schema?.hide).toBe(false)
-    })
-
     it('keeps a route listed as internal out of the public document', () => {
       const transform = apiDocumentationTransform({
         audience: 'public',
@@ -113,17 +104,6 @@ describe('apiDocumentationTransform', () => {
         audience: 'public',
         hiddenRoutes: ['/admin'],
         internalRoutes: ['/admin'],
-        publicRoutes: ['/admin'],
-      })
-
-      expect(transform(input('/admin', {})).schema?.hide).toBe(true)
-    })
-
-    it('prefers internal over public when a route matches both', () => {
-      const transform = apiDocumentationTransform({
-        audience: 'public',
-        internalRoutes: ['/admin'],
-        publicRoutes: ['/admin'],
       })
 
       expect(transform(input('/admin', {})).schema?.hide).toBe(true)
@@ -148,13 +128,11 @@ describe('apiDocumentationTransform', () => {
     })
 
     it('does not mark anything in the public document', () => {
-      const transform = apiDocumentationTransform({
-        audience: 'public',
-        publicRoutes: ['/legacy'],
-      })
+      const transform = apiDocumentationTransform({ audience: 'public' })
 
-      const { schema } = transform(input('/legacy', { hide: true }))
+      const { schema } = transform(input('/internal-task', { hide: true }))
 
+      expect(schema?.hide).toBe(true)
       expect(schema).not.toHaveProperty(DEFAULT_INTERNAL_MARKER_KEY)
     })
 

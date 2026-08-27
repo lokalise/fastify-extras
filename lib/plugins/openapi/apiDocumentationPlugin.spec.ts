@@ -12,7 +12,7 @@ import {
   apiDocumentationPlugin,
 } from './apiDocumentationPlugin.js'
 import { DEFAULT_INTERNAL_MARKER_KEY } from './apiDocumentationTransform.js'
-import { DEFAULT_HIDDEN_ROUTES } from './documentationRouteMatchers.js'
+import { DEFAULT_HIDDEN_ROUTES, matchesAnyRoute } from './documentationRouteMatchers.js'
 
 /**
  * A registry of its own rather than `z.globalRegistry`, so the model
@@ -129,8 +129,7 @@ const buildApp = async (
     () => ({ actor: 'a', action: 'b' }),
   )
 
-  // Overridden either way by the tests that care.
-  typedApp.get('/legacy', { schema: { hide: true } }, () => ({ status: 'ok' }))
+  // Overridden by the tests that care.
   typedApp.delete(
     '/users/:userId',
     { schema: { params: z.object({ userId: z.string() }) } },
@@ -183,7 +182,6 @@ describe('apiDocumentationPlugin', () => {
 
     beforeAll(async () => {
       app = await buildApp({
-        publicRoutes: ['/legacy'],
         internalRoutes: [(route) => route.method === 'DELETE'],
       })
     })
@@ -195,7 +193,6 @@ describe('apiDocumentationPlugin', () => {
     it('publishes only the endpoints that are not hidden', () => {
       expect(documentedPaths(publicDocument(app))).toStrictEqual([
         '/audit',
-        '/legacy',
         '/tree',
         '/users',
         '/users/{userId}',
@@ -207,7 +204,6 @@ describe('apiDocumentationPlugin', () => {
         '/audit',
         '/internal/audit',
         '/internal/reindex',
-        '/legacy',
         '/tree',
         '/users',
         '/users/{userId}',
@@ -234,10 +230,6 @@ describe('apiDocumentationPlugin', () => {
       expect(allPaths.filter((path) => path.startsWith('/documentation'))).toStrictEqual([])
     })
 
-    it('honours an override that publishes a hidden endpoint', () => {
-      expect(documentedOperations(publicDocument(app), '/legacy')).toStrictEqual(['get'])
-    })
-
     it('honours an override that hides a published endpoint from the public document only', () => {
       expect(documentedOperations(publicDocument(app), '/users/{userId}')).toStrictEqual(['get'])
       expect(documentedOperations(internalDocument(app), '/users/{userId}')).toStrictEqual([
@@ -254,12 +246,6 @@ describe('apiDocumentationPlugin', () => {
         true,
       )
       expect(document?.paths['/users']?.post).not.toHaveProperty(DEFAULT_INTERNAL_MARKER_KEY)
-    })
-
-    it('does not mark an endpoint the override moved into the public document', () => {
-      expect(internalDocument(app)?.paths['/legacy']?.get).not.toHaveProperty(
-        DEFAULT_INTERNAL_MARKER_KEY,
-      )
     })
 
     it('titles the internal document apart from the public one', () => {
@@ -454,6 +440,41 @@ describe('apiDocumentationPlugin', () => {
         (await app.inject().get('/documentation/internal/openapi.json').end()).statusCode,
       ).toBe(404)
       expect((await app.inject().get('/documentation/openapi.json').end()).statusCode).toBe(200)
+    })
+  })
+
+  describe('the default documentation matcher', () => {
+    /**
+     * Pins the assumption behind the single `/documentation` entry in
+     * {@link DEFAULT_HIDDEN_ROUTES}: a string matcher is exact-or-prefix, so
+     * that one entry covers every route the two references register, however
+     * deep. If a future @fastify/swagger or Scalar mounts something outside
+     * that subtree, this fails rather than quietly documenting it.
+     */
+    it('covers every route the two references register', async () => {
+      const app = fastify()
+      const registeredUrls: string[] = []
+      app.addHook('onRoute', (route) => {
+        registeredUrls.push(route.url)
+      })
+
+      await app.register(apiDocumentationPlugin, {
+        openapi: { info: { title: 'Users API', version: '1.0.0' } },
+        exposeInternalDocumentation: true,
+        logLevel: 'silent',
+      })
+      await app.ready()
+
+      // The reference routes, the two documents in both formats, and Scalar's
+      // own asset routes: everything the plugin adds.
+      expect(registeredUrls.length).toBeGreaterThan(0)
+
+      const uncovered = registeredUrls.filter(
+        (url) => !matchesAnyRoute({ url, method: 'GET' }, ['/documentation']),
+      )
+
+      expect(uncovered).toStrictEqual([])
+      await app.close()
     })
   })
 
