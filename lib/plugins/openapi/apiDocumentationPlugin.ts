@@ -107,12 +107,6 @@ export type ApiDocumentationPluginOptions = {
   hiddenRoutes?: readonly DocumentationRouteMatcher[]
 
   /**
-   * Routes kept out of the public document even though the route builder did
-   * not hide them. They still show up in the internal one.
-   */
-  internalRoutes?: readonly DocumentationRouteMatcher[]
-
-  /**
    * Key stamped on internal operations in the internal document so readers
    * can tell them apart from the public ones. `false` turns it off.
    *
@@ -254,10 +248,11 @@ function readDocument(app: AnyFastifyInstance, decorator: string): unknown {
  * a hidden route is documented in the internal reference and left out of the
  * public one, an unhidden route appears in both.
  *
- * Endpoints that carry no contract visibility, such as the healthchecks and
- * the Prometheus scrape endpoint, are hidden from both documents by default,
- * see {@link DEFAULT_HIDDEN_ROUTES}. `internalRoutes` keeps a route out of
- * the public document even when the route builder did not hide it.
+ * Endpoints that carry no contract visibility, such as the healthchecks, are
+ * hidden from both documents by default, see {@link DEFAULT_HIDDEN_ROUTES}.
+ * `hiddenRoutes` is the only override, and it only subtracts: which of the
+ * two documents a route appears in is the route builder's call, not the
+ * service's.
  *
  * Register the plugin before the routes it should document. `@fastify/swagger`
  * collects routes through an `onRoute` hook, and a hook only sees what is
@@ -341,7 +336,6 @@ const plugin: FastifyPluginAsync<ApiDocumentationPluginOptions> = async (
     apiDocumentationTransform({
       audience,
       hiddenRoutes: allHiddenRoutes,
-      internalRoutes: options.internalRoutes,
       internalMarkerKey: options.internalMarkerKey,
       transform: options.transform,
     })

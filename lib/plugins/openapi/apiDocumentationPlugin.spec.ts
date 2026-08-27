@@ -129,10 +129,11 @@ const buildApp = async (
     () => ({ actor: 'a', action: 'b' }),
   )
 
-  // Overridden by the tests that care.
+  // Same path as a public GET, hidden by the route builder: the two methods
+  // land in different documents.
   typedApp.delete(
     '/users/:userId',
-    { schema: { params: z.object({ userId: z.string() }) } },
+    { schema: { hide: true, params: z.object({ userId: z.string() }) } },
     () => ({ status: 'ok' }),
   )
 
@@ -181,9 +182,7 @@ describe('apiDocumentationPlugin', () => {
     let app: DocumentedApp
 
     beforeAll(async () => {
-      app = await buildApp({
-        internalRoutes: [(route) => route.method === 'DELETE'],
-      })
+      app = await buildApp()
     })
 
     afterAll(async () => {
@@ -230,7 +229,7 @@ describe('apiDocumentationPlugin', () => {
       expect(allPaths.filter((path) => path.startsWith('/documentation'))).toStrictEqual([])
     })
 
-    it('honours an override that hides a published endpoint from the public document only', () => {
+    it('splits two methods of one path between the documents', () => {
       expect(documentedOperations(publicDocument(app), '/users/{userId}')).toStrictEqual(['get'])
       expect(documentedOperations(internalDocument(app), '/users/{userId}')).toStrictEqual([
         'delete',

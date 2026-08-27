@@ -107,12 +107,6 @@ export type ApiDocumentationTransformOptions = {
   hiddenRoutes?: readonly DocumentationRouteMatcher[]
 
   /**
-   * Routes kept out of the public document even though they are not hidden.
-   * They still appear in the internal one.
-   */
-  internalRoutes?: readonly DocumentationRouteMatcher[]
-
-  /**
    * Key stamped on internal operations in the internal document, so readers
    * and downstream tooling can tell them apart from the public ones. `false`
    * turns the marking off.
@@ -135,17 +129,20 @@ export type ApiDocumentationTransformOptions = {
 type RouteAudience = 'public' | 'internal' | 'hidden'
 
 /**
- * Overrides win over the `hide` flag, and the more restrictive override wins
- * over the more permissive one: `hiddenRoutes` beats `internalRoutes`. A route
- * listed in both is a configuration mistake, and the way it resolves keeps that
- * mistake out of the public document rather than in it.
+ * `hiddenRoutes` is the only override, and it only ever subtracts: a route on
+ * that list is in neither document, whatever its `hide` flag says. Everything
+ * else follows the flag the route builder set.
+ *
+ * There is deliberately no way to move a route between the two documents from
+ * here. `schema.hide` is the builder's own answer to whether an endpoint is
+ * customer-facing, and a route that needs to contradict it wants its contract
+ * changed rather than the documentation configured around it.
  */
 function resolveRouteAudience(
   route: DocumentedRoute,
   options: ApiDocumentationTransformOptions,
 ): RouteAudience {
   if (matchesAnyRoute(route, options.hiddenRoutes)) return 'hidden'
-  if (matchesAnyRoute(route, options.internalRoutes)) return 'internal'
 
   return route.schema?.hide === true ? 'internal' : 'public'
 }

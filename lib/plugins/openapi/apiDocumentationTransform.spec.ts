@@ -81,32 +81,38 @@ describe('apiDocumentationTransform', () => {
       ).toBe(true)
     })
 
-    it('keeps a route listed as internal out of the public document', () => {
-      const transform = apiDocumentationTransform({
-        audience: 'public',
-        internalRoutes: ['/admin'],
-      })
-
-      expect(transform(input('/admin', { hide: false })).schema?.hide).toBe(true)
-    })
-
-    it('shows a route listed as internal in the internal document', () => {
+    it('hides a listed route from the internal document too', () => {
       const transform = apiDocumentationTransform({
         audience: 'internal',
-        internalRoutes: ['/admin'],
+        hiddenRoutes: ['/metrics'],
       })
 
-      expect(transform(input('/admin', { hide: false })).schema?.hide).toBe(false)
+      expect(transform(input('/metrics', { hide: false })).schema?.hide).toBe(true)
     })
 
-    it('resolves overlapping overrides towards the more restrictive one', () => {
-      const transform = apiDocumentationTransform({
-        audience: 'public',
-        hiddenRoutes: ['/admin'],
-        internalRoutes: ['/admin'],
-      })
+    /**
+     * The only override subtracts. A route the builder did not hide cannot be
+     * moved into the internal document from here, and a route it did hide
+     * cannot be moved out of it.
+     */
+    it('leaves the choice between the two documents to the hide flag', () => {
+      const options = { hiddenRoutes: ['/admin'] } as const
 
-      expect(transform(input('/admin', {})).schema?.hide).toBe(true)
+      expect(
+        apiDocumentationTransform({ audience: 'public', ...options })(
+          input('/users', { hide: false }),
+        ).schema?.hide,
+      ).toBe(false)
+      expect(
+        apiDocumentationTransform({ audience: 'public', ...options })(
+          input('/task', { hide: true }),
+        ).schema?.hide,
+      ).toBe(true)
+      expect(
+        apiDocumentationTransform({ audience: 'internal', ...options })(
+          input('/task', { hide: true }),
+        ).schema?.hide,
+      ).toBe(false)
     })
   })
 

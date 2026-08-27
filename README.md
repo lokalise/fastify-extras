@@ -574,7 +574,6 @@ decision is made before this plugin sees the route.
 | no `hide`, or `hide: false` | documented       | documented                                     |
 | `hide: true`                | hidden           | documented, marked `x-internal-endpoint: true` |
 | matched by `hiddenRoutes`   | hidden           | hidden                                         |
-| matched by `internalRoutes` | hidden           | documented, marked                             |
 
 The internal reference is a superset: it documents the public endpoints too, and marks the ones that are internal.
 
@@ -661,11 +660,12 @@ that guards the smaller surface never ends up with the larger one open.
 `openapi` is required. `@fastify/swagger` reads the presence of that key as the choice between OpenAPI 3 and
 Swagger 2.0, and a Swagger 2.0 document cannot carry the component references the transforms produce.
 
-#### Overriding the audience of a route
+#### Taking a route out of both documents
 
-`hiddenRoutes` and `internalRoutes` both take a list of matchers. A string matches one url and nothing else, a
-regular expression is tested against the url, and a function receives `{ url, method, schema }` for anything else.
-Urls are the Fastify ones, with `:param` placeholders rather than the `{param}` form the document uses.
+`hiddenRoutes` is the only override, and it only subtracts. A route on the list is in neither document, whatever its
+`hide` flag says. It takes a list of matchers: a string matches one url and nothing else, a regular expression is
+tested against the url, and a function receives `{ url, method, schema }` for anything else. Urls are the Fastify
+ones, with `:param` placeholders rather than the `{param}` form the document uses.
 
 Strings carry no pattern syntax at all. `/admin` matches `/admin`, not `/admin/users`; `/admin*` matches a url that
 literally contains an asterisk. Reach for a regular expression when you mean a subtree, which keeps the reach visible
@@ -675,18 +675,16 @@ at the call site instead of implied by a string.
 await app.register(apiDocumentationPlugin, {
   openapi: { info: { title: 'Users API', version: '1.0.0' } },
   // adds to the defaults rather than replacing them
-  hiddenRoutes: [...DEFAULT_HIDDEN_ROUTES, '/internal-metrics'],
-  // kept out of the public document even though the route builder did not hide it
-  internalRoutes: [/^\/admin\//, ({ method }) => method === 'DELETE'],
+  hiddenRoutes: [...DEFAULT_HIDDEN_ROUTES, '/internal-metrics', /^\/debug\//],
 })
 ```
 
-`hiddenRoutes` replaces `DEFAULT_HIDDEN_ROUTES` rather than adding to it, hence the spread. A route matched by both
-lists resolves to the more restrictive one: `hiddenRoutes` beats `internalRoutes`.
+`hiddenRoutes` replaces `DEFAULT_HIDDEN_ROUTES` rather than adding to it, hence the spread.
 
-There is no override in the other direction. `schema.hide` is the route builder's own answer to "is this endpoint
-customer-facing", and a route needing to contradict it wants the contract changed rather than the documentation
-patched around it.
+Which of the two documents a route appears in is not configurable, in either direction. `schema.hide` is the route
+builder's own answer to "is this endpoint customer-facing", and a route needing to contradict it wants its contract
+changed rather than the documentation configured around it. So the only question left for a service is whether a
+route is API surface at all, which is what `hiddenRoutes` answers.
 
 #### Models
 
@@ -731,7 +729,6 @@ it reaches the document. `internalMarkerKey: false` turns the marking off.
 | `internalRoutePrefix`         | `/documentation/internal`                     | Where the internal reference is served                                        |
 | `exposeInternalDocumentation` | `false`                                       | Whether the internal document is built and served at all                      |
 | `hiddenRoutes`                | `DEFAULT_HIDDEN_ROUTES`                       | Routes kept out of both documents                                             |
-| `internalRoutes`              | -                                             | Routes kept out of the public document even though they are not hidden        |
 | `internalMarkerKey`           | `x-internal-endpoint`                         | Key marking internal operations, or `false`                                   |
 | `transform`                   | -                                             | Route-level transform, typically `jsonSchemaTransform`                        |
 | `transformObject`             | -                                             | Document-level transform, typically `jsonSchemaTransformObject`               |
