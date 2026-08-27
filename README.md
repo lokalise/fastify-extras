@@ -16,6 +16,7 @@ Reusable plugins for Fastify.
   - [OpenTelemetry Transaction Manager Plugin](#opentelemetry-transaction-manager-plugin)
   - [Datadog Transaction Manager Plugin](#datadog-transaction-manager-plugin)
   - [UnhandledException Plugin](#unhandledexception-plugin)
+  - [API Documentation Plugin](#api-documentation-plugin)
 
 ## Dependency Management
 
@@ -41,6 +42,13 @@ The following needs to be taken into consideration when adding new runtime depen
 - `pino`;
 - `bullmq`;
 - `ioredis`;
+
+### Optional Peer Dependencies
+
+Only needed by the plugin that uses them. They are imported when that plugin is registered, so services that do not
+register it need neither installed.
+
+- `@fastify/swagger`, `@scalar/fastify-api-reference`: [API Documentation Plugin](#api-documentation-plugin).
 
 ## Plugins
 
@@ -532,6 +540,148 @@ When an uncaught exception occurs, the plugin:
 - `fastify`: The framework this plugin is designed for.
 
 > 🚨 It's critical to note that this plugin listens to the process's 'uncaughtException' event. Multiple listeners on this event can introduce unpredictable behavior in your application. Ensure that this is the sole listener for this event or handle interactions between multiple listeners carefully.
+
+### API Documentation Plugin
+
+Serves two API references off one route table: the customer-facing one and the internal one, both rendered by
+[`@scalar/fastify-api-reference`](https://github.com/scalar/scalar/tree/main/integrations/fastify). The plugin registers
+[`@fastify/swagger`](https://github.com/fastify/fastify-swagger) twice, once per audience, and points a Scalar instance
+at each document.
+
+`@fastify/swagger` and `@scalar/fastify-api-reference` are optional peer dependencies, imported when the plugin is
+registered:
+
+```bash
+npm i @fastify/swagger @scalar/fastify-api-reference
+```
+
+#### What separates the two documents
+
+`schema.hide`. Route builders that resolve contract visibility (`@lokalise/api-contracts`, and the
+`opinionated-machine` builders on top of it) already set it on everything that is not customer-facing, so the audience
+decision is made before this plugin sees the route.
+
+| Route                       | Public reference | Internal reference                             |
+| --------------------------- | ---------------- | ---------------------------------------------- |
+| no `hide`, or `hide: false` | documented       | documented                                     |
+| `hide: true`                | hidden           | documented, marked `x-internal-endpoint: true` |
+| matched by `hiddenRoutes`   | hidden           | hidden                                         |
+| matched by `publicRoutes`   | documented       | documented                                     |
+| matched by `internalRoutes` | hidden           | documented, marked                             |
+
+The internal reference is a superset: it documents the public endpoints too, and marks the ones that are internal.
+
+Endpoints with no contract behind them are hidden from both documents by default. `DEFAULT_HIDDEN_ROUTES` is `/`,
+`/health`, `/metrics` and `/documentation`, matched exactly or as a path prefix, so `/health/ready` goes with
+`/health`. The configured reference prefixes are always hidden on top of that: Scalar registers its own routes with
+`hide: true`, and without the exclusion the internal document would document the documentation.
+
+#### Usage
+
+```typescript
+import { apiDocumentationPlugin } from '@lokalise/fastify-extras'
+import { jsonSchemaTransform, jsonSchemaTransformObject } from 'fastify-type-provider-zod'
+
+await app.register(apiDocumentationPlugin, {
+  openapi: { info: { title: 'Users API', version: '1.0.0' } },
+  exposeInternalDocumentation: !isProduction,
+  transform: jsonSchemaTransform,
+  transformObject: jsonSchemaTransformObject,
+  internalHooks: { onRequest: requireInternalNetwork },
+})
+```
+
+Register it before the routes it should document. `@fastify/swagger` collects routes through an `onRoute` hook, and a
+hook only sees what is registered after it.
+
+That serves:
+
+- `/documentation/`, the public reference, with `/documentation/openapi.json` and `/documentation/openapi.yaml` for the
+  document itself;
+- `/documentation/internal/`, the internal reference, with the same two document endpoints under it.
+
+`exposeInternalDocumentation: false` builds no internal document and registers none of its routes, so in an environment
+that faces the public internet there is nothing to reach. Where the internal reference is served, `internalHooks` is
+where an authentication or network check on it goes.
+
+#### Overriding the audience of a route
+
+`hiddenRoutes`, `publicRoutes` and `internalRoutes` all take a list of matchers. A string matches the url exactly or as
+a path prefix, a regular expression is tested against the url, and a function receives `{ url, method, schema }` for
+anything else. Urls are the Fastify ones, with `:param` placeholders rather than the `{param}` form the document uses.
+
+```typescript
+await app.register(apiDocumentationPlugin, {
+  openapi: { info: { title: 'Users API', version: '1.0.0' } },
+  // adds to the defaults rather than replacing them
+  hiddenRoutes: [...DEFAULT_HIDDEN_ROUTES, '/internal-metrics'],
+  // published even though the route builder hid it
+  publicRoutes: ['/legacy/tokens'],
+  // kept out of the public document even though the route builder did not hide it
+  internalRoutes: [/^\/admin\//, ({ method }) => method === 'DELETE'],
+})
+```
+
+`hiddenRoutes` replaces `DEFAULT_HIDDEN_ROUTES` rather than adding to it, hence the spread. A route matched by more
+than one list resolves to the most restrictive: `hiddenRoutes` beats `internalRoutes`, which beats `publicRoutes`.
+
+#### Models
+
+Hiding an operation does not remove the schemas behind it. `fastify-type-provider-zod`'s `jsonSchemaTransformObject`
+writes the entire Zod registry into `components.schemas` in one pass over the finished document, and never sees which
+operations the route-level transform hid. `app.addSchema` shared schemas land there the same way. Both Scalar and
+`@fastify/swagger-ui` render `components.schemas` as their models panel, so an internal-only response shape in the
+public document is not merely present in the JSON, a reader sees its name and its fields on screen.
+
+The plugin therefore prunes every `components` entry the document's own operations do not reference, transitively,
+before serving it. Three parts of that are worth expecting rather than being surprised by:
+
+- The provider emits a `Foo` and a `FooInput` per registered schema. Pruning keeps only the direction actually used, so
+  a response-only schema loses its `Input` twin, and the panel is shorter than the registry even for a document with
+  nothing internal in it.
+- Self-referential models (the Zod 4 getter pattern) survive: the walk is cycle-safe.
+- `components.securitySchemes` is never pruned, since security schemes are referenced by name from `security`
+  requirements rather than by `$ref`.
+
+Set `pruneUnreferencedComponents: false` for a document that deliberately publishes a schema catalogue beyond what its
+operations reference. `pruneUnreachableComponents(document)` is also exported on its own, for services that assemble
+their documents by hand.
+
+Scalar's `configuration: { hideModels: true }` hides the panel but leaves the schemas in the document. Prune for the
+leak, hide for the noise.
+
+#### Marking internal operations
+
+Operations that are internal are marked `x-internal-endpoint: true` in the internal document. Deliberately not
+`x-internal`: Scalar reads both `x-internal` and `x-scalar-ignore` as a request to leave the operation out of the
+reference, which would hide every internal endpoint from the document that exists to show them. Both keys are rejected
+when passed as `internalMarkerKey`, along with any key without the `x-` prefix, which `@fastify/swagger` drops before
+it reaches the document. `internalMarkerKey: false` turns the marking off.
+
+#### Options
+
+| Option                        | Default                                       | Description                                                                  |
+| ----------------------------- | --------------------------------------------- | ---------------------------------------------------------------------------- |
+| `openapi`                     | -                                             | Document metadata (`info`, `servers`, `security`, `tags`) for both documents  |
+| `internalOpenapi`             | `openapi`, with `(internal)` added to the title | Metadata for the internal document. Replaces `openapi`, not merged into it |
+| `publicRoutePrefix`           | `/documentation`                              | Where the public reference is served                                          |
+| `internalRoutePrefix`         | `/documentation/internal`                     | Where the internal reference is served                                        |
+| `exposeInternalDocumentation` | `true`                                        | Whether the internal document is built and served at all                      |
+| `hiddenRoutes`                | `DEFAULT_HIDDEN_ROUTES`                       | Routes kept out of both documents                                             |
+| `publicRoutes`                | -                                             | Routes published in the public document even though they are hidden           |
+| `internalRoutes`              | -                                             | Routes kept out of the public document even though they are not hidden        |
+| `internalMarkerKey`           | `x-internal-endpoint`                         | Key marking internal operations, or `false`                                   |
+| `transform`                   | -                                             | Route-level transform, typically `jsonSchemaTransform`                        |
+| `transformObject`             | -                                             | Document-level transform, typically `jsonSchemaTransformObject`               |
+| `pruneUnreferencedComponents` | `true`                                        | Drop `components` entries no operation of the document references             |
+| `scalarConfiguration`         | -                                             | Passed through to Scalar for both references                                  |
+| `internalScalarConfiguration` | -                                             | Scalar configuration for the internal reference only                          |
+| `hooks` / `internalHooks`     | -                                             | `onRequest` / `preHandler` hooks for the reference routes                     |
+| `logLevel`                    | -                                             | Log level for the routes both references register                             |
+| `documentDecorator`           | `swagger`                                     | Decorator holding the public document                                         |
+| `internalDocumentDecorator`   | `internalSwagger`                             | Decorator holding the internal document                                       |
+
+Both documents stay available programmatically, as `app.swagger()` and `app.internalSwagger()`.
 
 ## Utilities
 
