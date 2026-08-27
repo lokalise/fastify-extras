@@ -40,6 +40,7 @@
         "@bugsnag/node": "^8.4.0",
         "@fastify/error": "^4.2.0",
         "@lokalise/error-utils": "^3.0.0",
+        "@scalar/fastify-api-reference": "^1.66.1",
         "@splitsoftware/splitio": "^11.6.0",
         "@supercharge/promise-pool": "^3.2.0",
         "fastify-metrics": "^13.2.0",
@@ -49,6 +50,7 @@
     },
     "peerDependencies": {
         "@fastify/jwt": ">=9.1.0",
+        "@fastify/swagger": ">=9.5.1",
         "@lokalise/api-contracts": ">=5.0.0",
         "@lokalise/background-jobs-common": ">=12.0.0",
         "@lokalise/node-core": ">=14.0.0",
@@ -65,6 +67,7 @@
         "@amplitude/analytics-types": "^2.10.0",
         "@biomejs/biome": "^1.9.4",
         "@fastify/sse": "^0.6.0",
+        "@fastify/swagger": "^9.8.1",
         "@lokalise/backend-http-client": "12.0.0",
         "@lokalise/background-jobs-common": "^15.2.0",
         "@lokalise/biome-config": "^2.0.0",

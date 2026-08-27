@@ -115,3 +115,25 @@ export {
   type AnyFastifyInstance,
   type CommonFastifyInstance,
 } from './plugins/pluginsCommon.js'
+
+export {
+  type ApiDocumentationAudience,
+  type ApiDocumentationHooks,
+  apiDocumentationPlugin,
+  type ApiDocumentationPluginOptions,
+  type ApiDocumentationTransform,
+  apiDocumentationTransform,
+  type ApiDocumentationTransformInput,
+  type ApiDocumentationTransformOptions,
+  type ApiDocumentationTransformResult,
+  type ChainedApiDocumentationTransform,
+  type ChainedApiDocumentationTransformObject,
+  DEFAULT_HIDDEN_ROUTES,
+  DEFAULT_INTERNAL_MARKER_KEY,
+  type DocumentationRouteMatcher,
+  type DocumentedRoute,
+  type OpenApiDocumentDefinition,
+  type OpenApiDocumentLike,
+  type OpenApiRouteSchema,
+  pruneUnreachableComponents,
+} from './plugins/openapi/index.js'
