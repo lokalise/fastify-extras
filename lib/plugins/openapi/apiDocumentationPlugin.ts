@@ -96,10 +96,12 @@ export type ApiDocumentationPluginOptions = {
    * default rather than adding to it, so spread it in to keep it:
    * `hiddenRoutes: [...DEFAULT_HIDDEN_ROUTES, '/internal-metrics']`.
    *
-   * The configured documentation prefixes are always hidden on top of
-   * whatever this says: the reference registers its own routes with
-   * `hide: true`, and without that the internal document would document the
-   * documentation.
+   * The reference's own routes are excluded on top of whatever this says,
+   * by url rather than by prefix: Scalar registers them with `hide: true`,
+   * which is indistinguishable from a contract-derived hide, so without the
+   * exclusion the internal document would document the documentation. Because
+   * it matches urls exactly, a service owning a real endpoint under the
+   * documentation prefix keeps it documented.
    */
   hiddenRoutes?: readonly DocumentationRouteMatcher[]
 
@@ -304,9 +306,15 @@ const plugin: FastifyPluginAsync<ApiDocumentationPluginOptions> = async (
    *
    * Scalar registers its routes with `hide: true`, which is indistinguishable
    * from a route hidden because it is internal, so without an exclusion the
-   * internal document documents the documentation. The route prefixes alone
-   * do not cover that: a reference mounted at `/` registers `/openapi.json`
-   * and friends, and `/` is deliberately not read as a prefix of every url.
+   * internal document documents the documentation.
+   *
+   * This is the whole exclusion, rather than a fallback behind hiding the
+   * configured prefixes. Prefixes get it wrong in both directions: a
+   * reference mounted at `/` registers `/openapi.json` and friends, and `/`
+   * is deliberately not read as a prefix of every url, while hiding
+   * `/documentation` would swallow a service's own
+   * `/documentation/guides/:slug` along with the reference. The set holds the
+   * urls that were actually registered, so it covers exactly them.
    *
    * The transform reads this set when a document is generated rather than
    * when it is built, by which point every reference route is in it.
@@ -326,8 +334,6 @@ const plugin: FastifyPluginAsync<ApiDocumentationPluginOptions> = async (
 
   const allHiddenRoutes: readonly DocumentationRouteMatcher[] = [
     ...hiddenRoutes,
-    publicRoutePrefix,
-    internalRoutePrefix,
     ({ url }) => referenceRoutes.has(url),
   ]
 

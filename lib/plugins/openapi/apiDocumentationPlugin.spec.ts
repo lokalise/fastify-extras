@@ -12,7 +12,7 @@ import {
   apiDocumentationPlugin,
 } from './apiDocumentationPlugin.js'
 import { DEFAULT_INTERNAL_MARKER_KEY } from './apiDocumentationTransform.js'
-import { DEFAULT_HIDDEN_ROUTES, matchesAnyRoute } from './documentationRouteMatchers.js'
+import { DEFAULT_HIDDEN_ROUTES } from './documentationRouteMatchers.js'
 
 /**
  * A registry of its own rather than `z.globalRegistry`, so the model
@@ -443,13 +443,12 @@ describe('apiDocumentationPlugin', () => {
     })
   })
 
-  describe('the default documentation matcher', () => {
+  describe('excluding the documentation from itself', () => {
     /**
-     * Pins the assumption behind the single `/documentation` entry in
-     * {@link DEFAULT_HIDDEN_ROUTES}: a string matcher is exact-or-prefix, so
-     * that one entry covers every route the two references register, however
-     * deep. If a future @fastify/swagger or Scalar mounts something outside
-     * that subtree, this fails rather than quietly documenting it.
+     * The reference routes are excluded by url, from the set the reference
+     * scopes actually registered, rather than by hiding the `/documentation`
+     * prefix. Both keep the documentation out of its own documents; only the
+     * exact one leaves the rest of the subtree to the service.
      */
     it('covers every route the two references register', async () => {
       const app = fastify()
@@ -465,15 +464,37 @@ describe('apiDocumentationPlugin', () => {
       })
       await app.ready()
 
-      // The reference routes, the two documents in both formats, and Scalar's
+      // The reference routes, both documents in both formats, and Scalar's
       // own asset routes: everything the plugin adds.
       expect(registeredUrls.length).toBeGreaterThan(0)
 
-      const uncovered = registeredUrls.filter(
-        (url) => !matchesAnyRoute({ url, method: 'GET' }, ['/documentation']),
-      )
+      const documented = [
+        ...documentedPaths(publicDocument(app)),
+        ...documentedPaths(internalDocument(app)),
+      ]
 
-      expect(uncovered).toStrictEqual([])
+      expect(documented).toStrictEqual([])
+      await app.close()
+    })
+
+    it('leaves a real endpoint under the same prefix documented', async () => {
+      const app = fastify()
+
+      await app.register(apiDocumentationPlugin, {
+        openapi: { info: { title: 'Users API', version: '1.0.0' } },
+        exposeInternalDocumentation: true,
+        logLevel: 'silent',
+      })
+      // A service that serves its own end-user documentation over the API.
+      app.get('/documentation/guides/:slug', () => ({}))
+      await app.ready()
+
+      expect(documentedPaths(publicDocument(app))).toStrictEqual(['/documentation/guides/{slug}'])
+      // Still nothing of the reference's own alongside it.
+      expect(
+        documentedPaths(internalDocument(app)).filter((path) => path.includes('openapi')),
+      ).toStrictEqual([])
+
       await app.close()
     })
   })

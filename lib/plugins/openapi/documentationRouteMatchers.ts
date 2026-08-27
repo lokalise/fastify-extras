@@ -39,18 +39,29 @@ export type DocumentationRouteMatcher = string | RegExp | ((route: DocumentedRou
  * Routes kept out of both documents unless the service says otherwise.
  *
  * These are the endpoints every Lokalise service exposes for infrastructure
- * rather than for callers: the root route, the healthcheck endpoints, the
- * Prometheus scrape endpoint and the documentation itself. Prefix matching
- * covers `/health/ready` and friends along with them.
+ * rather than for callers: the root route, the healthcheck endpoints and the
+ * Prometheus scrape endpoint. Prefix matching covers `/health/ready` and
+ * friends along with them.
+ *
+ * The documentation's own routes are not on this list. The plugin excludes
+ * them by url instead, from the set the reference scopes actually registered,
+ * which is exact where a prefix is a guess: a service owning a real
+ * `/documentation/guides/:slug` endpoint keeps it documented.
+ *
+ * The two prefixes that remain are still guesses, and a service whose domain
+ * puts real endpoints under them (`/health/tips` for a healthcare API,
+ * `/metrics/daily` for an analytics one) has to say so, since this plugin
+ * has no way to know which routes the healthcheck and metrics plugins
+ * registered. Prefix matching breaks on a path segment, so only the subtree
+ * is affected: `/health-history` and `/healthy-habits` are documented.
  *
  * Exported so a service that wants to add to the list rather than replace it
- * can spread it into its own `hiddenRoutes`.
+ * can spread it into its own `hiddenRoutes`, or filter an entry out of it.
  */
 export const DEFAULT_HIDDEN_ROUTES: readonly DocumentationRouteMatcher[] = [
   '/',
   '/health',
   '/metrics',
-  '/documentation',
 ]
 
 function matchesUrlPrefix(url: string, prefix: string): boolean {

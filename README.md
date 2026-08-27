@@ -583,17 +583,33 @@ The internal reference is a superset: it documents the public endpoints too, and
 `hiddenRoutes` defaults to the exported `DEFAULT_HIDDEN_ROUTES`, the endpoints a service exposes for infrastructure
 rather than for callers. Each entry matches the url exactly or as a path prefix.
 
-| Matcher          | Hides                                                                | Registered by                                             |
-| ---------------- | -------------------------------------------------------------------- | --------------------------------------------------------- |
-| `/`              | the root route only, since `/` is not read as a prefix of every url    | `commonHealthcheckPlugin`, `commonSyncHealthcheckPlugin`     |
-| `/health`        | `/health` and everything under it, such as `/health/ready`            | `publicHealthcheckPlugin`, the common healthcheck plugins   |
-| `/metrics`       | `/metrics` and everything under it                                   | `metricsPlugin`                                            |
-| `/documentation` | `/documentation` and everything under it, `/documentation/internal` included | this plugin                                     |
+| Matcher    | Hides                                                               | Registered by                                            |
+| ---------- | ------------------------------------------------------------------- | -------------------------------------------------------- |
+| `/`        | the root route only, since `/` is not read as a prefix of every url   | `commonHealthcheckPlugin`, `commonSyncHealthcheckPlugin`    |
+| `/health`  | `/health` and everything under it, such as `/health/ready`           | `publicHealthcheckPlugin`, the common healthcheck plugins  |
+| `/metrics` | `/metrics` and everything under it                                   | `metricsPlugin`                                           |
 
-Prefix matching breaks on a path segment, so `/documentation` does not cover `/documentation-archive`.
+The reference's own routes are excluded separately, and by url rather than by prefix: the plugin records what the two
+Scalar scopes register and hides exactly those. Scalar registers them with `hide: true`, which is indistinguishable
+from a contract-derived hide, so without the exclusion the internal document would document the documentation.
 
-Whatever `publicRoutePrefix` and `internalRoutePrefix` are set to is hidden on top of that list. Scalar registers its
-own routes with `hide: true`, and without the exclusion the internal document would document the documentation.
+That is why `/documentation` is not in the table. Hiding the prefix would get it wrong in both directions: it misses a
+reference mounted at `/`, which registers `/openapi.json` at the root, and it swallows a service's own
+`/documentation/guides/:slug` along with the reference. Matching the registered urls covers exactly the reference.
+
+#### When a default hides an endpoint you own
+
+`/health` and `/metrics` are still prefix guesses, since this plugin has no way to know which routes the healthcheck
+and metrics plugins registered. A service whose domain puts real endpoints under them, `/health/tips` for a healthcare
+API or `/metrics/daily` for an analytics one, would find them missing from both documents with nothing said about it.
+Filter the entry out and hide the infrastructure routes precisely:
+
+```typescript
+hiddenRoutes: [...DEFAULT_HIDDEN_ROUTES.filter((matcher) => matcher !== '/health'), '/health/ready']
+```
+
+Only the subtree is affected. Prefix matching breaks on a path segment, so `/healthy-habits` and `/health-history` are
+documented either way, and so is `/documentation-archive`.
 
 #### Usage
 
@@ -637,9 +653,9 @@ Swagger 2.0, and a Swagger 2.0 document cannot carry the component references th
 
 `hiddenRoutes` and `internalRoutes` both take a list of matchers. A string matches the url exactly or as a path
 prefix, a regular expression is tested against the url, and a function receives `{ url, method, schema }` for anything
-else. There is no glob syntax: `/documentation*` matches a url that literally contains the asterisk, while
-`/documentation` already covers the whole subtree. Urls are the Fastify ones, with `:param` placeholders rather than
-the `{param}` form the document uses.
+else. There is no glob syntax: `/admin*` matches a url that literally contains the asterisk, while `/admin` already
+covers `/admin` and everything under it. Urls are the Fastify ones, with `:param` placeholders rather than the
+`{param}` form the document uses.
 
 ```typescript
 await app.register(apiDocumentationPlugin, {

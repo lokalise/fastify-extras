@@ -69,7 +69,7 @@ describe('documentationRouteMatchers', () => {
     })
 
     it('hides the service utility endpoints by default', () => {
-      const hidden = ['/', '/health', '/health/ready', '/metrics', '/documentation/openapi.json']
+      const hidden = ['/', '/health', '/health/ready', '/metrics', '/metrics/collect']
       const documented = ['/users', '/healthy-habits', '/metrics-explained']
 
       for (const url of hidden) {
@@ -78,6 +78,16 @@ describe('documentationRouteMatchers', () => {
       for (const url of documented) {
         expect(matchesAnyRoute(route(url), DEFAULT_HIDDEN_ROUTES)).toBe(false)
       }
+    })
+
+    /**
+     * The documentation's own routes are excluded by url rather than by
+     * prefix, so the defaults do not reach into a subtree the service may own
+     * endpoints in. See the plugin spec for the exclusion that replaces it.
+     */
+    it('does not claim the /documentation subtree', () => {
+      expect(matchesAnyRoute(route('/documentation/guides'), DEFAULT_HIDDEN_ROUTES)).toBe(false)
+      expect(matchesAnyRoute(route('/documentation'), DEFAULT_HIDDEN_ROUTES)).toBe(false)
     })
   })
 })
