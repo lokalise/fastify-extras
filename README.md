@@ -36,6 +36,7 @@ The following needs to be taken into consideration when adding new runtime depen
 ### Peer Dependencies
 
 - `@fastify/jwt`;
+- `@fastify/swagger`;
 - `@opentelemetry/api`;
 - `dd-trace`;
 - `fastify`;
@@ -43,12 +44,15 @@ The following needs to be taken into consideration when adding new runtime depen
 - `bullmq`;
 - `ioredis`;
 
+`@fastify/swagger` is loaded at runtime only by the [API Documentation Plugin](#api-documentation-plugin), but the
+published typings reference its types from the package root, so every consumer needs it installed.
+
 ### Optional Peer Dependencies
 
-Only needed by the plugin that uses them. They are imported when that plugin is registered, so services that do not
-register it need neither installed.
+Only needed by the plugin that uses them, and imported when that plugin is registered, so a service that does not
+register it needs nothing installed.
 
-- `@fastify/swagger`, `@scalar/fastify-api-reference`: [API Documentation Plugin](#api-documentation-plugin).
+- `@scalar/fastify-api-reference`: [API Documentation Plugin](#api-documentation-plugin).
 
 ## Plugins
 
@@ -548,8 +552,8 @@ Serves two API references off one route table: the customer-facing one and the i
 [`@fastify/swagger`](https://github.com/fastify/fastify-swagger) twice, once per audience, and points a Scalar instance
 at each document.
 
-`@fastify/swagger` and `@scalar/fastify-api-reference` are optional peer dependencies, imported when the plugin is
-registered:
+Neither package is loaded until the plugin is registered. `@scalar/fastify-api-reference` is an optional peer
+dependency; `@fastify/swagger` is a required one, since the published typings reference its types:
 
 ```bash
 npm i @fastify/swagger @scalar/fastify-api-reference
@@ -571,10 +575,22 @@ decision is made before this plugin sees the route.
 
 The internal reference is a superset: it documents the public endpoints too, and marks the ones that are internal.
 
-Endpoints with no contract behind them are hidden from both documents by default. `DEFAULT_HIDDEN_ROUTES` is `/`,
-`/health`, `/metrics` and `/documentation`, matched exactly or as a path prefix, so `/health/ready` goes with
-`/health`. The configured reference prefixes are always hidden on top of that: Scalar registers its own routes with
-`hide: true`, and without the exclusion the internal document would document the documentation.
+#### Routes hidden by default
+
+`hiddenRoutes` defaults to the exported `DEFAULT_HIDDEN_ROUTES`, the endpoints a service exposes for infrastructure
+rather than for callers. Each entry matches the url exactly or as a path prefix.
+
+| Matcher          | Hides                                                                | Registered by                                             |
+| ---------------- | -------------------------------------------------------------------- | --------------------------------------------------------- |
+| `/`              | the root route only, since `/` is not read as a prefix of every url    | `commonHealthcheckPlugin`, `commonSyncHealthcheckPlugin`     |
+| `/health`        | `/health` and everything under it, such as `/health/ready`            | `publicHealthcheckPlugin`, the common healthcheck plugins   |
+| `/metrics`       | `/metrics` and everything under it                                   | `metricsPlugin`                                            |
+| `/documentation` | `/documentation` and everything under it, `/documentation/internal` included | this plugin                                     |
+
+Prefix matching breaks on a path segment, so `/documentation` does not cover `/documentation-archive`.
+
+Whatever `publicRoutePrefix` and `internalRoutePrefix` are set to is hidden on top of that list. Scalar registers its
+own routes with `hide: true`, and without the exclusion the internal document would document the documentation.
 
 #### Usage
 
@@ -584,7 +600,7 @@ import { jsonSchemaTransform, jsonSchemaTransformObject } from 'fastify-type-pro
 
 await app.register(apiDocumentationPlugin, {
   openapi: { info: { title: 'Users API', version: '1.0.0' } },
-  exposeInternalDocumentation: !isProduction,
+  exposeInternalDocumentation: true,
   transform: jsonSchemaTransform,
   transformObject: jsonSchemaTransformObject,
   internalHooks: { onRequest: requireInternalNetwork },
@@ -600,9 +616,11 @@ That serves:
   document itself;
 - `/documentation/internal/`, the internal reference, with the same two document endpoints under it.
 
-`exposeInternalDocumentation: false` builds no internal document and registers none of its routes, so in an environment
-that faces the public internet there is nothing to reach. Where the internal reference is served, `internalHooks` is
-where an authentication or network check on it goes.
+The internal reference is opt-in. `exposeInternalDocumentation` defaults to `false`, which builds no internal document
+and registers none of its routes, so there is nothing to reach until a service asks for it. That document lists every
+endpoint the public one hides, along with their schemas, and the plugin puts no authentication in front of it, so
+`internalHooks` is where an authentication or network check goes, and `exposeInternalDocumentation: !isProduction` is
+the shape for a service that wants it only outside production.
 
 #### Overriding the audience of a route
 
@@ -666,7 +684,7 @@ it reaches the document. `internalMarkerKey: false` turns the marking off.
 | `internalOpenapi`             | `openapi`, with `(internal)` added to the title | Metadata for the internal document. Replaces `openapi`, not merged into it |
 | `publicRoutePrefix`           | `/documentation`                              | Where the public reference is served                                          |
 | `internalRoutePrefix`         | `/documentation/internal`                     | Where the internal reference is served                                        |
-| `exposeInternalDocumentation` | `true`                                        | Whether the internal document is built and served at all                      |
+| `exposeInternalDocumentation` | `false`                                       | Whether the internal document is built and served at all                      |
 | `hiddenRoutes`                | `DEFAULT_HIDDEN_ROUTES`                       | Routes kept out of both documents                                             |
 | `publicRoutes`                | -                                             | Routes published in the public document even though they are hidden           |
 | `internalRoutes`              | -                                             | Routes kept out of the public document even though they are not hidden        |
@@ -681,7 +699,8 @@ it reaches the document. `internalMarkerKey: false` turns the marking off.
 | `documentDecorator`           | `swagger`                                     | Decorator holding the public document                                         |
 | `internalDocumentDecorator`   | `internalSwagger`                             | Decorator holding the internal document                                       |
 
-Both documents stay available programmatically, as `app.swagger()` and `app.internalSwagger()`.
+Both documents stay available programmatically, as `app.swagger()` and `app.internalSwagger()`. The
+`internalSwagger` decorator only exists where `exposeInternalDocumentation` is on.
 
 ## Utilities
 

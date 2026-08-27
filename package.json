@@ -98,9 +98,6 @@
     },
     "packageManager": "pnpm@11.9.0",
     "peerDependenciesMeta": {
-        "@fastify/swagger": {
-            "optional": true
-        },
         "@scalar/fastify-api-reference": {
             "optional": true
         }

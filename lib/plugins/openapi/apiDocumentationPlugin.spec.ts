@@ -80,6 +80,9 @@ const buildApp = async (
 
   await app.register(apiDocumentationPlugin, {
     openapi: { info: { title: 'Users API', version: '1.0.0' } },
+    // Opt in here rather than in every block: the option is off by default,
+    // and most of what there is to assert lives in the internal document.
+    exposeInternalDocumentation: true,
     transform: createJsonSchemaTransform({ schemaRegistry }),
     transformObject: createJsonSchemaTransformObject({ schemaRegistry }),
     logLevel: 'silent',
@@ -424,6 +427,33 @@ describe('apiDocumentationPlugin', () => {
 
       expect(response.statusCode).toBe(200)
       expect(documentedPaths(response.json<OpenApiDocument>())).not.toContain('/internal/reindex')
+    })
+  })
+
+  describe('exposeInternalDocumentation default', () => {
+    let app: DocumentedApp
+
+    beforeAll(async () => {
+      // Registered without the option, unlike `buildApp`, which opts in.
+      app = fastify()
+      await app.register(apiDocumentationPlugin, {
+        openapi: { info: { title: 'Users API', version: '1.0.0' } },
+        logLevel: 'silent',
+      })
+      app.get('/internal/reindex', { schema: { hide: true } }, () => ({ status: 'ok' }))
+      await app.ready()
+    })
+
+    afterAll(async () => {
+      await app.close()
+    })
+
+    it('leaves the internal reference off until the service asks for it', async () => {
+      expect(app.internalSwagger).toBeUndefined()
+      expect(
+        (await app.inject().get('/documentation/internal/openapi.json').end()).statusCode,
+      ).toBe(404)
+      expect((await app.inject().get('/documentation/openapi.json').end()).statusCode).toBe(200)
     })
   })
 

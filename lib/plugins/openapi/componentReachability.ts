@@ -71,6 +71,17 @@ function collectDiscriminatorRefs(value: unknown, acc: Set<string>): boolean {
   return true
 }
 
+/**
+ * Keys whose string value names another component.
+ *
+ * `$dynamicRef` and its 2019-09 predecessor `$recursiveRef` usually point at
+ * an anchor rather than at a component path, in which case collecting the
+ * value is a no-op, but a document is free to write a plain pointer there.
+ * Collecting one that is not a component reference only ever keeps a
+ * component alive, so the loose reading is the safe one.
+ */
+const REF_KEYS = new Set(['$ref', '$dynamicRef', '$recursiveRef'])
+
 function collectRefs(value: unknown, acc: Set<string>): void {
   if (Array.isArray(value)) {
     for (const item of value) collectRefs(item, acc)
@@ -79,7 +90,7 @@ function collectRefs(value: unknown, acc: Set<string>): void {
   if (typeof value !== 'object' || value === null) return
 
   for (const [key, nested] of Object.entries(value)) {
-    if (key === '$ref' && typeof nested === 'string') {
+    if (REF_KEYS.has(key) && typeof nested === 'string') {
       acc.add(nested)
       continue
     }

@@ -69,11 +69,16 @@ export type ApiDocumentationPluginOptions = {
   internalRoutePrefix?: `/${string}`
 
   /**
-   * Whether the internal reference is served at all. Set it to `false` in
-   * environments that face the public internet: neither the internal document
-   * nor its routes are then created, so there is nothing to reach.
+   * Whether the internal reference is served at all. Off by default: the
+   * internal document lists every endpoint the public one hides, along with
+   * their schemas, and it carries no authentication of its own, so a service
+   * turns it on once it has decided who may read it. `internalHooks` is
+   * where that check goes.
    *
-   * @default true
+   * Left `false`, neither the internal document nor its routes are created,
+   * so there is nothing to reach.
+   *
+   * @default false
    */
   exposeInternalDocumentation?: boolean
 
@@ -247,14 +252,15 @@ function readDocument(app: AnyFastifyInstance, decorator: string): unknown {
  *
  * Both references are rendered by `@scalar/fastify-api-reference`, and both
  * `@fastify/swagger` and `@scalar/fastify-api-reference` have to be installed
- * by the service. They are imported only when this plugin is registered, so
- * services that do not use it need neither.
+ * by the service. Neither is imported until this plugin is registered, so a
+ * service that does not use it never loads them, but `@fastify/swagger` still
+ * has to be installed for the package typings to resolve.
  *
  * @example
  * ```ts
  * await app.register(apiDocumentationPlugin, {
  *   openapi: { info: { title: 'Users API', version: '1.0.0' } },
- *   exposeInternalDocumentation: !isProduction,
+ *   exposeInternalDocumentation: true,
  *   transform: jsonSchemaTransform,
  *   transformObject: jsonSchemaTransformObject,
  *   internalHooks: { onRequest: requireInternalNetwork },
@@ -268,7 +274,7 @@ const plugin: FastifyPluginAsync<ApiDocumentationPluginOptions> = async (
   const {
     publicRoutePrefix = DEFAULT_PUBLIC_ROUTE_PREFIX,
     internalRoutePrefix = DEFAULT_INTERNAL_ROUTE_PREFIX,
-    exposeInternalDocumentation = true,
+    exposeInternalDocumentation = false,
     hiddenRoutes = DEFAULT_HIDDEN_ROUTES,
     documentDecorator = DEFAULT_PUBLIC_DECORATOR,
     internalDocumentDecorator = DEFAULT_INTERNAL_DECORATOR,

@@ -123,6 +123,38 @@ describe('componentReachability', () => {
       expect(Object.keys(result.components.schemas).sort()).toStrictEqual(['Cat', 'Dog', 'Pet'])
     })
 
+    it('follows $dynamicRef, which an OpenAPI 3.1 document may point at a component', () => {
+      const document = {
+        paths: {
+          '/trees': {
+            get: {
+              responses: {
+                200: {
+                  content: {
+                    'application/json': { schema: { $ref: '#/components/schemas/Tree' } },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            Tree: {
+              type: 'object',
+              properties: { root: { $dynamicRef: '#/components/schemas/Node' } },
+            },
+            Node: { type: 'object' },
+            Orphan: { type: 'object' },
+          },
+        },
+      }
+
+      const result = pruneUnreachableComponents(document)
+
+      expect(Object.keys(result.components.schemas).sort()).toStrictEqual(['Node', 'Tree'])
+    })
+
     it('ignores a schema property that happens to be called discriminator', () => {
       const document = {
         paths: {
