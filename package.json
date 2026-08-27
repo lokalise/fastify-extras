@@ -40,6 +40,7 @@
         "@bugsnag/node": "^8.4.0",
         "@fastify/error": "^4.2.0",
         "@lokalise/error-utils": "^3.0.0",
+        "@scalar/fastify-api-reference": "^1.66.1",
         "@splitsoftware/splitio": "^11.6.0",
         "@supercharge/promise-pool": "^3.2.0",
         "fastify-metrics": "^13.2.0",
@@ -54,7 +55,6 @@
         "@lokalise/background-jobs-common": ">=12.0.0",
         "@lokalise/node-core": ">=14.0.0",
         "@opentelemetry/api": ">=1.9.0",
-        "@scalar/fastify-api-reference": ">=1.60.0",
         "bullmq": "^5.19.0 || ^6.0.0",
         "dd-trace": ">=5.0.0",
         "fastify": "^5.10.0",
@@ -76,7 +76,6 @@
         "@opentelemetry/api": "^1.9.0",
         "@opentelemetry/context-async-hooks": "^2.10.0",
         "@opentelemetry/sdk-trace-base": "^2.10.0",
-        "@scalar/fastify-api-reference": "^1.66.1",
         "@types/node": "^24.7.0",
         "@vitest/coverage-v8": "^4.1.9",
         "auto-changelog": "^2.4.0",
@@ -96,10 +95,5 @@
     "engines": {
         "node": ">=22"
     },
-    "packageManager": "pnpm@11.9.0",
-    "peerDependenciesMeta": {
-        "@scalar/fastify-api-reference": {
-            "optional": true
-        }
-    }
+    "packageManager": "pnpm@11.9.0"
 }

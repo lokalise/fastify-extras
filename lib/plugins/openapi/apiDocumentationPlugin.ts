@@ -12,7 +12,7 @@ import {
   DEFAULT_HIDDEN_ROUTES,
   type DocumentationRouteMatcher,
 } from './documentationRouteMatchers.js'
-import { importOptionalPeer } from './optionalPeerImport.js'
+import { importPeerDependency } from './peerDependencyImport.js'
 
 const DEFAULT_PUBLIC_ROUTE_PREFIX = '/documentation'
 const DEFAULT_INTERNAL_ROUTE_PREFIX = '/documentation/internal'
@@ -258,11 +258,14 @@ function readDocument(app: AnyFastifyInstance, decorator: string): unknown {
  * collects routes through an `onRoute` hook, and a hook only sees what is
  * registered after it.
  *
- * Both references are rendered by `@scalar/fastify-api-reference`, and both
- * `@fastify/swagger` and `@scalar/fastify-api-reference` have to be installed
- * by the service. Neither is imported until this plugin is registered, so a
- * service that does not use it never loads them, but `@fastify/swagger` still
- * has to be installed for the package typings to resolve.
+ * Both references are rendered by `@scalar/fastify-api-reference`, which is a
+ * dependency of this package and needs nothing from the service.
+ * `@fastify/swagger` is a peer dependency and has to be installed alongside
+ * it: it decorates the service's own app, and its types appear in this
+ * plugin's options.
+ *
+ * Neither is imported until this plugin is registered, so a service using any
+ * other plugin from this package loads neither.
  *
  * @example
  * ```ts
@@ -289,11 +292,8 @@ const plugin: FastifyPluginAsync<ApiDocumentationPluginOptions> = async (
   } = options
 
   const [{ default: fastifySwagger }, { default: fastifyApiReference }] = await Promise.all([
-    importOptionalPeer('@fastify/swagger', () => import('@fastify/swagger')),
-    importOptionalPeer(
-      '@scalar/fastify-api-reference',
-      () => import('@scalar/fastify-api-reference'),
-    ),
+    importPeerDependency('@fastify/swagger', () => import('@fastify/swagger')),
+    import('@scalar/fastify-api-reference'),
   ])
 
   /**

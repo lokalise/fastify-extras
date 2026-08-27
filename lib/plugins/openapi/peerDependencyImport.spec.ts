@@ -1,4 +1,4 @@
-import { importOptionalPeer } from './optionalPeerImport.js'
+import { importPeerDependency } from './peerDependencyImport.js'
 
 const moduleNotFound = (specifier: string): NodeJS.ErrnoException => {
   const error: NodeJS.ErrnoException = new Error(
@@ -9,30 +9,28 @@ const moduleNotFound = (specifier: string): NodeJS.ErrnoException => {
   return error
 }
 
-describe('importOptionalPeer', () => {
+describe('importPeerDependency', () => {
   it('returns the module when it is installed', async () => {
     const module = { default: 'plugin' }
 
-    await expect(
-      importOptionalPeer('@scalar/fastify-api-reference', async () => module),
-    ).resolves.toBe(module)
+    await expect(importPeerDependency('@fastify/swagger', async () => module)).resolves.toBe(module)
   })
 
   it('names the package to install when it is missing', async () => {
-    const promise = importOptionalPeer('@scalar/fastify-api-reference', () => {
-      throw moduleNotFound('@scalar/fastify-api-reference')
+    const promise = importPeerDependency('@fastify/swagger', () => {
+      throw moduleNotFound('@fastify/swagger')
     })
 
     await expect(promise).rejects.toThrow(
-      /apiDocumentationPlugin requires "@scalar\/fastify-api-reference", which is not installed/,
+      /apiDocumentationPlugin requires "@fastify\/swagger", which is not installed/,
     )
   })
 
   it('keeps the resolution failure as the cause', async () => {
-    const cause = moduleNotFound('@scalar/fastify-api-reference')
+    const cause = moduleNotFound('@fastify/swagger')
 
     await expect(
-      importOptionalPeer('@scalar/fastify-api-reference', () => {
+      importPeerDependency('@fastify/swagger', () => {
         throw cause
       }),
     ).rejects.toMatchObject({ cause })
@@ -47,7 +45,7 @@ describe('importOptionalPeer', () => {
     const cause = moduleNotFound('some-transitive-dependency')
 
     await expect(
-      importOptionalPeer('@scalar/fastify-api-reference', () => {
+      importPeerDependency('@fastify/swagger', () => {
         throw cause
       }),
     ).rejects.toBe(cause)
@@ -57,7 +55,7 @@ describe('importOptionalPeer', () => {
     const cause = new Error('the package threw while initialising')
 
     await expect(
-      importOptionalPeer('@scalar/fastify-api-reference', () => {
+      importPeerDependency('@fastify/swagger', () => {
         throw cause
       }),
     ).rejects.toBe(cause)

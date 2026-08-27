@@ -28,10 +28,15 @@ The following needs to be taken into consideration when adding new runtime depen
 ### Dependencies
 
 - `@bugsnag/js`;
+- `@scalar/fastify-api-reference`;
 - `@splitsoftware/splitio`;
 - `fastify-metrics`;
 - `fastify-plugin`;
 - `tslib`.
+
+`@scalar/fastify-api-reference` renders the references the
+[API Documentation Plugin](#api-documentation-plugin) serves. A consumer never imports it, which is what makes it a
+dependency rather than a peer, and it is imported only when that plugin is registered.
 
 ### Peer Dependencies
 
@@ -46,13 +51,6 @@ The following needs to be taken into consideration when adding new runtime depen
 
 `@fastify/swagger` is loaded at runtime only by the [API Documentation Plugin](#api-documentation-plugin), but the
 published typings reference its types from the package root, so every consumer needs it installed.
-
-### Optional Peer Dependencies
-
-Only needed by the plugin that uses them, and imported when that plugin is registered, so a service that does not
-register it needs nothing installed.
-
-- `@scalar/fastify-api-reference`: [API Documentation Plugin](#api-documentation-plugin).
 
 ## Plugins
 
@@ -552,16 +550,18 @@ Serves two API references off one route table: the customer-facing one and the i
 [`@fastify/swagger`](https://github.com/fastify/fastify-swagger) twice, once per audience, and points a Scalar instance
 at each document.
 
-Neither package is loaded until the plugin is registered. `@scalar/fastify-api-reference` is an optional peer
-dependency; `@fastify/swagger` is a required one, since the published typings reference its types:
+`@scalar/fastify-api-reference` is a dependency of this package, so there is nothing to install for it.
+`@fastify/swagger` is a peer dependency and has to be installed alongside:
 
 ```bash
-npm i @fastify/swagger @scalar/fastify-api-reference
+npm i @fastify/swagger
 ```
 
-Scalar ships a rendered API reference bundle, around 4 MB with its transitive dependencies, which a service registering
-any other plugin from this package has no use for. Registering `apiDocumentationPlugin` without it installed fails at
-registration with an error naming the package to install.
+It is a peer because it decorates the service's own app and its types appear in this plugin's published options, so
+the two have to agree on one copy of it. Registering the plugin without it fails with an error naming it.
+
+Neither package is imported until the plugin is registered, so a service using any other plugin from this package
+loads neither.
 
 #### What separates the two documents
 
