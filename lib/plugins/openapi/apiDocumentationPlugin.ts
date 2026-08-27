@@ -22,7 +22,7 @@ const DEFAULT_INTERNAL_DECORATOR = 'internalSwagger'
  * The `openapi` section of the generated document: `info`, `servers`,
  * `security`, `tags` and anything else `@fastify/swagger` passes through.
  */
-export type OpenApiDocumentDefinition = FastifyDynamicSwaggerOptions['openapi']
+export type OpenApiDocumentDefinition = NonNullable<FastifyDynamicSwaggerOptions['openapi']>
 
 /**
  * Document-level transform, as `@fastify/swagger` calls it. This is where
@@ -39,8 +39,14 @@ export type ApiDocumentationPluginOptions = {
   /**
    * Document metadata (`info`, `servers`, `security`, `tags`) shared by both
    * documents.
+   *
+   * Required, and required to be present rather than `undefined`:
+   * `@fastify/swagger` reads the presence of this key as the choice between
+   * OpenAPI 3 and Swagger 2.0, and a Swagger 2.0 document cannot carry the
+   * component references the transforms produce. Passing `{}` is enough to
+   * select OpenAPI 3, though a document with no `info` is not valid OpenAPI.
    */
-  openapi?: OpenApiDocumentDefinition
+  openapi: OpenApiDocumentDefinition
 
   /**
    * Metadata for the internal document. It replaces `openapi` rather than
@@ -155,12 +161,21 @@ export type ApiDocumentationPluginOptions = {
   /** Scalar configuration overrides for the internal reference only. */
   internalScalarConfiguration?: Record<string, unknown>
 
-  /** Fastify hooks for the public reference routes. */
+  /**
+   * Fastify hooks for the reference routes, both the public ones and, unless
+   * `internalHooks` replaces them, the internal ones.
+   */
   hooks?: ApiDocumentationHooks
 
   /**
    * Fastify hooks for the internal reference routes. This is where an
    * authentication or network check on the internal documentation goes.
+   *
+   * Merged over `hooks` per hook name, the way
+   * `internalScalarConfiguration` merges over `scalarConfiguration`, so a
+   * check that covers the public reference covers the internal one too
+   * unless this replaces it. The internal document is a superset of the
+   * public one, so inheriting is the safe direction.
    */
   internalHooks?: ApiDocumentationHooks
 
@@ -195,10 +210,10 @@ export type ApiDocumentationPluginOptions = {
  */
 function resolveInternalOpenapi(
   openapi: OpenApiDocumentDefinition,
-  internalOpenapi: OpenApiDocumentDefinition,
+  internalOpenapi: OpenApiDocumentDefinition | undefined,
 ): OpenApiDocumentDefinition {
   if (internalOpenapi !== undefined) return internalOpenapi
-  if (openapi?.info === undefined) return openapi
+  if (openapi.info === undefined) return openapi
 
   return { ...openapi, info: { ...openapi.info, title: `${openapi.info.title} (internal)` } }
 }
@@ -285,12 +300,37 @@ const plugin: FastifyPluginAsync<ApiDocumentationPluginOptions> = async (
     import('@scalar/fastify-api-reference'),
   ])
 
-  // The reference registers its own routes with `hide: true`, which is
-  // indistinguishable from a route hidden because it is internal.
+  /**
+   * Urls of the routes the two references register, filled in as they are
+   * registered.
+   *
+   * Scalar registers its routes with `hide: true`, which is indistinguishable
+   * from a route hidden because it is internal, so without an exclusion the
+   * internal document documents the documentation. The route prefixes alone
+   * do not cover that: a reference mounted at `/` registers `/openapi.json`
+   * and friends, and `/` is deliberately not read as a prefix of every url.
+   *
+   * The transform reads this set when a document is generated rather than
+   * when it is built, by which point every reference route is in it.
+   */
+  const referenceRoutes = new Set<string>()
+
+  const registerReference = async (
+    referenceOptions: Parameters<typeof fastifyApiReference>[1],
+  ): Promise<void> => {
+    await app.register(async (scope) => {
+      scope.addHook('onRoute', (route) => {
+        referenceRoutes.add(route.url)
+      })
+      await scope.register(fastifyApiReference, referenceOptions)
+    })
+  }
+
   const allHiddenRoutes: readonly DocumentationRouteMatcher[] = [
     ...hiddenRoutes,
     publicRoutePrefix,
     internalRoutePrefix,
+    ({ url }) => referenceRoutes.has(url),
   ]
 
   const buildTransform = (audience: 'public' | 'internal'): ApiDocumentationTransform =>
@@ -306,7 +346,7 @@ const plugin: FastifyPluginAsync<ApiDocumentationPluginOptions> = async (
   const transformObject = buildTransformObject(options)
 
   await app.register(fastifySwagger, {
-    openapi: options.openapi,
+    openapi: options.openapi ?? {},
     decorator: documentDecorator,
     transform: buildTransform('public'),
     transformObject,
@@ -314,14 +354,14 @@ const plugin: FastifyPluginAsync<ApiDocumentationPluginOptions> = async (
 
   if (exposeInternalDocumentation) {
     await app.register(fastifySwagger, {
-      openapi: resolveInternalOpenapi(options.openapi, options.internalOpenapi),
+      openapi: resolveInternalOpenapi(options.openapi ?? {}, options.internalOpenapi),
       decorator: internalDocumentDecorator,
       transform: buildTransform('internal'),
       transformObject,
     })
   }
 
-  await app.register(fastifyApiReference, {
+  await registerReference({
     routePrefix: publicRoutePrefix,
     ...(options.logLevel && { logLevel: options.logLevel }),
     ...(options.hooks && { hooks: options.hooks }),
@@ -332,10 +372,12 @@ const plugin: FastifyPluginAsync<ApiDocumentationPluginOptions> = async (
   })
 
   if (exposeInternalDocumentation) {
-    await app.register(fastifyApiReference, {
+    const internalHooks = { ...options.hooks, ...options.internalHooks }
+
+    await registerReference({
       routePrefix: internalRoutePrefix,
       ...(options.logLevel && { logLevel: options.logLevel }),
-      ...(options.internalHooks && { hooks: options.internalHooks }),
+      ...(Object.keys(internalHooks).length > 0 && { hooks: internalHooks }),
       configuration: {
         ...options.scalarConfiguration,
         ...options.internalScalarConfiguration,

@@ -509,5 +509,111 @@ describe('apiDocumentationPlugin', () => {
       expect((await app.inject().get('/documentation/internal/').end()).statusCode).toBe(401)
       expect((await app.inject().get('/documentation/').end()).statusCode).toBe(200)
     })
+
+    it('guards the internal reference with the public hooks when there are no internal ones', async () => {
+      const guarded = await buildApp({
+        hooks: {
+          onRequest: (_request, reply, done) => {
+            reply.code(401).send({ message: 'documentation is not public' })
+            done()
+          },
+        },
+      })
+
+      expect((await guarded.inject().get('/documentation/').end()).statusCode).toBe(401)
+      expect((await guarded.inject().get('/documentation/internal/').end()).statusCode).toBe(401)
+      expect(
+        (await guarded.inject().get('/documentation/internal/openapi.json').end()).statusCode,
+      ).toBe(401)
+
+      await guarded.close()
+    })
+
+    it('merges the two per hook name, so the internal reference keeps what it does not replace', async () => {
+      const calls: string[] = []
+      const guarded = await buildApp({
+        hooks: {
+          onRequest: (_request, reply, done) => {
+            reply.code(401).send({ message: 'public check' })
+            done()
+          },
+          preHandler: (_request, _reply, done) => {
+            calls.push('shared preHandler')
+            done()
+          },
+        },
+        internalHooks: {
+          onRequest: (_request, _reply, done) => {
+            calls.push('internal onRequest')
+            done()
+          },
+        },
+      })
+
+      // The internal `onRequest` replaces the public one, so the request gets
+      // past it, and the public `preHandler` still runs.
+      expect((await guarded.inject().get('/documentation/internal/').end()).statusCode).toBe(200)
+      expect(calls).toStrictEqual(['internal onRequest', 'shared preHandler'])
+
+      await guarded.close()
+    })
+  })
+
+  describe('a reference mounted at the root', () => {
+    let app: DocumentedApp
+
+    beforeAll(async () => {
+      // Built here rather than through `buildApp`, whose `GET /` collides
+      // with the reference index route at this prefix.
+      app = fastify()
+      await app.register(apiDocumentationPlugin, {
+        openapi: { info: { title: 'Users API', version: '1.0.0' } },
+        publicRoutePrefix: '/',
+        internalRoutePrefix: '/internal-docs',
+        exposeInternalDocumentation: true,
+        logLevel: 'silent',
+      })
+      app.get('/users', () => ({ status: 'ok' }))
+      app.get('/internal/reindex', { schema: { hide: true } }, () => ({ status: 'ok' }))
+      await app.ready()
+    })
+
+    afterAll(async () => {
+      await app.close()
+    })
+
+    it('keeps its own routes out of both documents', () => {
+      // `/` is not read as a prefix of every url, so the reference routes are
+      // kept out by the urls they registered under rather than by the prefix.
+      for (const path of ['/openapi.json', '/openapi.yaml', '/js/scalar.js']) {
+        expect(documentedPaths(publicDocument(app))).not.toContain(path)
+        expect(documentedPaths(internalDocument(app))).not.toContain(path)
+      }
+
+      expect(documentedPaths(publicDocument(app))).toStrictEqual(['/users'])
+      expect(documentedPaths(internalDocument(app))).toStrictEqual(['/internal/reindex', '/users'])
+    })
+  })
+
+  describe('openapi metadata', () => {
+    it('generates an OpenAPI 3 document even when no metadata is passed', async () => {
+      const app = fastify()
+      await app.register(apiDocumentationPlugin, {
+        // Omitted by a JavaScript caller: `@fastify/swagger` reads an absent
+        // `openapi` as a request for Swagger 2.0, which cannot carry the
+        // component references the transforms produce.
+        ...({} as { openapi: ApiDocumentationPluginOptions['openapi'] }),
+        logLevel: 'silent',
+      })
+      app.get('/users', () => ({ status: 'ok' }))
+      await app.ready()
+
+      const response = await app.inject().get('/documentation/openapi.json').end()
+
+      expect(response.statusCode).toBe(200)
+      expect(response.json<{ openapi?: string; swagger?: string }>().openapi).toMatch(/^3./)
+
+      await app.close()
+    })
   })
 })

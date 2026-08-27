@@ -622,6 +622,14 @@ endpoint the public one hides, along with their schemas, and the plugin puts no 
 `internalHooks` is where an authentication or network check goes, and `exposeInternalDocumentation: !isProduction` is
 the shape for a service that wants it only outside production.
 
+`hooks` covers both references. `internalHooks` merges over it per hook name, the way
+`internalScalarConfiguration` merges over `scalarConfiguration`, so a check written for the public reference guards
+the internal one too until something replaces it. The internal document is a superset of the public one, so a service
+that guards the smaller surface never ends up with the larger one open.
+
+`openapi` is required. `@fastify/swagger` reads the presence of that key as the choice between OpenAPI 3 and
+Swagger 2.0, and a Swagger 2.0 document cannot carry the component references the transforms produce.
+
 #### Overriding the audience of a route
 
 `hiddenRoutes`, `publicRoutes` and `internalRoutes` all take a list of matchers. A string matches the url exactly or as
@@ -680,7 +688,7 @@ it reaches the document. `internalMarkerKey: false` turns the marking off.
 
 | Option                        | Default                                       | Description                                                                  |
 | ----------------------------- | --------------------------------------------- | ---------------------------------------------------------------------------- |
-| `openapi`                     | -                                             | Document metadata (`info`, `servers`, `security`, `tags`) for both documents  |
+| `openapi`                     | required                                      | Document metadata (`info`, `servers`, `security`, `tags`) for both documents  |
 | `internalOpenapi`             | `openapi`, with `(internal)` added to the title | Metadata for the internal document. Replaces `openapi`, not merged into it |
 | `publicRoutePrefix`           | `/documentation`                              | Where the public reference is served                                          |
 | `internalRoutePrefix`         | `/documentation/internal`                     | Where the internal reference is served                                        |
@@ -694,7 +702,8 @@ it reaches the document. `internalMarkerKey: false` turns the marking off.
 | `pruneUnreferencedComponents` | `true`                                        | Drop `components` entries no operation of the document references             |
 | `scalarConfiguration`         | -                                             | Passed through to Scalar for both references                                  |
 | `internalScalarConfiguration` | -                                             | Scalar configuration for the internal reference only                          |
-| `hooks` / `internalHooks`     | -                                             | `onRequest` / `preHandler` hooks for the reference routes                     |
+| `hooks`                       | -                                             | `onRequest` / `preHandler` hooks for both references                          |
+| `internalHooks`               | `hooks`                                       | Hooks for the internal reference, merged over `hooks` per hook name            |
 | `logLevel`                    | -                                             | Log level for the routes both references register                             |
 | `documentDecorator`           | `swagger`                                     | Decorator holding the public document                                         |
 | `internalDocumentDecorator`   | `internalSwagger`                             | Decorator holding the internal document                                       |
