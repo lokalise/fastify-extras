@@ -580,36 +580,48 @@ The internal reference is a superset: it documents the public endpoints too, and
 
 #### Routes hidden by default
 
-`hiddenRoutes` defaults to the exported `DEFAULT_HIDDEN_ROUTES`, the endpoints a service exposes for infrastructure
-rather than for callers. Each entry matches the url exactly or as a path prefix.
+`hiddenRoutes` defaults to the exported `DEFAULT_HIDDEN_ROUTES`. Each entry is one url a sibling plugin in this
+package registers, and string matchers are exact, so nothing on this list has an opinion about the url space beneath
+it.
 
-| Matcher    | Hides                                                               | Registered by                                            |
-| ---------- | ------------------------------------------------------------------- | -------------------------------------------------------- |
-| `/`        | the root route only, since `/` is not read as a prefix of every url   | `commonHealthcheckPlugin`, `commonSyncHealthcheckPlugin`    |
-| `/health`  | `/health` and everything under it, such as `/health/ready`           | `publicHealthcheckPlugin`, the common healthcheck plugins  |
-| `/metrics` | `/metrics` and everything under it                                   | `metricsPlugin`                                           |
+| Url        | Registered by                                                                       | Why it needs excluding                                     |
+| ---------- | ----------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| `/`        | `commonHealthcheckPlugin`, `commonSyncHealthcheckPlugin` (unless `isRootRouteEnabled: false`) | registered with `hide: true`                     |
+| `/health`  | `commonHealthcheckPlugin`, `commonSyncHealthcheckPlugin`, `publicHealthcheckPlugin`   | registered with `hide: true`                              |
+| `/metrics` | a service exposing a scrape endpoint on its main app                                 | not this package's `metricsPlugin`, see below              |
 
-The reference's own routes are excluded separately, and by url rather than by prefix: the plugin records what the two
-Scalar scopes register and hides exactly those. Scalar registers them with `hide: true`, which is indistinguishable
-from a contract-derived hide, so without the exclusion the internal document would document the documentation.
+The healthcheck routes all set `schema.hide: true`, and that is exactly why they have to be listed. This plugin reads
+`hide: true` as "internal, put it in the internal document", so without the exclusion the healthchecks would be kept
+out of the public document and then documented in the internal one. Listing them keeps them out of both.
 
-That is why `/documentation` is not in the table. Hiding the prefix would get it wrong in both directions: it misses a
-reference mounted at `/`, which registers `/openapi.json` at the root, and it swallows a service's own
-`/documentation/guides/:slug` along with the reference. Matching the registered urls covers exactly the reference.
+`/metrics` is not for this package's `metricsPlugin`, which passes `endpoint: null` to `fastify-metrics` and serves
+the scrape endpoint from a separate server on port 9080. That route is never in the documented app's route table, so
+nothing needs to hide it. The entry covers a service that exposes `/metrics` on its main app by other means.
 
-#### When a default hides an endpoint you own
+`startupHealthcheckPlugin` registers no routes and needs nothing here.
 
-`/health` and `/metrics` are still prefix guesses, since this plugin has no way to know which routes the healthcheck
-and metrics plugins registered. A service whose domain puts real endpoints under them, `/health/tips` for a healthcare
-API or `/metrics/daily` for an analytics one, would find them missing from both documents with nothing said about it.
-Filter the entry out and hide the infrastructure routes precisely:
+The reference's own routes are excluded separately, from the set of urls the two Scalar scopes registered. Scalar
+registers them with `hide: true` too, which is indistinguishable from a contract-derived hide, so without the
+exclusion the internal document would document the documentation. That set is the reason `/documentation` is not in
+the table: matching registered urls covers a reference mounted at `/`, where a prefix cannot help, and leaves a
+service's own `/documentation/guides/:slug` documented.
+
+#### When a default does not match your setup
+
+Matching is exact, so a default only ever hides the url it names. Two cases need you to say something:
+
+- You moved a route. `publicHealthcheckPlugin` takes a `url`, so `url: '/healthz'` leaves `/healthz` documented in the
+  internal document while `/health` in the defaults matches nothing. Replace the list with the urls you configured.
+- You own a route that shares a name. `/metrics` as a real analytics endpoint, say. Drop the entry rather than
+  working around it.
 
 ```typescript
-hiddenRoutes: [...DEFAULT_HIDDEN_ROUTES.filter((matcher) => matcher !== '/health'), '/health/ready']
+// healthcheck moved, no scrape endpoint on this app
+hiddenRoutes: ['/', '/healthz']
 ```
 
-Only the subtree is affected. Prefix matching breaks on a path segment, so `/healthy-habits` and `/health-history` are
-documented either way, and so is `/documentation-archive`.
+Nothing nested is affected either way: `/health/ready`, `/health/tips`, `/metrics/daily` and `/documentation/guides`
+are documented with the defaults untouched. Use a regular expression when a subtree really is the target.
 
 #### Usage
 
@@ -651,11 +663,13 @@ Swagger 2.0, and a Swagger 2.0 document cannot carry the component references th
 
 #### Overriding the audience of a route
 
-`hiddenRoutes` and `internalRoutes` both take a list of matchers. A string matches the url exactly or as a path
-prefix, a regular expression is tested against the url, and a function receives `{ url, method, schema }` for anything
-else. There is no glob syntax: `/admin*` matches a url that literally contains the asterisk, while `/admin` already
-covers `/admin` and everything under it. Urls are the Fastify ones, with `:param` placeholders rather than the
-`{param}` form the document uses.
+`hiddenRoutes` and `internalRoutes` both take a list of matchers. A string matches one url and nothing else, a
+regular expression is tested against the url, and a function receives `{ url, method, schema }` for anything else.
+Urls are the Fastify ones, with `:param` placeholders rather than the `{param}` form the document uses.
+
+Strings carry no pattern syntax at all. `/admin` matches `/admin`, not `/admin/users`; `/admin*` matches a url that
+literally contains an asterisk. Reach for a regular expression when you mean a subtree, which keeps the reach visible
+at the call site instead of implied by a string.
 
 ```typescript
 await app.register(apiDocumentationPlugin, {

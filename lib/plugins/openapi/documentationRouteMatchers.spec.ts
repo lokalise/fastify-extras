@@ -15,21 +15,29 @@ describe('documentationRouteMatchers', () => {
       expect(matchesAnyRoute(route('/health'), ['/health'])).toBe(true)
     })
 
-    it('matches a string as a path prefix', () => {
-      expect(matchesAnyRoute(route('/documentation/openapi.json'), ['/documentation'])).toBe(true)
+    it('does not match a route nested under the string', () => {
+      expect(matchesAnyRoute(route('/health/ready'), ['/health'])).toBe(false)
+      expect(matchesAnyRoute(route('/documentation/openapi.json'), ['/documentation'])).toBe(false)
     })
 
     it('does not match a string that is only a character prefix', () => {
       expect(matchesAnyRoute(route('/health-history'), ['/health'])).toBe(false)
+      expect(matchesAnyRoute(route('/healthz'), ['/health'])).toBe(false)
     })
 
-    it('treats the root route as an exact match rather than a prefix of everything', () => {
+    it('treats the root route as itself rather than as the parent of everything', () => {
       expect(matchesAnyRoute(route('/'), ['/'])).toBe(true)
       expect(matchesAnyRoute(route('/users'), ['/'])).toBe(false)
     })
 
-    it('handles a matcher with a trailing slash', () => {
-      expect(matchesAnyRoute(route('/documentation/js/scalar.js'), ['/documentation/'])).toBe(true)
+    it('distinguishes a trailing slash, which Fastify registers as its own route', () => {
+      expect(matchesAnyRoute(route('/health/'), ['/health'])).toBe(false)
+      expect(matchesAnyRoute(route('/health'), ['/health/'])).toBe(false)
+    })
+
+    it('takes a regular expression for a subtree', () => {
+      expect(matchesAnyRoute(route('/admin/users'), [/^\/admin\//])).toBe(true)
+      expect(matchesAnyRoute(route('/administrator'), [/^\/admin\//])).toBe(false)
     })
 
     it('matches a regular expression against the url', () => {
@@ -69,7 +77,7 @@ describe('documentationRouteMatchers', () => {
     })
 
     it('hides the service utility endpoints by default', () => {
-      const hidden = ['/', '/health', '/health/ready', '/metrics', '/metrics/collect']
+      const hidden = ['/', '/health', '/metrics']
       const documented = ['/users', '/healthy-habits', '/metrics-explained']
 
       for (const url of hidden) {
@@ -81,13 +89,24 @@ describe('documentationRouteMatchers', () => {
     })
 
     /**
-     * The documentation's own routes are excluded by url rather than by
-     * prefix, so the defaults do not reach into a subtree the service may own
-     * endpoints in. See the plugin spec for the exclusion that replaces it.
+     * Every default is one url the sibling plugins in this package actually
+     * register, so none of them reaches into the space a service may own
+     * endpoints in. The documentation's own routes are excluded elsewhere,
+     * from the set the reference scopes registered; see the plugin spec.
      */
-    it('does not claim the /documentation subtree', () => {
-      expect(matchesAnyRoute(route('/documentation/guides'), DEFAULT_HIDDEN_ROUTES)).toBe(false)
-      expect(matchesAnyRoute(route('/documentation'), DEFAULT_HIDDEN_ROUTES)).toBe(false)
+    it('claims no url space below the endpoints it lists', () => {
+      const serviceOwned = [
+        '/health/tips',
+        '/health/ready',
+        '/metrics/daily',
+        '/documentation',
+        '/documentation/guides',
+        '/users',
+      ]
+
+      for (const url of serviceOwned) {
+        expect(matchesAnyRoute(route(url), DEFAULT_HIDDEN_ROUTES), url).toBe(false)
+      }
     })
   })
 })

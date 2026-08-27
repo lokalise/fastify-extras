@@ -28,35 +28,43 @@ export type DocumentedRoute = {
 /**
  * Matches a route by url or by an arbitrary predicate.
  *
- * A string matches the url exactly or as a path prefix, so `/documentation`
- * also covers `/documentation/openapi.json` but not `/documentation-archive`.
- * A regular expression is tested against the url. A function receives the
- * whole route, which is the form to use for method-specific rules.
+ * A string matches the url and nothing else: `/health` covers `/health`, not
+ * `/health/ready` and not `/healthz`. Listing one route never takes a claim
+ * on the url space beneath it, so a service can own `/documentation/guides`
+ * or `/health/tips` without this plugin having an opinion about it.
+ *
+ * A regular expression is tested against the url, which is the form to reach
+ * for when a subtree really is the target (`/^/admin//`). A function
+ * receives the whole route, for method-specific rules.
  */
 export type DocumentationRouteMatcher = string | RegExp | ((route: DocumentedRoute) => boolean)
 
 /**
  * Routes kept out of both documents unless the service says otherwise.
  *
- * These are the endpoints every Lokalise service exposes for infrastructure
- * rather than for callers: the root route, the healthcheck endpoints and the
- * Prometheus scrape endpoint. Prefix matching covers `/health/ready` and
- * friends along with them.
+ * These are the urls the sibling plugins in this package register, not
+ * guesses at a shape. `commonHealthcheckPlugin` and
+ * `commonSyncHealthcheckPlugin` register `/` and `/health`,
+ * `publicHealthcheckPlugin` registers `/health`, and all of them set
+ * `schema.hide: true`, which this plugin otherwise reads as "internal, put it
+ * in the internal document".
  *
- * The documentation's own routes are not on this list. The plugin excludes
- * them by url instead, from the set the reference scopes actually registered,
- * which is exact where a prefix is a guess: a service owning a real
- * `/documentation/guides/:slug` endpoint keeps it documented.
+ * `/metrics` is here for a service that exposes a Prometheus scrape endpoint
+ * on its main app. This package's own `metricsPlugin` does not need it: it
+ * passes `endpoint: null` to `fastify-metrics` and serves `/metrics` from a
+ * separate server on its own port, so that route is never in the documented
+ * app's route table to begin with.
  *
- * The two prefixes that remain are still guesses, and a service whose domain
- * puts real endpoints under them (`/health/tips` for a healthcare API,
- * `/metrics/daily` for an analytics one) has to say so, since this plugin
- * has no way to know which routes the healthcheck and metrics plugins
- * registered. Prefix matching breaks on a path segment, so only the subtree
- * is affected: `/health-history` and `/healthy-habits` are documented.
+ * Matching is exact, so none of these reaches into the url space below it. A
+ * service that owns `/health/tips` or `/metrics/daily` keeps them documented,
+ * and one that moves a healthcheck (`publicHealthcheckPlugin` takes a `url`)
+ * replaces this list with the urls it actually configured.
  *
- * Exported so a service that wants to add to the list rather than replace it
- * can spread it into its own `hiddenRoutes`, or filter an entry out of it.
+ * The documentation's own routes are not here either. The plugin excludes
+ * those separately, from the set of urls the reference scopes registered.
+ *
+ * Exported so a service can spread it into its own `hiddenRoutes` rather than
+ * retyping it.
  */
 export const DEFAULT_HIDDEN_ROUTES: readonly DocumentationRouteMatcher[] = [
   '/',
@@ -64,18 +72,10 @@ export const DEFAULT_HIDDEN_ROUTES: readonly DocumentationRouteMatcher[] = [
   '/metrics',
 ]
 
-function matchesUrlPrefix(url: string, prefix: string): boolean {
-  if (url === prefix) return true
-
-  const base = prefix.endsWith('/') ? prefix.slice(0, -1) : prefix
-  // `/` is the root route, not a prefix of every route there is.
-  if (base === '') return false
-
-  return url === base || url.startsWith(`${base}/`)
-}
-
 function matches(route: DocumentedRoute, matcher: DocumentationRouteMatcher): boolean {
-  if (typeof matcher === 'string') return matchesUrlPrefix(route.url, matcher)
+  // Exact, deliberately. A prefix would let one listed route decide the fate
+  // of every route registered beneath it, silently and at a distance.
+  if (typeof matcher === 'string') return route.url === matcher
   if (typeof matcher === 'function') return matcher(route)
 
   // A `g`-flagged regexp carries `lastIndex` between calls, which would make
