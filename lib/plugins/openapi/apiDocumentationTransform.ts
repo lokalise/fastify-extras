@@ -125,28 +125,6 @@ export type ApiDocumentationTransformOptions = {
   transform?: ChainedApiDocumentationTransform
 }
 
-/** What the route's own flags and the configured overrides add up to. */
-type RouteAudience = 'public' | 'internal' | 'hidden'
-
-/**
- * `hiddenRoutes` is the only override, and it only ever subtracts: a route on
- * that list is in neither document, whatever its `hide` flag says. Everything
- * else follows the flag the route builder set.
- *
- * There is deliberately no way to move a route between the two documents from
- * here. `schema.hide` is the builder's own answer to whether an endpoint is
- * customer-facing, and a route that needs to contradict it wants its contract
- * changed rather than the documentation configured around it.
- */
-function resolveRouteAudience(
-  route: DocumentedRoute,
-  options: ApiDocumentationTransformOptions,
-): RouteAudience {
-  if (matchesAnyRoute(route, options.hiddenRoutes)) return 'hidden'
-
-  return route.schema?.hide === true ? 'internal' : 'public'
-}
-
 /**
  * Build a `@fastify/swagger` `transform` that re-derives the `hide` flag for
  * one audience.
@@ -157,6 +135,13 @@ function resolveRouteAudience(
  * wrong one for the teams consuming the service internally. This transform
  * reads the same flag as a statement about the audience, so both documents can
  * be generated from one route table.
+ *
+ * `hiddenRoutes` is the only override, and it only ever subtracts: a route on
+ * that list is in neither document, whatever its `hide` flag says. There is
+ * deliberately no way to move a route between the two documents from here.
+ * `schema.hide` is the builder's own answer to whether an endpoint is
+ * customer-facing, and a route that needs to contradict it wants its contract
+ * changed rather than the documentation configured around it.
  *
  * The route's schema is never mutated: every registered document sees the same
  * route objects, and Fastify's own validation pipeline reads them too.
@@ -176,9 +161,13 @@ export function apiDocumentationTransform(
       method: input.route?.method ?? [],
       schema: input.schema,
     }
-    const routeAudience = resolveRouteAudience(route, options)
-    const hide =
-      routeAudience === 'hidden' || (routeAudience === 'internal' && audience !== 'internal')
+    // Two independent questions, and only these two. `hiddenRoutes` says
+    // whether the route is API surface at all and wins outright; `schema.hide`
+    // says which of the two documents it belongs in.
+    const isExcluded = matchesAnyRoute(route, options.hiddenRoutes)
+    const isInternal = !isExcluded && route.schema?.hide === true
+
+    const hide = isExcluded || (isInternal && audience !== 'internal')
 
     // A route without a schema is documented by default, so a hidden one needs
     // a schema invented for it to carry the flag. A route that has nothing to
@@ -192,7 +181,7 @@ export function apiDocumentationTransform(
     return {
       url: result.url,
       schema:
-        routeAudience === 'internal' && audience === 'internal' && internalMarkerKey !== false
+        isInternal && audience === 'internal' && internalMarkerKey !== false
           ? { ...resultSchema, [internalMarkerKey]: true }
           : resultSchema,
     }
