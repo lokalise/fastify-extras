@@ -91,6 +91,15 @@ export function defaultResolveResponseObject(error: FreeformRecord): ErrorRespon
     }
   }
 
+  // Not client-facing. Checked explicitly rather than left to the fallback: every @lokalise/errors error has a
+  // string `code`, so it would otherwise satisfy isStandardizedError and could be caught by the auth branch below.
+  if (InternalError.isInstance(error)) {
+    return {
+      statusCode: 500,
+      payload: INTERNAL_SERVER_ERROR_PAYLOAD,
+    }
+  }
+
   if (isPublicNonRecoverableError(error)) {
     return {
       statusCode: error.httpStatusCode ?? 500,

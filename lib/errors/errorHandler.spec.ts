@@ -888,6 +888,22 @@ describe('defaultResolveResponseObject', () => {
     })
   })
 
+  it('masks a @lokalise/errors InternalError whose code collides with a known auth error code', () => {
+    const error = LokaliseInternalError.create({
+      code: 'FST_JWT_AUTHORIZATION_TOKEN_EXPIRED',
+      message: 'internal token cache expired for tenant 42',
+    })
+
+    expect(defaultResolveResponseObject(error)).toEqual({
+      statusCode: 500,
+      payload: {
+        message: 'Internal server error',
+        code: 'INTERNAL_SERVER_ERROR',
+        errorCode: 'INTERNAL_SERVER_ERROR',
+      },
+    })
+  })
+
   it('maps Zod schema validation errors to a 400 VALIDATION_ERROR', () => {
     const validation = [
       {
