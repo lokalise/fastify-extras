@@ -1,6 +1,9 @@
 import { FastifyError } from '@fastify/error'
 import type { SSEReplyInterface } from '@fastify/sse'
-import { InternalError as LokaliseInternalError, PublicError } from '@lokalise/errors'
+import {
+  InternalError as LokaliseInternalError,
+  PublicError as LokalisePublicError,
+} from '@lokalise/errors'
 import type { ErrorReporter } from '@lokalise/node-core'
 import {
   isError,
@@ -57,7 +60,7 @@ export function isZodError(value: unknown): value is ZodError {
 function resolveLogObject(error: unknown): FreeformRecord {
   // Checked before node-core's isInternalError, which also matches on `error.name === 'InternalError'` and would
   // claim a consumer class of that name extending the @lokalise/errors base, dropping the `cause` chain.
-  if (LokaliseInternalError.isInstance(error) || PublicError.isInstance(error)) {
+  if (LokaliseInternalError.isInstance(error) || LokalisePublicError.isInstance(error)) {
     // `details` is not repeated at the top level: errWithCause already includes it (and `code`) as own
     // enumerable properties, and pino's serializer copes with circular or BigInt details where JSON.stringify throws.
     return {
@@ -94,7 +97,7 @@ export function defaultResolveResponseObject(error: FreeformRecord): ErrorRespon
     }
   }
 
-  if (PublicError.isInstance(error)) {
+  if (LokalisePublicError.isInstance(error)) {
     return {
       statusCode: error.httpStatusCode,
       payload: error.toPayload(),
