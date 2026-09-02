@@ -10,7 +10,7 @@ import type { ErrorReport } from '@lokalise/node-core'
 import { InternalError, PublicNonRecoverableError } from '@lokalise/node-core'
 import { type FastifyInstance, type RouteHandlerMethod, fastify } from 'fastify'
 import { type ServerSentEvent, parseServerSentEvents } from 'parse-sse'
-import { type MockInstance, afterAll, afterEach, describe, expect, it, vitest } from 'vitest'
+import { type MockInstance, afterEach, describe, expect, it, vitest } from 'vitest'
 import { type ZodSchema, z } from 'zod/v4'
 
 import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod'
@@ -95,7 +95,8 @@ class DatabaseQueryError extends LokaliseInternalError.from('DATABASE_QUERY_ERRO
 
 describe('errorHandler', () => {
   let app: FastifyInstance
-  afterAll(async () => {
+  // every test creates its own instance, so close after each rather than only the last one
+  afterEach(async () => {
     await app.close()
   })
 
