@@ -662,16 +662,26 @@ describe('errorHandler', () => {
       ])
     })
 
-    it('masks an InternalError created with InternalError.create as a 500 and logs it without cause', async () => {
+    it('masks an InternalError created with InternalError.create as a 500, reports it and logs it without cause', async () => {
+      const reports: ErrorReport[] = []
       let errorSpy: MockInstance | undefined
 
-      app = await initApp((req) => {
-        errorSpy = vitest.spyOn(req.log, 'error')
-        throw LokaliseInternalError.create({
-          code: 'LQA_REVIEW_MISSING',
-          message: 'LQA produced no review',
-        })
-      })
+      app = await initApp(
+        (req) => {
+          errorSpy = vitest.spyOn(req.log, 'error')
+          throw LokaliseInternalError.create({
+            code: 'LQA_REVIEW_MISSING',
+            message: 'LQA produced no review',
+          })
+        },
+        {
+          errorReporter: {
+            report: (report) => {
+              reports.push(report)
+            },
+          },
+        },
+      )
 
       const response = await app.inject().get('/').end()
 
@@ -680,6 +690,12 @@ describe('errorHandler', () => {
         message: 'Internal server error',
         code: 'INTERNAL_SERVER_ERROR',
         errorCode: 'INTERNAL_SERVER_ERROR',
+      })
+
+      expect(reports).toHaveLength(1)
+      expect(reports[0]!.error).toMatchObject({
+        message: 'LQA produced no review',
+        code: 'LQA_REVIEW_MISSING',
       })
 
       expect(errorSpy!.mock.calls).toHaveLength(1)
