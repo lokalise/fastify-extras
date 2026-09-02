@@ -1,5 +1,6 @@
 import { FastifyError } from '@fastify/error'
 import type { SSEReplyInterface } from '@fastify/sse'
+import { InternalError, PublicError } from '@lokalise/errors'
 import type { ErrorReporter } from '@lokalise/node-core'
 import {
   isError,
@@ -31,9 +32,20 @@ export type ErrorResponseObject = {
   headers?: Record<string, string>
   payload: {
     message: string
-    errorCode: string
+    code: string
+    /**
+     * @deprecated Compatibility alias of `code`, matching the `@lokalise/node-core` payload shape. The built-in
+     * mapping keeps emitting it alongside `code`; it will be dropped in a future major version.
+     */
+    errorCode?: string
     details?: FreeformRecord
   }
+}
+
+const INTERNAL_SERVER_ERROR_PAYLOAD: ErrorResponseObject['payload'] = {
+  message: 'Internal server error',
+  code: 'INTERNAL_SERVER_ERROR',
+  errorCode: 'INTERNAL_SERVER_ERROR',
 }
 
 export function isZodError(value: unknown): value is ZodError {
@@ -54,6 +66,15 @@ function resolveLogObject(error: unknown): FreeformRecord {
     }
   }
 
+  if (InternalError.isInstance(error) || PublicError.isInstance(error)) {
+    return {
+      msg: error.message,
+      code: error.code,
+      details: error.details ? JSON.stringify(error.details) : undefined,
+      error: pino.stdSerializers.errWithCause(error),
+    }
+  }
+
   return {
     message: isObject(error) ? error.message : JSON.stringify(error),
     error: isError(error) ? pino.stdSerializers.err(error) : error,
@@ -61,11 +82,19 @@ function resolveLogObject(error: unknown): FreeformRecord {
 }
 
 export function defaultResolveResponseObject(error: FreeformRecord): ErrorResponseObject {
+  if (PublicError.isInstance(error)) {
+    return {
+      statusCode: error.httpStatusCode,
+      payload: error.toPayload(),
+    }
+  }
+
   if (isPublicNonRecoverableError(error)) {
     return {
       statusCode: error.httpStatusCode ?? 500,
       payload: {
         message: error.message,
+        code: error.errorCode,
         errorCode: error.errorCode,
         details: error.details,
       },
@@ -77,6 +106,7 @@ export function defaultResolveResponseObject(error: FreeformRecord): ErrorRespon
       statusCode: 400,
       payload: {
         message: 'Invalid params',
+        code: 'VALIDATION_ERROR',
         errorCode: 'VALIDATION_ERROR',
         details: {
           error: error.validation,
@@ -90,6 +120,7 @@ export function defaultResolveResponseObject(error: FreeformRecord): ErrorRespon
       statusCode: 500,
       payload: {
         message: 'Invalid response',
+        code: 'RESPONSE_VALIDATION_ERROR',
         errorCode: 'RESPONSE_VALIDATION_ERROR',
         details: {
           error: error.cause.issues,
@@ -111,6 +142,7 @@ export function defaultResolveResponseObject(error: FreeformRecord): ErrorRespon
         statusCode: 401,
         payload: {
           message,
+          code: 'AUTH_FAILED',
           errorCode: 'AUTH_FAILED',
         },
       }
@@ -118,30 +150,29 @@ export function defaultResolveResponseObject(error: FreeformRecord): ErrorRespon
   }
 
   if (error instanceof FastifyError) {
-    if (error.statusCode === undefined || error.statusCode >= 500) {
-      return {
-        statusCode: error.statusCode ?? 500,
-        payload: {
-          message: 'Internal server error',
-          errorCode: 'INTERNAL_SERVER_ERROR',
-        },
-      }
-    }
-
-    return {
-      statusCode: error.statusCode,
-      payload: {
-        message: error.message,
-        errorCode: error.code,
-      },
-    }
+    return resolveFastifyErrorResponseObject(error)
   }
 
   return {
     statusCode: 500,
+    payload: INTERNAL_SERVER_ERROR_PAYLOAD,
+  }
+}
+
+function resolveFastifyErrorResponseObject(error: FastifyError): ErrorResponseObject {
+  if (error.statusCode === undefined || error.statusCode >= 500) {
+    return {
+      statusCode: error.statusCode ?? 500,
+      payload: INTERNAL_SERVER_ERROR_PAYLOAD,
+    }
+  }
+
+  return {
+    statusCode: error.statusCode,
     payload: {
-      message: 'Internal server error',
-      errorCode: 'INTERNAL_SERVER_ERROR',
+      message: error.message,
+      code: error.code,
+      errorCode: error.code,
     },
   }
 }

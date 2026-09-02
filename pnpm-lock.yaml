@@ -72,6 +72,9 @@ importers:
       '@lokalise/biome-config':
         specifier: ^2.0.0
         version: 2.0.0
+      '@lokalise/errors':
+        specifier: ^2.0.0
+        version: 2.0.0(zod@4.4.3)
       '@lokalise/node-core':
         specifier: ^14.4.2
         version: 14.9.1(zod@4.4.3)
@@ -348,6 +351,11 @@ packages:
     resolution: {integrity: sha512-HB3CzbCP0ZHghsgkXJfFK3gKb0TauajKOecX+v4pelvTASH9Hy7i90Spd46KixSigbQrkSEe2IYLGY0Ffz6C4w==}
     peerDependencies:
       '@lokalise/node-core': '>=11.0.0'
+
+  '@lokalise/errors@2.0.0':
+    resolution: {integrity: sha512-ohlCUm7f+/Ph9iD8q7f3QVZ479IB9d9VHNJrEUmeDlF3jWHS+odzOPGysjCmzJxKEQJSaLWLkZkq7RPijLnaYQ==}
+    peerDependencies:
+      zod: ^4.0.0
 
   '@lokalise/id-utils@3.0.1':
     resolution: {integrity: sha512-XgqjroAQi1RAEi2bRvC/7Fc/jM9UpFL1i+Wi1dJLJ0RwwJU/5lNtqv6XnkcHEWIwMTwbGulqvp0yHaZ8biEsaA==}
@@ -2019,6 +2027,10 @@ snapshots:
     dependencies:
       '@bugsnag/js': 8.10.0
       '@lokalise/node-core': 14.9.1(zod@4.4.3)
+
+  '@lokalise/errors@2.0.0(zod@4.4.3)':
+    dependencies:
+      zod: 4.4.3
 
   '@lokalise/id-utils@3.0.1':
     dependencies:

@@ -864,8 +864,10 @@ If validation fails, a `ZodError` will be thrown, preventing invalid data from b
 #### createErrorHandler
 
 `createErrorHandler` creates a shared error handler to be passed to `fastify.setErrorHandler`. It resolves any thrown
-error to a standardized `{ message, errorCode, details? }` payload, reports 5xx errors via the provided `errorReporter`
-and logs them.
+error to a standardized `{ message, code, errorCode?, details? }` payload, reports 5xx errors via the provided
+`errorReporter` and logs them. `code` identifies the error; `errorCode` is a deprecated alias of `code` kept for
+`@lokalise/node-core` compatibility. The built-in mapping always emits both, but custom `resolveResponseObject`
+overrides only have to return `code`. `errorCode` will be dropped in a future major version.
 
 Example usage:
 
@@ -894,6 +896,22 @@ The default error-to-response mapping is exported as `defaultResolveResponseObje
 outside the fastify handler and only prepend their own branches, e.g.
 `const responseObject = myBranches(error) ?? defaultResolveResponseObject(error)`.
 
+**`@lokalise/errors` support:**
+
+Errors from [`@lokalise/errors`](https://www.npmjs.com/package/@lokalise/errors) are handled natively, detected with
+the package's `isInstance()` guards so the check works across realms and duplicated package copies:
+
+- `PublicError` instances respond with `error.httpStatusCode` and `error.toPayload()` as the body, i.e.
+  `{ message, code, errorCode, details? }` (`details` is present only when the definition declares a `detailsSchema`). Like any other error, they are reported and logged only
+  when the status code is 5xx (e.g. `ErrorType.UNAVAILABLE`).
+- `InternalError` instances are not client-facing: they are masked as `500 INTERNAL_SERVER_ERROR`, reported, and logged
+  as `{ msg, code, details, error }`, with `details` JSON-stringified and `error` serialized via
+  `pino.stdSerializers.errWithCause` so the `cause` chain is preserved.
+
+`@lokalise/node-core` errors (`PublicNonRecoverableError`, `InternalError`) remain supported with unchanged behaviour,
+so both error families can coexist during a migration. A custom `resolveResponseObject` / `resolveLogObject` still
+takes precedence over the built-in mapping for both.
+
 **Server-Sent Events support:**
 
 The error handler is aware of routes streaming Server-Sent Events via `@fastify/sse` (including SSE contract routes
@@ -904,7 +922,7 @@ terminal event before closing the stream:
 
 ```
 event: error
-data: {"message":"Internal server error","errorCode":"INTERNAL_SERVER_ERROR"}
+data: {"message":"Internal server error","code":"INTERNAL_SERVER_ERROR","errorCode":"INTERNAL_SERVER_ERROR"}
 ```
 
 Error reporting and logging happen for stream errors too. Both detection conditions are required: `@fastify/sse` sets
