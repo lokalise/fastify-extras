@@ -55,6 +55,18 @@ export function isZodError(value: unknown): value is ZodError {
 }
 
 function resolveLogObject(error: unknown): FreeformRecord {
+  // Checked before node-core's isInternalError, which also matches on `error.name === 'InternalError'` and would
+  // claim a consumer class of that name extending the @lokalise/errors base, dropping the `cause` chain.
+  if (InternalError.isInstance(error) || PublicError.isInstance(error)) {
+    // `details` is not repeated at the top level: errWithCause already includes it (and `code`) as own
+    // enumerable properties, and pino's serializer copes with circular or BigInt details where JSON.stringify throws.
+    return {
+      msg: error.message,
+      code: error.code,
+      error: pino.stdSerializers.errWithCause(error),
+    }
+  }
+
   if (isInternalError(error)) {
     return {
       msg: error.message,
@@ -65,16 +77,6 @@ function resolveLogObject(error: unknown): FreeformRecord {
         message: error.message,
         stack: error.stack,
       }),
-    }
-  }
-
-  if (InternalError.isInstance(error) || PublicError.isInstance(error)) {
-    // `details` is not repeated at the top level: errWithCause already includes it (and `code`) as own
-    // enumerable properties, and pino's serializer copes with circular or BigInt details where JSON.stringify throws.
-    return {
-      msg: error.message,
-      code: error.code,
-      error: pino.stdSerializers.errWithCause(error),
     }
   }
 

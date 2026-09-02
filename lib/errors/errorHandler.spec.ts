@@ -628,6 +628,39 @@ describe('errorHandler', () => {
       })
     })
 
+    it('keeps the cause chain for a consumer class named InternalError', async () => {
+      // node-core's isInternalError also matches on `error.name === 'InternalError'`; this class must still be
+      // logged through the @lokalise/errors branch.
+      class InternalError extends LokaliseInternalError.from('MY_CODE')<{ a: number }> {}
+      let errorSpy: MockInstance | undefined
+
+      app = await initApp((req) => {
+        errorSpy = vitest.spyOn(req.log, 'error')
+        throw new InternalError({
+          message: 'shadowed',
+          details: { a: 1 },
+          cause: new Error('root cause'),
+        })
+      })
+
+      const response = await app.inject().get('/').end()
+
+      expect(response.statusCode).toBe(500)
+      expect(errorSpy!.mock.calls).toHaveLength(1)
+      expect(errorSpy!.mock.calls[0]).toEqual([
+        {
+          msg: 'shadowed',
+          code: 'MY_CODE',
+          error: expect.objectContaining({
+            name: 'InternalError',
+            code: 'MY_CODE',
+            details: { a: 1 },
+            cause: expect.objectContaining({ message: 'root cause' }),
+          }),
+        },
+      ])
+    })
+
     it('masks an InternalError created with InternalError.create as a 500 and logs it without cause', async () => {
       let errorSpy: MockInstance | undefined
 
