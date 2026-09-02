@@ -867,7 +867,9 @@ If validation fails, a `ZodError` will be thrown, preventing invalid data from b
 error to a standardized `{ message, code, errorCode?, details? }` payload, reports 5xx errors via the provided
 `errorReporter` and logs them. `code` identifies the error; `errorCode` is a deprecated alias of `code` kept for
 `@lokalise/node-core` compatibility. The built-in mapping always emits both, but custom `resolveResponseObject`
-overrides only have to return `code`. `errorCode` will be dropped in a future major version.
+overrides only have to return `code`. Because overrides may omit it, `errorCode` is typed as optional on
+`ErrorResponseObject`: code that reads `payload.errorCode` (e.g. from `defaultResolveResponseObject`) must handle
+`undefined` or, preferably, read `code` instead. `errorCode` will be dropped in a future major version.
 
 Example usage:
 
