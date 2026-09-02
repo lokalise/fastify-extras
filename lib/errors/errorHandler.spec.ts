@@ -528,10 +528,11 @@ describe('errorHandler', () => {
         {
           msg: 'Provider deepl is unavailable',
           code: 'PROVIDER_UNAVAILABLE',
-          details: '{"provider":"deepl"}',
           error: expect.objectContaining({
             type: 'ProviderUnavailableError',
             message: 'Provider deepl is unavailable',
+            code: 'PROVIDER_UNAVAILABLE',
+            details: { provider: 'deepl' },
             stack: expect.stringContaining('Provider deepl is unavailable'),
           }),
         },
@@ -574,10 +575,11 @@ describe('errorHandler', () => {
         {
           msg: 'Database query failed',
           code: 'DATABASE_QUERY_ERROR',
-          details: '{"query":"SELECT 1"}',
           error: expect.objectContaining({
             type: 'DatabaseQueryError',
             message: 'Database query failed',
+            code: 'DATABASE_QUERY_ERROR',
+            details: { query: 'SELECT 1' },
             stack: expect.stringContaining('Database query failed'),
             cause: expect.objectContaining({
               type: 'Error',
@@ -589,7 +591,44 @@ describe('errorHandler', () => {
       ])
     })
 
-    it('masks an InternalError created with InternalError.create as a 500 and logs it without details', async () => {
+    it('still masks, reports and logs an InternalError whose details cannot be JSON.stringified', async () => {
+      const reports: ErrorReport[] = []
+      let errorSpy: MockInstance | undefined
+      const details: Record<string, unknown> = { n: 1n }
+      details.self = details
+
+      app = await initApp(
+        (req) => {
+          errorSpy = vitest.spyOn(req.log, 'error')
+          throw LokaliseInternalError.create({ code: 'CIRC', message: 'circ', details })
+        },
+        {
+          errorReporter: {
+            report: (report) => {
+              reports.push(report)
+            },
+          },
+        },
+      )
+
+      const response = await app.inject().get('/').end()
+
+      expect(response.statusCode).toBe(500)
+      expect(response.json()).toEqual({
+        message: 'Internal server error',
+        code: 'INTERNAL_SERVER_ERROR',
+        errorCode: 'INTERNAL_SERVER_ERROR',
+      })
+      expect(reports).toHaveLength(1)
+      expect(errorSpy!.mock.calls).toHaveLength(1)
+      expect(errorSpy!.mock.calls[0]![0]).toMatchObject({
+        msg: 'circ',
+        code: 'CIRC',
+        error: expect.objectContaining({ message: 'circ', code: 'CIRC' }),
+      })
+    })
+
+    it('masks an InternalError created with InternalError.create as a 500 and logs it without cause', async () => {
       let errorSpy: MockInstance | undefined
 
       app = await initApp((req) => {
@@ -614,12 +653,14 @@ describe('errorHandler', () => {
         {
           msg: 'LQA produced no review',
           code: 'LQA_REVIEW_MISSING',
-          details: undefined,
           error: expect.objectContaining({
             message: 'LQA produced no review',
+            code: 'LQA_REVIEW_MISSING',
+            details: undefined,
           }),
         },
       ])
+      expect(errorSpy!.mock.calls[0]![0]).not.toHaveProperty('details')
       expect(errorSpy!.mock.calls[0]![0].error).not.toHaveProperty('cause')
     })
   })

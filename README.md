@@ -905,8 +905,8 @@ the package's `isInstance()` guards so the check works across realms and duplica
   `{ message, code, errorCode, details? }` (`details` is present only when the definition declares a `detailsSchema`). Like any other error, they are reported and logged only
   when the status code is 5xx (e.g. `ErrorType.UNAVAILABLE`).
 - `InternalError` instances are not client-facing: they are masked as `500 INTERNAL_SERVER_ERROR`, reported, and logged
-  as `{ msg, code, details, error }`, with `details` JSON-stringified and `error` serialized via
-  `pino.stdSerializers.errWithCause` so the `cause` chain is preserved.
+  as `{ msg, code, error }`, with `error` serialized via `pino.stdSerializers.errWithCause` so `details` and the
+  `cause` chain are preserved.
 
 `@lokalise/node-core` errors (`PublicNonRecoverableError`, `InternalError`) remain supported with unchanged behaviour,
 so both error families can coexist during a migration. A custom `resolveResponseObject` / `resolveLogObject` still

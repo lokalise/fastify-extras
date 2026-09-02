@@ -69,10 +69,11 @@ function resolveLogObject(error: unknown): FreeformRecord {
   }
 
   if (InternalError.isInstance(error) || PublicError.isInstance(error)) {
+    // `details` is not repeated at the top level: errWithCause already includes it (and `code`) as own
+    // enumerable properties, and pino's serializer copes with circular or BigInt details where JSON.stringify throws.
     return {
       msg: error.message,
       code: error.code,
-      details: error.details ? JSON.stringify(error.details) : undefined,
       error: pino.stdSerializers.errWithCause(error),
     }
   }
@@ -84,19 +85,17 @@ function resolveLogObject(error: unknown): FreeformRecord {
 }
 
 export function defaultResolveResponseObject(error: FreeformRecord): ErrorResponseObject {
-  if (PublicError.isInstance(error)) {
-    return {
-      statusCode: error.httpStatusCode,
-      payload: error.toPayload(),
-    }
-  }
-
-  // Not client-facing. Checked explicitly rather than left to the fallback: every @lokalise/errors error has a
-  // string `code`, so it would otherwise satisfy isStandardizedError and could be caught by the auth branch below.
   if (InternalError.isInstance(error)) {
     return {
       statusCode: 500,
       payload: INTERNAL_SERVER_ERROR_PAYLOAD,
+    }
+  }
+
+  if (PublicError.isInstance(error)) {
+    return {
+      statusCode: error.httpStatusCode,
+      payload: error.toPayload(),
     }
   }
 
