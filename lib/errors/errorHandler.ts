@@ -42,11 +42,13 @@ export type ErrorResponseObject = {
   }
 }
 
-const INTERNAL_SERVER_ERROR_PAYLOAD: ErrorResponseObject['payload'] = {
+// Shared by reference across responses, so it is frozen: a consumer wrapper that mutates the returned
+// payload would otherwise leak that mutation into every later 500 in the process.
+const INTERNAL_SERVER_ERROR_PAYLOAD: ErrorResponseObject['payload'] = Object.freeze({
   message: 'Internal server error',
   code: 'INTERNAL_SERVER_ERROR',
   errorCode: 'INTERNAL_SERVER_ERROR',
-}
+})
 
 export function isZodError(value: unknown): value is ZodError {
   return (value as ZodError).name === 'ZodError'

@@ -950,4 +950,21 @@ describe('defaultResolveResponseObject', () => {
       },
     })
   })
+
+  it('rejects mutation of the shared 500 payload instead of leaking it into later responses', () => {
+    const first = defaultResolveResponseObject(new Error('first'))
+
+    expect(() => {
+      first.payload.details = { requestId: 'req-1' }
+    }).toThrow(TypeError)
+    expect(() => {
+      first.payload.message = 'mutated'
+    }).toThrow(TypeError)
+
+    expect(defaultResolveResponseObject({ foo: 'bar' }).payload).toEqual({
+      message: 'Internal server error',
+      code: 'INTERNAL_SERVER_ERROR',
+      errorCode: 'INTERNAL_SERVER_ERROR',
+    })
+  })
 })
