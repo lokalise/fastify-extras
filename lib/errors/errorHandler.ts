@@ -1,5 +1,9 @@
 import { FastifyError } from '@fastify/error'
 import type { SSEReplyInterface } from '@fastify/sse'
+import {
+  InternalError as LokaliseInternalError,
+  PublicError as LokalisePublicError,
+} from '@lokalise/errors'
 import type { ErrorReporter } from '@lokalise/node-core'
 import {
   isError,
@@ -31,16 +35,41 @@ export type ErrorResponseObject = {
   headers?: Record<string, string>
   payload: {
     message: string
-    errorCode: string
+    code: string
+    /**
+     * @deprecated Compatibility alias of `code`, matching the `@lokalise/node-core` payload shape. The built-in
+     * mapping keeps emitting it alongside `code`; it will be dropped in a future major version.
+     */
+    errorCode?: string
     details?: FreeformRecord
   }
 }
+
+// Shared by reference across responses, so it is frozen: a consumer wrapper that mutates the returned
+// payload would otherwise leak that mutation into every later 500 in the process.
+const INTERNAL_SERVER_ERROR_PAYLOAD: ErrorResponseObject['payload'] = Object.freeze({
+  message: 'Internal server error',
+  code: 'INTERNAL_SERVER_ERROR',
+  errorCode: 'INTERNAL_SERVER_ERROR',
+})
 
 export function isZodError(value: unknown): value is ZodError {
   return (value as ZodError).name === 'ZodError'
 }
 
 function resolveLogObject(error: unknown): FreeformRecord {
+  // Checked before node-core's isInternalError, which also matches on `error.name === 'InternalError'` and would
+  // claim a consumer class of that name extending the @lokalise/errors base, dropping the `cause` chain.
+  if (LokaliseInternalError.isInstance(error) || LokalisePublicError.isInstance(error)) {
+    // `details` is not repeated at the top level: errWithCause already includes it (and `code`) as own
+    // enumerable properties, and pino's serializer copes with circular or BigInt details where JSON.stringify throws.
+    return {
+      msg: error.message,
+      code: error.code,
+      error: pino.stdSerializers.errWithCause(error),
+    }
+  }
+
   if (isInternalError(error)) {
     return {
       msg: error.message,
@@ -61,11 +90,26 @@ function resolveLogObject(error: unknown): FreeformRecord {
 }
 
 export function defaultResolveResponseObject(error: FreeformRecord): ErrorResponseObject {
+  if (LokaliseInternalError.isInstance(error)) {
+    return {
+      statusCode: 500,
+      payload: INTERNAL_SERVER_ERROR_PAYLOAD,
+    }
+  }
+
+  if (LokalisePublicError.isInstance(error)) {
+    return {
+      statusCode: error.httpStatusCode,
+      payload: error.toPayload(),
+    }
+  }
+
   if (isPublicNonRecoverableError(error)) {
     return {
       statusCode: error.httpStatusCode ?? 500,
       payload: {
         message: error.message,
+        code: error.errorCode,
         errorCode: error.errorCode,
         details: error.details,
       },
@@ -77,6 +121,7 @@ export function defaultResolveResponseObject(error: FreeformRecord): ErrorRespon
       statusCode: 400,
       payload: {
         message: 'Invalid params',
+        code: 'VALIDATION_ERROR',
         errorCode: 'VALIDATION_ERROR',
         details: {
           error: error.validation,
@@ -90,6 +135,7 @@ export function defaultResolveResponseObject(error: FreeformRecord): ErrorRespon
       statusCode: 500,
       payload: {
         message: 'Invalid response',
+        code: 'RESPONSE_VALIDATION_ERROR',
         errorCode: 'RESPONSE_VALIDATION_ERROR',
         details: {
           error: error.cause.issues,
@@ -111,6 +157,7 @@ export function defaultResolveResponseObject(error: FreeformRecord): ErrorRespon
         statusCode: 401,
         payload: {
           message,
+          code: 'AUTH_FAILED',
           errorCode: 'AUTH_FAILED',
         },
       }
@@ -118,30 +165,29 @@ export function defaultResolveResponseObject(error: FreeformRecord): ErrorRespon
   }
 
   if (error instanceof FastifyError) {
-    if (error.statusCode === undefined || error.statusCode >= 500) {
-      return {
-        statusCode: error.statusCode ?? 500,
-        payload: {
-          message: 'Internal server error',
-          errorCode: 'INTERNAL_SERVER_ERROR',
-        },
-      }
-    }
-
-    return {
-      statusCode: error.statusCode,
-      payload: {
-        message: error.message,
-        errorCode: error.code,
-      },
-    }
+    return resolveFastifyErrorResponseObject(error)
   }
 
   return {
     statusCode: 500,
+    payload: INTERNAL_SERVER_ERROR_PAYLOAD,
+  }
+}
+
+function resolveFastifyErrorResponseObject(error: FastifyError): ErrorResponseObject {
+  if (error.statusCode === undefined || error.statusCode >= 500) {
+    return {
+      statusCode: error.statusCode ?? 500,
+      payload: INTERNAL_SERVER_ERROR_PAYLOAD,
+    }
+  }
+
+  return {
+    statusCode: error.statusCode,
     payload: {
-      message: 'Internal server error',
-      errorCode: 'INTERNAL_SERVER_ERROR',
+      message: error.message,
+      code: error.code,
+      errorCode: error.code,
     },
   }
 }

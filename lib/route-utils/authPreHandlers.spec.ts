@@ -69,6 +69,7 @@ describe('authPreHandlers', () => {
       const response = await app.inject().get('/').end()
       expect(response.statusCode).toBe(401)
       expect(response.json()).toEqual({
+        code: 'AUTH_FAILED',
         errorCode: 'AUTH_FAILED',
         message: 'Authentication failed',
       })
@@ -84,6 +85,7 @@ describe('authPreHandlers', () => {
         .end()
       expect(response.statusCode).toBe(401)
       expect(response.json()).toEqual({
+        code: 'AUTH_FAILED',
         errorCode: 'AUTH_FAILED',
         message: 'Authentication failed',
       })
@@ -117,6 +119,7 @@ describe('authPreHandlers', () => {
 
       expect(response.statusCode).toBe(401)
       expect(response.json()).toEqual({
+        code: 'AUTH_FAILED',
         errorCode: 'AUTH_FAILED',
         message: 'Authentication failed',
       })
@@ -133,6 +136,7 @@ describe('authPreHandlers', () => {
 
       expect(response.statusCode).toBe(401)
       expect(response.json()).toEqual({
+        code: 'AUTH_FAILED',
         errorCode: 'AUTH_FAILED',
         message: 'Authentication failed',
       })
