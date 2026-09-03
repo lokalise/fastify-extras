@@ -39,7 +39,7 @@
         "@bugsnag/js": "^8.4.0",
         "@bugsnag/node": "^8.4.0",
         "@fastify/error": "^4.2.0",
-        "@lokalise/error-utils": "^3.0.0",
+        "@lokalise/error-utils": "^4.0.0",
         "@prometheus-io/client": "^0.16.1",
         "@scalar/fastify-api-reference": "^1.66.1",
         "@splitsoftware/splitio": "^11.6.0",
@@ -95,7 +95,7 @@
         "zod": "^4.1.12"
     },
     "engines": {
-        "node": ">=22"
+        "node": ">=24.3.0"
     },
     "packageManager": "pnpm@11.9.0"
 }

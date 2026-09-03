@@ -9,11 +9,5 @@ allowBuilds:
 # this lockfile was generated. Exempted so installs (incl. CI) don't fail the
 # supply-chain age check on these freshly published versions.
 minimumReleaseAgeExclude:
-  - '@opentelemetry/api-logs@0.220.0'
-  - dd-trace@5.111.0
-  - import-in-the-middle@3.3.0
-  - picomatch@4.0.5
-  - toad-cache@3.7.4
-  - '@lokalise/background-jobs-common@15.2.0'
-  - '@lokalise/errors@2.0.0'
   - fastify-metrics@14.0.0
+  - '@lokalise/error-utils@4.0.0'

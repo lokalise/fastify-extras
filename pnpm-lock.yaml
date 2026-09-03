@@ -27,8 +27,8 @@ importers:
         specifier: '>=5.0.0'
         version: 7.1.0(zod@4.4.3)
       '@lokalise/error-utils':
-        specifier: ^3.0.0
-        version: 3.0.0(@lokalise/node-core@14.9.1(zod@4.4.3))
+        specifier: ^4.0.0
+        version: 4.0.0(@lokalise/node-core@14.9.1(zod@4.4.3))
       '@prometheus-io/client':
         specifier: ^0.16.1
         version: 0.16.1
@@ -347,8 +347,9 @@ packages:
   '@lokalise/biome-config@2.0.0':
     resolution: {integrity: sha512-ema3JYp4B/5xoBI+nV6Rx3WVAQvm2TJ14oalXnX7qQ1r3GHIMrnKMHqv7R2AU7ww6j8SxdNomi2iEoLlmPijAg==}
 
-  '@lokalise/error-utils@3.0.0':
-    resolution: {integrity: sha512-HB3CzbCP0ZHghsgkXJfFK3gKb0TauajKOecX+v4pelvTASH9Hy7i90Spd46KixSigbQrkSEe2IYLGY0Ffz6C4w==}
+  '@lokalise/error-utils@4.0.0':
+    resolution: {integrity: sha512-M1onujB0PEgtWarBcpTcjoyiQaIl4WT2nzpm4AwPfHVdJt9/kJyaJETF9j1tUYLNmlJhk5zllmirMamQS3JLZg==}
+    engines: {node: '>=24.3.0'}
     peerDependencies:
       '@lokalise/node-core': '>=11.0.0'
 
@@ -2022,10 +2023,11 @@ snapshots:
 
   '@lokalise/biome-config@2.0.0': {}
 
-  '@lokalise/error-utils@3.0.0(@lokalise/node-core@14.9.1(zod@4.4.3))':
+  '@lokalise/error-utils@4.0.0(@lokalise/node-core@14.9.1(zod@4.4.3))':
     dependencies:
-      '@bugsnag/js': 8.10.0
+      '@bugsnag/node': 8.10.0
       '@lokalise/node-core': 14.9.1(zod@4.4.3)
+      pino-std-serializers: 7.1.0
 
   '@lokalise/errors@2.0.0(zod@4.4.3)':
     dependencies:
