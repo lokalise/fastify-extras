@@ -1,6 +1,6 @@
+import * as prometheus from '@prometheus-io/client'
 import { PromisePool } from '@supercharge/promise-pool'
 import type { FastifyBaseLogger } from 'fastify'
-import * as prometheus from 'prom-client'
 
 import { ObservableQueue } from './ObservableQueue.js'
 import type { QueueDiscoverer } from './queueDiscoverers.js'
@@ -19,25 +19,36 @@ export type MetricCollectorOptions = {
   histogramBuckets: number[]
 }
 
-const getMetrics = (prefix: string, histogramBuckets: number[]): Metrics => ({
-  countGauge: new prometheus.Gauge({
-    name: `${prefix}_jobs_count`,
-    help: 'Total number of jobs',
-    labelNames: ['status', 'queue'] as const,
-  }),
-  processedDuration: new prometheus.Histogram({
-    name: `${prefix}_jobs_processed_duration`,
-    help: 'Processing time of a jobs (processing until finished)',
-    buckets: histogramBuckets,
-    labelNames: ['status', 'queue'] as const,
-  }),
-  finishedDuration: new prometheus.Histogram({
-    name: `${prefix}_jobs_finished_duration`,
-    help: 'Finish time for jobs (created until finished)',
-    buckets: histogramBuckets,
-    labelNames: ['status', 'queue'] as const,
-  }),
-})
+const getMetricNames = (prefix: string) =>
+  ({
+    countGauge: `${prefix}_jobs_count`,
+    processedDuration: `${prefix}_jobs_processed_duration`,
+    finishedDuration: `${prefix}_jobs_finished_duration`,
+  }) satisfies Record<keyof Metrics, string>
+
+const getMetrics = (prefix: string, histogramBuckets: number[]): Metrics => {
+  const names = getMetricNames(prefix)
+
+  return {
+    countGauge: new prometheus.Gauge({
+      name: names.countGauge,
+      help: 'Total number of jobs',
+      labelNames: ['status', 'queue'] as const,
+    }),
+    processedDuration: new prometheus.Histogram({
+      name: names.processedDuration,
+      help: 'Processing time of a jobs (processing until finished)',
+      buckets: histogramBuckets,
+      labelNames: ['status', 'queue'] as const,
+    }),
+    finishedDuration: new prometheus.Histogram({
+      name: names.finishedDuration,
+      help: 'Finish time for jobs (created until finished)',
+      buckets: histogramBuckets,
+      labelNames: ['status', 'queue'] as const,
+    }),
+  }
+}
 
 export class MetricsCollector {
   private readonly metrics: Metrics
@@ -96,23 +107,17 @@ export class MetricsCollector {
     registry: prometheus.Registry,
     { metricsPrefix, histogramBuckets }: MetricCollectorOptions,
   ): Metrics {
-    const metrics = getMetrics(metricsPrefix, histogramBuckets)
-    const metricNames = Object.keys(metrics)
-
-    // If metrics are already registered, just return them to avoid triggering a Prometheus error
-    if (metricNames.length > 0 && registry.getSingleMetric(metricNames[0] ?? '')) {
-      const retrievedMetrics = registry.getMetricsAsArray()
-
-      const returnValue: Record<string, prometheus.MetricObject> = {}
-      for (const metric of retrievedMetrics) {
-        if (metricNames.includes(metric.name)) {
-          returnValue[metric.name as keyof Metrics] = metric
-        }
-      }
-
-      return returnValue as unknown as Metrics
+    // A second collector sharing the registry has to reuse what is already on it - registering
+    // the same metric name twice is an error. The registry is keyed by Prometheus metric name,
+    // while `Metrics` is keyed by our own property names, so the two are mapped back together.
+    const registered = Object.entries(getMetricNames(metricsPrefix)).map(
+      ([key, name]) => [key, registry.getSingleMetric(name)] as const,
+    )
+    if (registered.every(([, metric]) => metric)) {
+      return Object.fromEntries(registered) as unknown as Metrics
     }
 
+    const metrics = getMetrics(metricsPrefix, histogramBuckets)
     for (const metric of Object.values(metrics)) {
       registry.registerMetric(metric)
     }
