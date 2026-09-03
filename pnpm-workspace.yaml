@@ -16,3 +16,4 @@ minimumReleaseAgeExclude:
   - toad-cache@3.7.4
   - '@lokalise/background-jobs-common@15.2.0'
   - '@lokalise/errors@2.0.0'
+  - fastify-metrics@14.0.0

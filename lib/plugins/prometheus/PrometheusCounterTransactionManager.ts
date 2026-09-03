@@ -1,6 +1,6 @@
 import type { TransactionObservabilityManager } from '@lokalise/node-core'
+import type { Counter } from '@prometheus-io/client'
 import type { IFastifyMetrics } from 'fastify-metrics'
-import type { Counter } from 'prom-client'
 
 /**
  * TransactionObservabilityManager implementation that uses Prometheus counter
