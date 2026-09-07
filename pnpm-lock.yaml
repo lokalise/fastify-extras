@@ -68,7 +68,7 @@ importers:
         version: 12.0.0(@lokalise/api-contracts@7.1.0(zod@4.5.4))(@lokalise/node-core@14.9.1(zod@4.5.4))(zod@4.5.4)
       '@lokalise/background-jobs-common':
         specifier: ^15.2.0
-        version: 15.2.0(bullmq@6.3.1(ioredis@6.0.0))(ioredis@6.0.0)(pino@10.3.1)(toad-scheduler@4.1.0)(zod@4.5.4)
+        version: 15.2.0(bullmq@6.3.4(ioredis@6.0.0))(ioredis@6.0.0)(pino@10.3.1)(toad-scheduler@4.1.0)(zod@4.5.4)
       '@lokalise/biome-config':
         specifier: ^2.0.0
         version: 2.0.0
@@ -101,7 +101,7 @@ importers:
         version: 2.6.0
       bullmq:
         specifier: ^6.2.0
-        version: 6.3.1(ioredis@6.0.0)
+        version: 6.3.4(ioredis@6.0.0)
       dd-trace:
         specifier: ^6.0.0
         version: 6.13.0
@@ -889,8 +889,8 @@ packages:
     resolution: {integrity: sha512-ScQ4IuvIEF1TMlP7Zt+vjJ//9zlPb2SDcxWxM3bk8s6t6GGdJ7KO1dCcTidOPJKePW30LE/2cT7wCyPho9/Wxg==}
     engines: {node: 20 || >=22}
 
-  bullmq@6.3.1:
-    resolution: {integrity: sha512-dxFRQtN42H1SWpODKr1eHqFsgYPAWOKiZDihatP8Skdd/j8e0x77AP//TUqGMVuUmjHf/eNMa2e+g6bidc4oYg==}
+  bullmq@6.3.4:
+    resolution: {integrity: sha512-DpilB5sayCB8huCp4YuzVhJjxB4ieHidzu+GPgbcjPi3kQv0gdLoLnk+I+mMACDQ88rTbSiT+B4crmhWFGL9GA==}
     engines: {node: '>=14.17.0'}
     peerDependencies:
       bullmq-otel: '>=2.0.0'
@@ -1323,8 +1323,8 @@ packages:
     resolution: {integrity: sha512-4kmO/MdyUIkLIvTPr8VHLil4AtoKIoniWPIEk5+CDy0xnWC84azhSFmuJ7PxZdsYtiP5kEeQsORAVIeMgxT+Hw==}
     hasBin: true
 
-  msgpackr@2.0.5:
-    resolution: {integrity: sha512-cef05H/dSYpLpqp3sj/qyZh5vhUYCalnaLO7j1yOmpsR0y/XwLVtK7r5gn+U/F7CTEfMowcGhlUQJDLcLf7jcA==}
+  msgpackr@2.1.0:
+    resolution: {integrity: sha512-p/pBCVO63CsvvpkomUnNNag6+n38rULuDA6HHe70o2gtC8ODI52foF/4ko2qQcp6OiErJXTmrZeXmsGGHsIQNQ==}
 
   nanoid@3.3.18:
     resolution: {integrity: sha512-DTg4MJbGMWkfi6VZFdNt2/caMbQy4Ou+Op/hJQvGEWcnVfoA1QA+xzRKAzw9jD6+GVOOeYr/mIcuDSdug6F6+w==}
@@ -2007,11 +2007,11 @@ snapshots:
       undici: 8.10.0
       zod: 4.5.4
 
-  '@lokalise/background-jobs-common@15.2.0(bullmq@6.3.1(ioredis@6.0.0))(ioredis@6.0.0)(pino@10.3.1)(toad-scheduler@4.1.0)(zod@4.5.4)':
+  '@lokalise/background-jobs-common@15.2.0(bullmq@6.3.4(ioredis@6.0.0))(ioredis@6.0.0)(pino@10.3.1)(toad-scheduler@4.1.0)(zod@4.5.4)':
     dependencies:
       '@lokalise/id-utils': 3.0.1
       '@lokalise/node-core': 14.9.1(zod@4.5.4)
-      bullmq: 6.3.1(ioredis@6.0.0)
+      bullmq: 6.3.4(ioredis@6.0.0)
       ioredis: 6.0.0
       pino: 10.3.1
       redis-semaphore: 5.7.0(ioredis@6.0.0)
@@ -2483,10 +2483,10 @@ snapshots:
     dependencies:
       balanced-match: 4.0.4
 
-  bullmq@6.3.1(ioredis@6.0.0):
+  bullmq@6.3.4(ioredis@6.0.0):
     dependencies:
       cron-parser: 5.10.0
-      msgpackr: 2.0.5
+      msgpackr: 2.1.0
       node-abort-controller: 3.1.1
       semver: 7.8.5
       tslib: 2.8.1
@@ -2895,7 +2895,7 @@ snapshots:
       '@msgpackr-extract/msgpackr-extract-win32-x64': 3.0.4
     optional: true
 
-  msgpackr@2.0.5:
+  msgpackr@2.1.0:
     optionalDependencies:
       msgpackr-extract: 3.0.4
 
