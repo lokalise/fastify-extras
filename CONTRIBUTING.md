@@ -31,7 +31,7 @@ If your PR affects anything used by consumers (API, types, runtime behavior, or 
 Create **one changeset per logical change** — a PR with unrelated changes should have multiple changesets.
 
 > The interactive `pnpm changeset` CLI is available as an optional alternative, but manually authored changesets are preferred so descriptions stay specific and file names readable.
-
+>
 > **Note:** If you add headers inside a changeset, use `####` or `#####` only. Shallower headers will break the final CHANGELOG and upstream tooling.
 
 **Choose the correct bump type:**
