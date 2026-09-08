@@ -1,33 +1,40 @@
-# Workflow for releasing package to npm registry
-name: Release to NPM
+# Workflow for releasing package to npm registry via Changesets.
+# On every push to main it either opens/updates the "Release Packages" PR
+# (when pending changesets exist) or publishes the current version to npm.
+name: Release
+
 on:
-  pull_request:
-    types:
-      - closed # Only run after PRs have been merged or closed
+  push:
     branches:
-      - main # Only run for PRs targeted against main branch
+      - main
+  repository_dispatch:
+    types:
+      - release
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions: {}
 
 jobs:
   release:
-    # Only run for pull requests that has been merged (not closed) and that doesn't have `skip-release` label
-    if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'skip-release') == false
-    name: release
+    name: Release
+    timeout-minutes: 15
     runs-on: ubuntu-latest
     permissions:
-      id-token: write  # Required for OIDC trusted publishing
-      contents: write  # Required for git operations
+      id-token: write # Required for OIDC trusted publishing
+      contents: write # Required for pushing the release branch and tags
+      pull-requests: write # Required for opening the release PR
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
-        with:
-          ref: main
-          fetch-depth: 0 # fetch all commits so auto-changelog is correctly generating
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v6
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
 
-      - name: Setup Node
-        uses: actions/setup-node@v7
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 24.x
           scope: '@lokalise'
@@ -37,30 +44,25 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build Package
-        run: pnpm run build
+      - name: Create Release Pull Request or Publish
+        id: changesets
+        uses: changesets/action@8488615a623b1b9c987934bb89eae8af6a946ac1 # v2.1.1
+        with:
+          publish-script: pnpm run ci:publish
+          pr-title: 'Release Packages'
+          commit-message: 'chore: update versions'
 
-      - name: Setup git config
+      - name: Auto-merge Changesets PR
+        # has-changesets is also true when only empty changesets exist, in which case the
+        # action logs "All changesets are empty; not creating PR" and pr-number is blank.
+        if: steps.changesets.outputs.pr-number != ''
         run: |
-          git config --global user.email "auto-release@lokalise.com"
-          git config --global user.name "AUTO RELEASE"
-
-      # Apply proper semver according to github labels
-
-      - name: Major label detected
-        if: contains(github.event.pull_request.labels.*.name, 'major')
-        run: npm version major
-
-      - name: Minor label detected
-        if: contains(github.event.pull_request.labels.*.name, 'minor')
-        run: npm version minor
-
-      - name: Patch label detected
-        if: contains(github.event.pull_request.labels.*.name, 'patch')
-        run: npm version patch
-
-      - name: Git push
-        run: git push origin main && git push --tags
-
-      - name: Release Package
-        run: npm publish
+          gh pr merge --squash --admin "$PR_NUMBER"
+          gh api --method POST /repos/$REPO/dispatches -f 'event_type=release'
+        env:
+          # BOT_ACCESS_TOKEN bypasses branch protection (immediate merge regardless of
+          # approval/checks), and lets the repository_dispatch trigger the publish run —
+          # a GITHUB_TOKEN-fired dispatch would not start a new workflow.
+          GITHUB_TOKEN: ${{ secrets.BOT_ACCESS_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ steps.changesets.outputs.pr-number }}

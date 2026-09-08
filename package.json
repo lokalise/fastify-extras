@@ -32,7 +32,8 @@
         "lint:fix": "biome check --write",
         "docker:start": "docker compose -f docker-compose.yml up --build -d redis && docker compose -f docker-compose.yml up --build -d wait_for_redis",
         "docker:stop": "docker compose -f docker-compose.yml down",
-        "version": "auto-changelog -p && git add CHANGELOG.md && biome check --write package.json && git add package.json"
+        "changeset": "changeset",
+        "ci:publish": "pnpm run build && changeset publish"
     },
     "dependencies": {
         "@amplitude/analytics-node": "^1.5.7",
@@ -67,6 +68,7 @@
     "devDependencies": {
         "@amplitude/analytics-types": "^2.10.0",
         "@biomejs/biome": "^1.9.4",
+        "@changesets/cli": "^3.0.1",
         "@fastify/sse": "^0.6.0",
         "@fastify/swagger": "^9.8.1",
         "@lokalise/backend-http-client": "12.0.0",
@@ -80,7 +82,6 @@
         "@opentelemetry/sdk-trace-base": "^2.10.0",
         "@types/node": "^24.7.0",
         "@vitest/coverage-v8": "^4.1.9",
-        "auto-changelog": "^2.4.0",
         "bullmq": "^6.2.0",
         "dd-trace": "^6.0.0",
         "fastify": "^5.10.0",
