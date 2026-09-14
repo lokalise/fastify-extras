@@ -70,8 +70,8 @@ importers:
         specifier: 12.0.0
         version: 12.0.0(@lokalise/api-contracts@7.1.0(zod@4.5.4))(@lokalise/node-core@14.9.1(zod@4.5.4))(zod@4.5.4)
       '@lokalise/background-jobs-common':
-        specifier: ^15.2.0
-        version: 15.2.0(bullmq@6.3.4(ioredis@6.0.0))(ioredis@6.0.0)(pino@10.3.1)(toad-scheduler@4.1.0)(zod@4.5.4)
+        specifier: ^17.0.0
+        version: 17.0.0(bullmq@6.3.4(ioredis@6.0.0))(ioredis@6.0.0)(pino@10.3.1)(toad-scheduler@4.1.0)(zod@4.5.4)
       '@lokalise/biome-config':
         specifier: ^2.0.0
         version: 2.0.0
@@ -412,14 +412,14 @@ packages:
       '@lokalise/node-core': '>=13.1.0'
       zod: '>=3.25.56'
 
-  '@lokalise/background-jobs-common@15.2.0':
-    resolution: {integrity: sha512-XHmqGU94TD7jMpzP5Yi9kSL5IWwqluUAhJx104FOq+/jIY5eVjD4nDrtAGtHM/DM+37uSzsXANHtJS5vCX8Yeg==}
+  '@lokalise/background-jobs-common@17.0.0':
+    resolution: {integrity: sha512-C7IE76NYLUO6CELtwQZl/r1tvkVzHqcU4u7WPxnALpdyUJKKf7QkyADyvGqXawpxU/2adyInCEiVccvEzj30/Q==}
     peerDependencies:
       bullmq: ^5.28.2 || ^6.0.0
-      ioredis: ^5.4.1 || ^6.0.0
+      ioredis: ^6.0.0
       pino: '>=9.7.0'
       toad-scheduler: ^4.0.1
-      zod: '>=3.25.67'
+      zod: '>=4.5.0 <5.0.0'
 
   '@lokalise/biome-config@2.0.0':
     resolution: {integrity: sha512-ema3JYp4B/5xoBI+nV6Rx3WVAQvm2TJ14oalXnX7qQ1r3GHIMrnKMHqv7R2AU7ww6j8SxdNomi2iEoLlmPijAg==}
@@ -1570,11 +1570,11 @@ packages:
     resolution: {integrity: sha512-DJnGAeenTdpMEH6uAJRK/uiyEIH9WVsUmoLwzudwGJUwZPp80PDBWPHXSAGNPwNvIXAbe7MSUB1zQFugFml66A==}
     engines: {node: '>=4'}
 
-  redis-semaphore@5.7.0:
-    resolution: {integrity: sha512-2xjl8eYVVTKX8O8C/H70iWEGx8BSOOzI5P1tQgXEO8A8dR2/BPgU7QctCfcXOHsQ7/IIkebv1ulEdo2iC2SwvA==}
+  redis-semaphore@5.8.0:
+    resolution: {integrity: sha512-I8Y6MexOHOOO1iHQfAgRELH5RExgRX6igevq0qLtLqKHLhycXwoJCaYZE1unLx4fTJXBACkcDkfNoLCsSB9pqg==}
     engines: {node: '>= 14.17.0'}
     peerDependencies:
-      ioredis: ^4.1.0 || ^5
+      ioredis: ^4.1.0 || ^5 || ^6
     peerDependenciesMeta:
       ioredis:
         optional: true
@@ -2227,14 +2227,14 @@ snapshots:
       undici: 8.10.0
       zod: 4.5.4
 
-  '@lokalise/background-jobs-common@15.2.0(bullmq@6.3.4(ioredis@6.0.0))(ioredis@6.0.0)(pino@10.3.1)(toad-scheduler@4.1.0)(zod@4.5.4)':
+  '@lokalise/background-jobs-common@17.0.0(bullmq@6.3.4(ioredis@6.0.0))(ioredis@6.0.0)(pino@10.3.1)(toad-scheduler@4.1.0)(zod@4.5.4)':
     dependencies:
       '@lokalise/id-utils': 3.0.1
       '@lokalise/node-core': 14.9.1(zod@4.5.4)
       bullmq: 6.3.4(ioredis@6.0.0)
       ioredis: 6.0.0
       pino: 10.3.1
-      redis-semaphore: 5.7.0(ioredis@6.0.0)
+      redis-semaphore: 5.8.0(ioredis@6.0.0)
       toad-scheduler: 4.1.0
       ts-deepmerge: 8.0.0
       zod: 4.5.4
@@ -3290,7 +3290,7 @@ snapshots:
     dependencies:
       redis-errors: 1.2.0
 
-  redis-semaphore@5.7.0(ioredis@6.0.0):
+  redis-semaphore@5.8.0(ioredis@6.0.0):
     dependencies:
       debug: 4.4.3
     optionalDependencies:
