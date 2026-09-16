@@ -198,7 +198,6 @@ function pruneComponentsInPlace(document: OpenApiDocumentLike): void {
   }
 }
 
-
 /**
  * Drop every `components` entry the document no longer references.
  *
