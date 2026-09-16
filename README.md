@@ -711,6 +711,20 @@ their documents by hand.
 Scalar's `configuration: { hideModels: true }` hides the panel but leaves the schemas in the document. Prune for the
 leak, hide for the noise.
 
+#### Tags
+
+Services that share a tag catalogue across documents define each tag once — name and description in a single place — so a
+tag never carries divergent descriptions across services, then register that whole catalogue on every document.
+`@fastify/swagger` copies it through verbatim, so a document otherwise advertises tags for operations it does not serve:
+a translations-only tag in the export service's reference, or, in the internal-vs-public split, a tag only a hidden
+operation uses lingering in the public document. Both UIs render those as empty groups.
+
+The plugin therefore prunes every top-level `tags` entry the document's own operations do not reference, using the tag
+names the operations already carry. A tag object with no readable `name` is kept, since reachability cannot speak to a
+tag it cannot identify. Set `pruneUnreferencedTags: false` for a document that deliberately advertises tags beyond what
+its operations use. `pruneUnreferencedTags(document)` is also exported on its own, for services that assemble their
+documents by hand.
+
 #### Marking internal operations
 
 Operations that are internal are marked `x-internal-endpoint: true` in the internal document. Deliberately not
@@ -733,6 +747,7 @@ it reaches the document. `internalMarkerKey: false` turns the marking off.
 | `transform`                   | -                                             | Route-level transform, typically `jsonSchemaTransform`                        |
 | `transformObject`             | -                                             | Document-level transform, typically `jsonSchemaTransformObject`               |
 | `pruneUnreferencedComponents` | `true`                                        | Drop `components` entries no operation of the document references             |
+| `pruneUnreferencedTags`       | `true`                                        | Drop top-level `tags` no operation of the document references                 |
 | `scalarConfiguration`         | -                                             | Passed through to Scalar for both references                                  |
 | `internalScalarConfiguration` | -                                             | Scalar configuration for the internal reference only                          |
 | `hooks`                       | -                                             | `onRequest` / `preHandler` hooks for both references                          |

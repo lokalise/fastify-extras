@@ -13,6 +13,7 @@ import {
   type DocumentationRouteMatcher,
 } from './documentationRouteMatchers.js'
 import { importPeerDependency } from './peerDependencyImport.js'
+import { pruneUnreferencedTags } from './tagReachability.js'
 
 const DEFAULT_PUBLIC_ROUTE_PREFIX = '/documentation'
 const DEFAULT_INTERNAL_ROUTE_PREFIX = '/documentation/internal'
@@ -147,6 +148,21 @@ export type ApiDocumentationPluginOptions = {
    */
   pruneUnreferencedComponents?: boolean
 
+  /**
+   * Drop top-level `tags` no operation of the document references.
+   *
+   * Services share one canonical tag catalogue and register the whole of it on
+   * every document, so a document otherwise advertises tags for operations it
+   * does not serve — and, in the internal-vs-public split, tags only its hidden
+   * operations use. Both UIs render those as empty groups.
+   *
+   * Turn it off only for a document that deliberately advertises tags beyond
+   * what its operations use.
+   *
+   * @default true
+   */
+  pruneUnreferencedTags?: boolean
+
   /** Passed through to `@scalar/fastify-api-reference` for both references. */
   scalarConfiguration?: Record<string, unknown>
 
@@ -213,7 +229,11 @@ function resolveInternalOpenapi(
 function buildTransformObject(
   options: ApiDocumentationPluginOptions,
 ): ChainedApiDocumentationTransformObject {
-  const { transformObject, pruneUnreferencedComponents = true } = options
+  const {
+    transformObject,
+    pruneUnreferencedComponents = true,
+    pruneUnreferencedTags: shouldPruneTags = true,
+  } = options
 
   return (input) => {
     const document = transformObject
@@ -222,7 +242,11 @@ function buildTransformObject(
         ? input.openapiObject
         : input.swaggerObject
 
-    return pruneUnreferencedComponents ? pruneUnreachableComponents(document) : document
+    const withComponents = pruneUnreferencedComponents
+      ? pruneUnreachableComponents(document)
+      : document
+
+    return shouldPruneTags ? pruneUnreferencedTags(withComponents) : withComponents
   }
 }
 

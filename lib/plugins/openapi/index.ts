@@ -25,3 +25,4 @@ export {
   type DocumentedRoute,
   type OpenApiRouteSchema,
 } from './documentationRouteMatchers.js'
+export { pruneUnreferencedTags } from './tagReachability.js'

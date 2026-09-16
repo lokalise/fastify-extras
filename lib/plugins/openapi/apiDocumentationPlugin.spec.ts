@@ -345,6 +345,63 @@ describe('apiDocumentationPlugin', () => {
     })
   })
 
+  describe('tag pruning', () => {
+    const buildTaggedApp = async (
+      options: Partial<ApiDocumentationPluginOptions> = {},
+    ): Promise<DocumentedApp> => {
+      const app = fastify()
+      app.setValidatorCompiler(validatorCompiler)
+      app.setSerializerCompiler(serializerCompiler)
+
+      await app.register(apiDocumentationPlugin, {
+        openapi: {
+          info: { title: 'Users API', version: '1.0.0' },
+          tags: [
+            { name: 'Users', description: 'user operations' },
+            { name: 'Reports', description: 'never served here' },
+          ],
+        },
+        transform: createJsonSchemaTransform({ schemaRegistry }),
+        transformObject: createJsonSchemaTransformObject({ schemaRegistry }),
+        logLevel: 'silent',
+        ...options,
+      })
+
+      app
+        .withTypeProvider<ZodTypeProvider>()
+        .get('/users', { schema: { tags: ['Users'], response: { 200: USER_SCHEMA } } }, () => ({
+          id: '1',
+          email: 'a@b.c',
+          category: { name: 'admin' },
+        }))
+
+      await app.ready()
+
+      return app as DocumentedApp
+    }
+
+    const tagNames = (app: DocumentedApp): string[] =>
+      ((publicDocument(app) as { tags?: Array<{ name: string }> }).tags ?? [])
+        .map((tag) => tag.name)
+        .sort()
+
+    it('keeps only the tags the served operations reference', async () => {
+      const app = await buildTaggedApp()
+
+      expect(tagNames(app)).toStrictEqual(['Users'])
+
+      await app.close()
+    })
+
+    it('keeps the whole tag catalogue when pruning is disabled', async () => {
+      const app = await buildTaggedApp({ pruneUnreferencedTags: false })
+
+      expect(tagNames(app)).toStrictEqual(['Reports', 'Users'])
+
+      await app.close()
+    })
+  })
+
   describe('serving the references', () => {
     let app: DocumentedApp
 
