@@ -32,6 +32,28 @@ describe('tagReachability', () => {
       expect(result.tags.map((tag) => tag.name)).toStrictEqual(['Users', 'Admin', 'Export'])
     })
 
+    it('keeps a tag referenced only by a callback operation', () => {
+      const document = {
+        paths: {
+          '/subscribe': {
+            post: {
+              tags: ['Users'],
+              callbacks: {
+                onEvent: {
+                  '{$request.body#/callbackUrl}': { post: { tags: ['Callback'] } },
+                },
+              },
+            },
+          },
+        },
+        tags: [{ name: 'Users' }, { name: 'Callback' }, { name: 'Orphan' }],
+      }
+
+      const result = pruneUnreferencedTags(document)
+
+      expect(result.tags.map((tag) => tag.name)).toStrictEqual(['Users', 'Callback'])
+    })
+
     it('empties the tags array when nothing survives', () => {
       const document = {
         paths: { '/health': { get: {} } },
