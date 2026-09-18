@@ -136,4 +136,5 @@ export {
   type OpenApiDocumentLike,
   type OpenApiRouteSchema,
   pruneUnreachableComponents,
+  pruneUnreferencedTags,
 } from './plugins/openapi/index.js'

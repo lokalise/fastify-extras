@@ -176,6 +176,30 @@ function resolveReachableComponents(
   return reachable
 }
 
+/** The in-place worker behind {@link pruneUnreachableComponents}. */
+function pruneComponentsInPlace(document: OpenApiDocumentLike): void {
+  const components = document.components
+  if (components === undefined) return
+
+  const reachable = resolveReachableComponents(document, components)
+
+  for (const section of Object.keys(components)) {
+    if (!PRUNABLE_COMPONENT_SECTIONS.has(section)) continue
+
+    const entries = components[section]
+    if (typeof entries !== 'object' || entries === null) continue
+
+    const entryRecord = entries as Record<string, unknown>
+    const kept: Record<string, unknown> = {}
+    for (const [name, value] of Object.entries(entryRecord)) {
+      if (reachable.has(`${section}/${name}`)) kept[name] = value
+    }
+
+    if (Object.keys(kept).length === 0) delete components[section]
+    else components[section] = kept
+  }
+}
+
 /**
  * Drop every `components` entry the document no longer references.
  *
@@ -200,26 +224,4 @@ export function pruneUnreachableComponents<Document>(document: Document): Docume
   pruneComponentsInPlace(result as OpenApiDocumentLike)
 
   return result
-}
-
-/** Prune in place, for callers that already hold a private copy. */
-export function pruneComponentsInPlace(document: OpenApiDocumentLike): void {
-  const components = document.components
-  if (components === undefined) return
-
-  const reachable = resolveReachableComponents(document, components)
-
-  for (const section of Object.keys(components)) {
-    if (!PRUNABLE_COMPONENT_SECTIONS.has(section)) continue
-
-    const entries = components[section]
-    if (typeof entries !== 'object' || entries === null) continue
-
-    const entryRecord = entries as Record<string, unknown>
-    for (const name of Object.keys(entryRecord)) {
-      if (!reachable.has(`${section}/${name}`)) delete entryRecord[name]
-    }
-
-    if (Object.keys(entryRecord).length === 0) delete components[section]
-  }
 }
