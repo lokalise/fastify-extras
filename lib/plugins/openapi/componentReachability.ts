@@ -190,11 +190,13 @@ function pruneComponentsInPlace(document: OpenApiDocumentLike): void {
     if (typeof entries !== 'object' || entries === null) continue
 
     const entryRecord = entries as Record<string, unknown>
-    for (const name of Object.keys(entryRecord)) {
-      if (!reachable.has(`${section}/${name}`)) delete entryRecord[name]
+    const kept: Record<string, unknown> = {}
+    for (const [name, value] of Object.entries(entryRecord)) {
+      if (reachable.has(`${section}/${name}`)) kept[name] = value
     }
 
-    if (Object.keys(entryRecord).length === 0) delete components[section]
+    if (Object.keys(kept).length === 0) delete components[section]
+    else components[section] = kept
   }
 }
 
