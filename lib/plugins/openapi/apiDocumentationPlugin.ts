@@ -3,6 +3,7 @@ import type { FastifyPluginAsync, onRequestHookHandler, preHandlerHookHandler } 
 import fp from 'fastify-plugin'
 import type { AnyFastifyInstance } from '../pluginsCommon.js'
 import {
+  type ApiDocumentationAudience,
   type ApiDocumentationTransform,
   type ChainedApiDocumentationTransform,
   apiDocumentationTransform,
@@ -13,6 +14,7 @@ import {
   type DocumentationRouteMatcher,
 } from './documentationRouteMatchers.js'
 import { importPeerDependency } from './peerDependencyImport.js'
+import { stripInternalFieldsFromDocument } from './stripInternalFields.js'
 import { pruneUnreferencedTags } from './tagReachability.js'
 
 const DEFAULT_PUBLIC_ROUTE_PREFIX = '/documentation'
@@ -149,6 +151,17 @@ export type ApiDocumentationPluginOptions = {
   pruneUnreferencedComponents?: boolean
 
   /**
+   * Remove response and request properties marked
+   * `.meta({ visibility: 'internal' })` from the generated documents.
+   *
+   * The marker is audience-aware, matching the route-level split: internal
+   * fields are dropped from the public document and kept in the internal one.
+   *
+   * @default true
+   */
+  stripInternalFields?: boolean
+
+  /**
    * Drop top-level `tags` no operation of the document references.
    *
    * Services share one canonical tag catalogue and register the whole of it on
@@ -228,19 +241,26 @@ function resolveInternalOpenapi(
 
 function buildTransformObject(
   options: ApiDocumentationPluginOptions,
+  audience: ApiDocumentationAudience,
 ): ChainedApiDocumentationTransformObject {
   const {
     transformObject,
+    stripInternalFields: shouldStripInternalFields = true,
     pruneUnreferencedComponents = true,
     pruneUnreferencedTags: shouldPruneTags = true,
   } = options
 
   return (input) => {
-    const document = transformObject
+    const assembled = transformObject
       ? transformObject(input)
       : 'openapiObject' in input
         ? input.openapiObject
         : input.swaggerObject
+
+    // Strip before pruning: dropping an internal field can leave the component unreachable
+    const document = shouldStripInternalFields
+      ? stripInternalFieldsFromDocument(assembled, audience)
+      : assembled
 
     const withComponents = pruneUnreferencedComponents
       ? pruneUnreachableComponents(document)
@@ -364,13 +384,11 @@ const plugin: FastifyPluginAsync<ApiDocumentationPluginOptions> = async (
       transform: options.transform,
     })
 
-  const transformObject = buildTransformObject(options)
-
   await app.register(fastifySwagger, {
     openapi: options.openapi ?? {},
     decorator: documentDecorator,
     transform: buildTransform('public'),
-    transformObject,
+    transformObject: buildTransformObject(options, 'public'),
   })
 
   if (exposeInternalDocumentation) {
@@ -378,7 +396,7 @@ const plugin: FastifyPluginAsync<ApiDocumentationPluginOptions> = async (
       openapi: resolveInternalOpenapi(options.openapi ?? {}, options.internalOpenapi),
       decorator: internalDocumentDecorator,
       transform: buildTransform('internal'),
-      transformObject,
+      transformObject: buildTransformObject(options, 'internal'),
     })
   }
 
