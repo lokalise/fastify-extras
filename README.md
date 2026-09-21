@@ -733,6 +733,27 @@ reference, which would hide every internal endpoint from the document that exist
 when passed as `internalMarkerKey`, along with any key without the `x-` prefix, which `@fastify/swagger` drops before
 it reaches the document. `internalMarkerKey: false` turns the marking off.
 
+#### Field-level visibility
+
+Whole operations split by audience through `schema.hide`; individual response and request _fields_ split through a Zod
+`.meta({ visibility: 'internal' })` marker. A field carrying it is dropped from the public document and kept in the
+internal one. It covers response bodies, request bodies and the query, path and header parameters, and recurses through
+nested objects, arrays and `components.schemas`, so a field behind a shared `$ref` is stripped too.
+
+```typescript
+const USER_SCHEMA = z.object({
+  id: z.string(),
+  internalNote: z.string().meta({ visibility: 'internal' }), // absent from the public document
+})
+```
+
+On by default. Set `stripInternalFields: false` to publish internal fields verbatim.
+
+**The marker must live in the registry `fastify-type-provider-zod` (ftpz) reads.** Using the global registry is
+recommended, since that is where Zod's `.meta()` writes and ftpz reads from it by default. With a custom registry, add
+the visibility metadata to that registry yourself, or the field goes unstripped. See the
+[Zod metadata docs](https://zod.dev/metadata).
+
 #### Options
 
 | Option                        | Default                                       | Description                                                                  |
@@ -747,6 +768,7 @@ it reaches the document. `internalMarkerKey: false` turns the marking off.
 | `transform`                   | -                                             | Route-level transform, typically `jsonSchemaTransform`                        |
 | `transformObject`             | -                                             | Document-level transform, typically `jsonSchemaTransformObject`               |
 | `pruneUnreferencedComponents` | `true`                                        | Drop `components` entries no operation of the document references             |
+| `stripInternalFields`         | `true`                                        | Drop response/request fields marked `visibility: 'internal'`, audience-aware  |
 | `pruneUnreferencedTags`       | `true`                                        | Drop top-level `tags` no operation of the document references                 |
 | `scalarConfiguration`         | -                                             | Passed through to Scalar for both references                                  |
 | `internalScalarConfiguration` | -                                             | Scalar configuration for the internal reference only                          |
