@@ -71,7 +71,7 @@ importers:
         version: 12.0.0(@lokalise/api-contracts@7.1.0(zod@4.6.2))(@lokalise/node-core@14.9.1(zod@4.6.2))(zod@4.6.2)
       '@lokalise/background-jobs-common':
         specifier: ^17.0.0
-        version: 17.0.0(bullmq@6.3.7(ioredis@6.0.0))(ioredis@6.0.0)(pino@10.3.1)(toad-scheduler@4.1.0)(zod@4.6.2)
+        version: 17.0.1(bullmq@6.3.7(ioredis@6.0.0))(ioredis@6.0.0)(pino@10.3.1)(toad-scheduler@4.1.0)(zod@4.6.2)
       '@lokalise/biome-config':
         specifier: ^2.0.0
         version: 2.0.0
@@ -412,8 +412,8 @@ packages:
       '@lokalise/node-core': '>=13.1.0'
       zod: '>=3.25.56'
 
-  '@lokalise/background-jobs-common@17.0.0':
-    resolution: {integrity: sha512-C7IE76NYLUO6CELtwQZl/r1tvkVzHqcU4u7WPxnALpdyUJKKf7QkyADyvGqXawpxU/2adyInCEiVccvEzj30/Q==}
+  '@lokalise/background-jobs-common@17.0.1':
+    resolution: {integrity: sha512-uDenmZE+VGYEn3X92Ed+zS9V8IZ44nMpzKtLMJC+aCtJHMWatQZ2IBkAc7E3vaBCbvMtLiAOZX1/7HgnsF/cvw==}
     peerDependencies:
       bullmq: ^5.28.2 || ^6.0.0
       ioredis: ^6.0.0
@@ -2236,7 +2236,7 @@ snapshots:
       undici: 8.10.0
       zod: 4.6.2
 
-  '@lokalise/background-jobs-common@17.0.0(bullmq@6.3.7(ioredis@6.0.0))(ioredis@6.0.0)(pino@10.3.1)(toad-scheduler@4.1.0)(zod@4.6.2)':
+  '@lokalise/background-jobs-common@17.0.1(bullmq@6.3.7(ioredis@6.0.0))(ioredis@6.0.0)(pino@10.3.1)(toad-scheduler@4.1.0)(zod@4.6.2)':
     dependencies:
       '@lokalise/id-utils': 3.0.1
       '@lokalise/node-core': 14.9.1(zod@4.6.2)
