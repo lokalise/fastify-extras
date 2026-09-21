@@ -104,7 +104,7 @@ importers:
         version: 6.3.7(ioredis@6.0.0)
       dd-trace:
         specifier: ^6.0.0
-        version: 6.15.0
+        version: 6.16.0
       fastify:
         specifier: ^5.10.0
         version: 5.12.4
@@ -851,8 +851,8 @@ packages:
     resolution: {integrity: sha512-qGzCltMN05ohRRQAXB8TPWt+0Coz9Va266gr9nYN1qc/f/EIaup3VRg7b59mtRaeKTRcxreF20l/udCM/gOqNg==}
     engines: {node: '>=8'}
 
-  '@tybys/wasm-util@0.10.3':
-    resolution: {integrity: sha512-F3fo1MYrRJYL3zER0OUOmkutjr1Vp23m7OsSgp7nq4SP6OqX6C/56XFIPAl5bt3zaBRjmW7SGz3u/6LwFpYcOg==}
+  '@tybys/wasm-util@0.10.4':
+    resolution: {integrity: sha512-W3c4gRigFS0T/Ma4qIYF3GDAc5AQdHb1yL5znJT1Zv1YaD9Kitx656wBjvr19qbiosmZT8lWDM5BEMynUqX65A==}
 
   '@types/chai@5.2.3':
     resolution: {integrity: sha512-Mw558oeA9fFbv65/y4mHtXDs9bPnFMZAL/jxdPFUpOHHIXX91mcgEHbS5Lahr+pwZFR8A7GQleRWeI6cGFC2UA==}
@@ -1042,8 +1042,8 @@ packages:
     resolution: {integrity: sha512-TyyeGcjx0YeThAI9fTFtgsvj5qd4R+aGfVmXiUhevbgzWFDr7IK4tv4YjE6jaGzLHQTchk4h7DHdr5q4WGgaZw==}
     engines: {node: '>=12.17'}
 
-  dd-trace@6.15.0:
-    resolution: {integrity: sha512-AuOnUVMXba0UumQurgt1h3bId/Kh9avNcDP25cUhQkx9DXk5xBw2IPZOuAIB3vQfjtpJiTPxosuXegqt/tkV+A==}
+  dd-trace@6.16.0:
+    resolution: {integrity: sha512-gMBPwfw8iQlwmUMGxKRN0aemewUQYp/9e2faXcgh9yCFqvr7QtjjZt5ve7PigHPnQB8sTEKYuMusATwJjqyjKQ==}
     engines: {node: '>=22'}
 
   debug@4.4.3:
@@ -2317,7 +2317,7 @@ snapshots:
     dependencies:
       '@emnapi/core': 1.10.0
       '@emnapi/runtime': 1.10.0
-      '@tybys/wasm-util': 0.10.3
+      '@tybys/wasm-util': 0.10.4
     optional: true
 
   '@opentelemetry/api-logs@0.222.0':
@@ -2578,7 +2578,7 @@ snapshots:
 
   '@supercharge/promise-pool@3.3.0': {}
 
-  '@tybys/wasm-util@0.10.3':
+  '@tybys/wasm-util@0.10.4':
     dependencies:
       tslib: 2.8.1
     optional: true
@@ -2761,7 +2761,7 @@ snapshots:
 
   dc-polyfill@0.1.11: {}
 
-  dd-trace@6.15.0:
+  dd-trace@6.16.0:
     dependencies:
       dc-polyfill: 0.1.11
       import-in-the-middle: 3.5.1
