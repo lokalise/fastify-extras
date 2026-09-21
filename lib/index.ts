@@ -138,3 +138,5 @@ export {
   pruneUnreachableComponents,
   pruneUnreferencedTags,
 } from './plugins/openapi/index.js'
+
+export * from './zod/index.js'
