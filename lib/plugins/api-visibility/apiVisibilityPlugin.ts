@@ -1,5 +1,5 @@
 import type { RouteVisibility } from '@lokalise/api-contracts'
-import type { FastifyInstance, FastifyPluginCallback, FastifySchema } from 'fastify'
+import type { FastifyInstance, FastifyPluginCallback, FastifyRequest, FastifySchema } from "fastify";
 import fp from 'fastify-plugin'
 import { ResponseSerializationError } from 'fastify-type-provider-zod'
 import { z } from 'zod/v4'
@@ -14,7 +14,7 @@ const buildPublicEncoders = (
   method: string | string[],
   url: string,
   responses: Record<string, unknown>,
-): Record<string, PublicEncoder>  => {
+): Record<string, PublicEncoder> => {
   const encoders: Record<string, PublicEncoder> = {}
 
   for (const [statusCode, maybeSchema] of Object.entries(responses)) {
@@ -24,9 +24,9 @@ const buildPublicEncoders = (
     if (publicSchema === maybeSchema) continue
 
     encoders[statusCode] = (payload) => {
-
       const result = safeEncode(publicSchema, payload)
-      if (result.error) throw new ResponseSerializationError(String(method), url, { cause: result.error })
+      if (result.error)
+        throw new ResponseSerializationError(String(method), url, { cause: result.error })
 
       return JSON.stringify(result.data)
     }
@@ -35,9 +35,13 @@ const buildPublicEncoders = (
   return encoders
 }
 
+const isInternalCaller = (request: FastifyRequest, sourceHeader: string) =>
+  request.headers[sourceHeader] === ('internal' satisfies RouteVisibility)
+
 export type ApiVisibilityPluginOptions = {
   /**
-   * TODO: CC TO Document
+   * Request header carrying the caller's audience, stamped by the gateway. Only
+   * an exact `internal` value is treated as internal; anything else is public.
    *
    * @default 'x-api-source'
    */
@@ -45,7 +49,10 @@ export type ApiVisibilityPluginOptions = {
 }
 
 /**
- * // TODO: CC TO Document
+ * Strips response properties marked `.meta({ visibility: 'internal' })` for
+ * public callers and keeps them for internal ones — the runtime counterpart to
+ * the OpenAPI document cleanup. Audience comes from `sourceHeader`, fail-closed.
+ * Register before the routes it should cover.
  */
 function plugin(
   fastify: FastifyInstance,
@@ -64,9 +71,8 @@ function plugin(
   })
 
   fastify.addHook('preHandler', (request, reply, done) => {
-    // internal callers go through the route's normal serializer
-    const isInternalCaller = request.headers[sourceHeader] === ('internal' satisfies RouteVisibility)
-    if (isInternalCaller) return done()
+    // Internal callers go through the route's normal serializer untouched.
+    if (isInternalCaller(request, sourceHeader)) return done()
 
     const encoders = request.routeOptions.schema
       ? encodersBySchema.get(request.routeOptions.schema)
