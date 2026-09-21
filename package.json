@@ -52,7 +52,7 @@
     "peerDependencies": {
         "@fastify/jwt": ">=9.1.0",
         "@fastify/swagger": ">=9.5.1",
-        "@lokalise/api-contracts": ">=5.0.0",
+        "@lokalise/api-contracts": ">=7.2.0",
         "@lokalise/background-jobs-common": ">=12.0.0",
         "@lokalise/errors": ">=2.0.0",
         "@lokalise/node-core": ">=14.0.0",
@@ -71,6 +71,7 @@
         "@changesets/cli": "^3.0.1",
         "@fastify/sse": "^0.6.0",
         "@fastify/swagger": "^9.8.1",
+        "@lokalise/api-contracts": "^8.0.1",
         "@lokalise/backend-http-client": "12.0.0",
         "@lokalise/background-jobs-common": "^17.0.0",
         "@lokalise/biome-config": "^2.0.0",
