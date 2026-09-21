@@ -140,3 +140,5 @@ export {
   pruneUnreachableComponents,
   pruneUnreferencedTags,
 } from './plugins/openapi/index.js'
+
+export * from './plugins/api-visibility/index.js'
