@@ -46,6 +46,45 @@ describe('derivePublicSchema', () => {
     })
   })
 
+  describe.each<{
+    name: string
+    wrap: (schema: z.ZodType) => z.ZodType
+    passesThrough: unknown[]
+  }>([
+    { name: 'ZodOptional', wrap: (schema) => schema.optional(), passesThrough: [undefined] },
+    { name: 'ZodNullable', wrap: (schema) => schema.nullable(), passesThrough: [null] },
+    { name: 'ZodDefault', wrap: (schema) => schema.default({ keep: 'd' }), passesThrough: [] },
+    { name: 'ZodPrefault', wrap: (schema) => schema.prefault({ keep: 'd' }), passesThrough: [] },
+    { name: 'ZodCatch', wrap: (schema) => schema.catch({ keep: 'c' }), passesThrough: [] },
+    { name: 'ZodReadonly', wrap: (schema) => schema.readonly(), passesThrough: [] },
+    {
+      name: 'ZodNonOptional',
+      wrap: (schema) => schema.optional().nonoptional(),
+      passesThrough: [],
+    },
+  ])('single-inner wrapper: $name', ({ wrap, passesThrough }) => {
+    const INNER_WITH_INTERNAL = z.object({
+      keep: z.string(),
+      secret: z.string().meta({ visibility: 'internal' }),
+    })
+
+    it('drops internal fields from the wrapped schema', () => {
+      const derived = derivePublicSchema(wrap(INNER_WITH_INTERNAL))
+
+      expect(derived.parse({ keep: 'k', secret: 's' })).toEqual({ keep: 'k' })
+    })
+
+    it('returns the same schema instance when the wrapped schema has no internal fields', () => {
+      const schema = wrap(z.object({ keep: z.string() }))
+
+      expect(derivePublicSchema(schema)).toBe(schema)
+    })
+
+    it.each(passesThrough)('passes %s through unchanged', (value) => {
+      expect(derivePublicSchema(wrap(INNER_WITH_INTERNAL)).parse(value)).toEqual(value)
+    })
+  })
+
   describe('ZodArray', () => {
     const INNER_WITH_INTERNAL = z.object({
       keep: z.string(),
@@ -60,56 +99,6 @@ describe('derivePublicSchema', () => {
 
     it('returns the same schema instance when the element has no internal fields', () => {
       const schema = z.array(z.object({ keep: z.string() }))
-
-      expect(derivePublicSchema(schema)).toBe(schema)
-    })
-  })
-
-  describe('ZodOptional', () => {
-    const INNER_WITH_INTERNAL = z.object({
-      keep: z.string(),
-      secret: z.string().meta({ visibility: 'internal' }),
-    })
-
-    it('drops internal fields from the wrapped schema', () => {
-      const derived = derivePublicSchema(INNER_WITH_INTERNAL.optional())
-
-      expect(derived.parse({ keep: 'k', secret: 's' })).toEqual({ keep: 'k' })
-    })
-
-    it('keeps passing undefined through', () => {
-      const derived = derivePublicSchema(INNER_WITH_INTERNAL.optional())
-
-      expect(derived.parse(undefined)).toBeUndefined()
-    })
-
-    it('returns the same schema instance when the wrapped schema has no internal fields', () => {
-      const schema = z.object({ keep: z.string() }).optional()
-
-      expect(derivePublicSchema(schema)).toBe(schema)
-    })
-  })
-
-  describe('ZodNullable', () => {
-    const INNER_WITH_INTERNAL = z.object({
-      keep: z.string(),
-      secret: z.string().meta({ visibility: 'internal' }),
-    })
-
-    it('drops internal fields from the wrapped schema', () => {
-      const derived = derivePublicSchema(INNER_WITH_INTERNAL.nullable())
-
-      expect(derived.parse({ keep: 'k', secret: 's' })).toEqual({ keep: 'k' })
-    })
-
-    it('keeps passing null through', () => {
-      const derived = derivePublicSchema(INNER_WITH_INTERNAL.nullable())
-
-      expect(derived.parse(null)).toBeNull()
-    })
-
-    it('returns the same schema instance when the wrapped schema has no internal fields', () => {
-      const schema = z.object({ keep: z.string() }).nullable()
 
       expect(derivePublicSchema(schema)).toBe(schema)
     })
@@ -200,6 +189,96 @@ describe('derivePublicSchema', () => {
       const schema = z.map(z.string(), z.object({ keep: z.string() }))
 
       expect(derivePublicSchema(schema)).toBe(schema)
+    })
+  })
+
+  describe('ZodSet', () => {
+    it('drops internal fields from the value schema', () => {
+      const schema = z.set(
+        z.object({ keep: z.string(), secret: z.string().meta({ visibility: 'internal' }) }),
+      )
+
+      const parsed = derivePublicSchema(schema).parse(
+        new Set([{ keep: 'k', secret: 's' }]),
+      ) as Set<unknown>
+      expect([...parsed]).toEqual([{ keep: 'k' }])
+    })
+
+    it('returns the same schema instance when the value has no internal fields', () => {
+      const schema = z.set(z.object({ keep: z.string() }))
+
+      expect(derivePublicSchema(schema)).toBe(schema)
+    })
+  })
+
+  describe('ZodIntersection', () => {
+    it('drops internal fields from both sides', () => {
+      const schema = z.intersection(
+        z.object({ a: z.string(), aSecret: z.string().meta({ visibility: 'internal' }) }),
+        z.object({ b: z.string(), bSecret: z.string().meta({ visibility: 'internal' }) }),
+      )
+
+      expect(
+        derivePublicSchema(schema).parse({ a: 'x', aSecret: 's', b: 'y', bSecret: 's' }),
+      ).toEqual({ a: 'x', b: 'y' })
+    })
+
+    it('returns the same schema instance when neither side has internal fields', () => {
+      const schema = z.intersection(z.object({ a: z.string() }), z.object({ b: z.string() }))
+
+      expect(derivePublicSchema(schema)).toBe(schema)
+    })
+  })
+
+  describe('ZodLazy', () => {
+    it('drops internal fields from the lazily-resolved schema', () => {
+      const schema = z.lazy(() =>
+        z.object({ keep: z.string(), secret: z.string().meta({ visibility: 'internal' }) }),
+      )
+
+      expect(derivePublicSchema(schema).parse({ keep: 'k', secret: 's' })).toEqual({ keep: 'k' })
+    })
+
+    it('returns the same schema instance when the lazy schema has no internal fields', () => {
+      const schema = z.lazy(() => z.object({ keep: z.string() }))
+
+      expect(derivePublicSchema(schema)).toBe(schema)
+    })
+  })
+
+  describe('recursive schemas', () => {
+    it('strips internal fields without overflowing on the getter pattern', () => {
+      const Node: z.ZodType = z.object({
+        label: z.string(),
+        secret: z.string().meta({ visibility: 'internal' }),
+        get children() {
+          return z.array(Node)
+        },
+      })
+
+      const derived = derivePublicSchema(Node)
+      expect(
+        derived.parse({
+          label: 'root',
+          secret: 's',
+          children: [{ label: 'child', secret: 's2', children: [] }],
+        }),
+      ).toEqual({ label: 'root', children: [{ label: 'child', children: [] }] })
+    })
+
+    it('strips internal fields without overflowing on a recursive z.lazy', () => {
+      const Node: z.ZodType = z.lazy(() =>
+        z.object({
+          label: z.string(),
+          secret: z.string().meta({ visibility: 'internal' }),
+          next: Node.optional(),
+        }),
+      )
+
+      const derived = derivePublicSchema(Node)
+      expect(
+        derived.parse({ label: 'a', secret: 's', next: { label: 'b', secret: 's2' } }),
+      ).toEqual({ label: 'a', next: { label: 'b' } })
     })
   })
 
