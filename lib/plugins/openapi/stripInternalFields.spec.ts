@@ -127,6 +127,39 @@ describe('stripInternalFields', () => {
       expect(Object.keys(strip().components.schemas.User.properties)).toEqual(['id'])
     })
 
+    it('drops a property whose `$ref` target component is internal', () => {
+      // ftpz emits a registered internal schema as `{ $ref }`, carrying the
+      // marker on the component rather than inline on the property.
+      const document: FreeformRecord = {
+        openapi: '3.1.0',
+        info: { title: 'X', version: '1.0.0' },
+        paths: {
+          '/x': {
+            get: {
+              responses: {
+                '200': {
+                  content: {
+                    'application/json': {
+                      schema: objectSchema(
+                        { id: { type: 'string' }, secret: { $ref: '#/components/schemas/Secret' } },
+                        ['id', 'secret'],
+                      ),
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: { schemas: { Secret: { type: 'string', visibility: 'internal' } } },
+      }
+
+      const result = stripInternalFieldsFromDocument(document, 'public') as FreeformRecord
+      const schema = result.paths['/x'].get.responses['200'].content['application/json'].schema
+      expect(Object.keys(schema.properties)).toEqual(['id'])
+      expect(schema.required).toEqual(['id'])
+    })
+
     it('drops internal query parameters', () => {
       expect(parameters(strip()).map((parameter) => parameter.name)).toEqual(['page'])
     })

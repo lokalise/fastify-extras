@@ -11,6 +11,27 @@ const withoutVisibilityMarker = (schema: Record<string, unknown>): Record<string
   return rest
 }
 
+const LOCAL_SCHEMA_REF_PREFIX = '#/components/schemas/'
+
+/**
+ * The schema a property's visibility should be read from. `fastify-type-provider-zod`
+ * emits a registered schema property as `{ $ref: '#/components/schemas/…' }`, so the
+ * marker lives on the referenced component, not on the property — follow a local
+ * `$ref` to that component. Non-`$ref` (inline) properties are their own source.
+ */
+const visibilitySource = (
+  propertySchema: Record<string, unknown>,
+  schemas: Record<string, unknown> | undefined,
+): Record<string, unknown> => {
+  const ref = propertySchema.$ref
+  if (!schemas || typeof ref !== 'string' || !ref.startsWith(LOCAL_SCHEMA_REF_PREFIX)) {
+    return propertySchema
+  }
+
+  const target = schemas[ref.slice(LOCAL_SCHEMA_REF_PREFIX.length)]
+  return isPlainObject(target) ? target : propertySchema
+}
+
 /**
  * Rebuild `required` without `removed`, returning `undefined` when nothing
  * stays required so the caller can leave the key off rather than emit an empty
@@ -34,6 +55,7 @@ const prunedRequired = (required: unknown, removed: ReadonlySet<string>): string
 const cleanProperties = (
   schema: Record<string, unknown>,
   audience: ApiDocumentationAudience,
+  schemas: Record<string, unknown> | undefined,
 ): void => {
   const { properties } = schema
   if (!isPlainObject(properties)) return
@@ -44,7 +66,7 @@ const cleanProperties = (
     if (
       audience === 'public' &&
       isPlainObject(propertySchema) &&
-      propertySchema.visibility === 'internal'
+      visibilitySource(propertySchema, schemas).visibility === 'internal'
     ) {
       removed.add(name)
       continue
@@ -94,9 +116,14 @@ const cleanParameters = (
  * public document) and the `visibility` marker scrubbed before the surviving
  * subtrees are walked, so a stripped subtree is never visited.
  */
-const walk = (node: unknown, audience: ApiDocumentationAudience, seen: WeakSet<object>): void => {
+const walk = (
+  node: unknown,
+  audience: ApiDocumentationAudience,
+  seen: WeakSet<object>,
+  schemas: Record<string, unknown> | undefined,
+): void => {
   if (Array.isArray(node)) {
-    for (const item of node) walk(item, audience, seen)
+    for (const item of node) walk(item, audience, seen, schemas)
     return
   }
 
@@ -104,10 +131,10 @@ const walk = (node: unknown, audience: ApiDocumentationAudience, seen: WeakSet<o
   if (seen.has(node)) return
   seen.add(node)
 
-  cleanProperties(node, audience)
+  cleanProperties(node, audience, schemas)
   cleanParameters(node, audience)
 
-  for (const value of Object.values(node)) walk(value, audience, seen)
+  for (const value of Object.values(node)) walk(value, audience, seen, schemas)
 }
 
 /**
@@ -128,7 +155,10 @@ export function stripInternalFieldsFromDocument<Document>(
   audience: ApiDocumentationAudience,
 ): Document {
   const result = structuredClone(document)
-  walk(result, audience, new WeakSet())
+  const components = isPlainObject(result) ? result.components : undefined
+  const schemas =
+    isPlainObject(components) && isPlainObject(components.schemas) ? components.schemas : undefined
+  walk(result, audience, new WeakSet(), schemas)
 
   return result
 }
