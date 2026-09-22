@@ -1,5 +1,12 @@
 import type { RouteVisibility } from '@lokalise/api-contracts'
-import type { FastifyInstance, FastifyPluginCallback, FastifyRequest, FastifySchema } from 'fastify'
+import type {} from '@lokalise/fastify-api-contracts' // Pulls the `FastifyContextConfig.apiContract` augmentation
+import type {
+  FastifyContextConfig,
+  FastifyInstance,
+  FastifyPluginCallback,
+  FastifyRequest,
+  FastifySchema,
+} from 'fastify'
 import fp from 'fastify-plugin'
 import {
   ResponseSerializationError,
@@ -9,6 +16,17 @@ import {
 import { z } from 'zod/v4'
 import { safeEncode } from 'zod/v4/core'
 import { derivePublicSchema } from './derivePublicSchema.js'
+
+declare module 'fastify' {
+  interface FastifyContextConfig {
+    /**
+     * Route audience for the visibility gate. Contract routes get it from
+     * `@lokalise/fastify-api-contracts` (`config.apiContract`); set it directly
+     * to gate a non-contract (legacy) route.
+     */
+    visibility?: RouteVisibility
+  }
+}
 
 const DEFAULT_SOURCE_HEADER = 'x-api-source' // TODO: discuss default with the team
 
@@ -44,6 +62,14 @@ const buildPublicEncoders = (
 const isInternalCaller = (request: FastifyRequest, sourceHeader: string) =>
   request.headers[sourceHeader] === ('internal' satisfies RouteVisibility)
 
+/**
+ * A route's audience: the contract's `visibility` wins, then the direct
+ * `config.visibility` marker. `apiContract` is optional-chained because the
+ * augmentation types it as always present, but non-contract routes carry none.
+ */
+const resolveVisibility = (config: FastifyContextConfig): RouteVisibility | undefined =>
+  config.apiContract?.visibility ?? config.visibility
+
 export type ApiVisibilityPluginOptions = {
   /**
    * Request header carrying the caller's audience, stamped by the gateway. Only
@@ -70,6 +96,14 @@ const plugin = (
 
   const sourceHeader = (options.sourceHeader ?? DEFAULT_SOURCE_HEADER).toLowerCase()
   const encodersBySchema = new WeakMap<FastifySchema, Record<string, PublicEncoder>>()
+
+  fastify.addHook('onRequest', (request, reply, done) => {
+    const isPublicCaller = !isInternalCaller(request, sourceHeader)
+    const visibility = resolveVisibility(request.routeOptions.config)
+    if (isPublicCaller && visibility === 'internal') return reply.callNotFound()
+
+    done()
+  })
 
   fastify.addHook('onRoute', (route) => {
     const responses = route.schema?.response as Record<string, unknown> | undefined
