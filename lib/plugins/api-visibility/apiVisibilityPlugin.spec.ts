@@ -1,5 +1,6 @@
+import { defineApiContract } from '@lokalise/api-contracts'
+import { buildFastifyApiRoute } from '@lokalise/fastify-api-contracts'
 import fastify, { type FastifyInstance } from 'fastify'
-import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { z } from 'zod/v4'
 import { type ApiVisibilityPluginOptions, apiVisibilityPlugin } from './apiVisibilityPlugin.js'
 
@@ -10,56 +11,73 @@ const USER_SCHEMA = z.object({
   items: z.array(z.object({ keep: z.string(), hide: z.string().meta({ visibility: 'internal' }) })),
 })
 
+const USER_CONTRACT = defineApiContract({
+  visibility: 'public',
+  method: 'get',
+  description: 'user',
+  summary: 'user',
+  pathResolver: () => '/user',
+  requestQuerySchema: z.object({ status: z.enum(['201', '204']).optional() }),
+  responsesByStatusCode: {
+    200: USER_SCHEMA,
+    201: z.object({ id: z.string() }),
+    204: z.undefined(),
+  },
+})
+
+const HEALTH_CONTRACT = defineApiContract({
+  visibility: 'public',
+  method: 'get',
+  description: 'health',
+  summary: 'health',
+  pathResolver: () => '/health',
+  responsesByStatusCode: { 200: z.object({ status: z.string() }) },
+})
+
 const buildApp = async (options: ApiVisibilityPluginOptions = {}): Promise<FastifyInstance> => {
   const app = fastify()
-
   await app.register(apiVisibilityPlugin, options)
 
-  const typedApp = app.withTypeProvider<ZodTypeProvider>()
-
-  typedApp.get(
-    '/user',
-    {
-      schema: {
-        querystring: z.object({ status: z.enum(['201', '204']).optional() }),
-        response: {
-          200: USER_SCHEMA,
-          201: z.object({ id: z.string() }),
-          204: z.undefined(),
-        },
-      },
-    },
-    (request, reply) => {
+  app.route(
+    buildFastifyApiRoute(USER_CONTRACT, (request) => {
       const { status } = request.query
       if (status === '201') {
+        // `name` is absent from the 201 schema; only `id` may survive.
         const created = { id: '1', name: 'Ada' }
-        reply.code(201).send(created)
-        return
+        return { status: 201, body: created }
       }
-      if (status === '204') {
-        reply.code(204).send()
-        return
+      if (status === '204') return { status: 204, body: undefined }
+      return {
+        status: 200,
+        body: {
+          id: '1',
+          mandatoryInternal: 'm',
+          optionalInternal: 'o',
+          items: [{ keep: 'k', hide: 'h' }],
+        },
       }
-      reply.code(200).send({
-        id: '1',
-        mandatoryInternal: 'm',
-        optionalInternal: 'o',
-        items: [{ keep: 'k', hide: 'h' }],
-      })
+    }),
+  )
+  app.route(buildFastifyApiRoute(HEALTH_CONTRACT, () => ({ status: 200, body: { status: 'ok' } })))
+
+  app.get(
+    '/legacy',
+    {
+      config: { visibility: 'internal', apiContract: undefined as any },
+      schema: { response: { 200: z.object({ id: z.string() }) } },
     },
+    () => ({ id: '1' }),
   )
 
-  typedApp.get('/plain', { schema: { response: { 200: z.object({ id: z.string() }) } } }, () => ({
-    id: '1',
-  }))
-
   await app.ready()
-
   return app
 }
 
 const getUser = (app: FastifyInstance, headers: Record<string, string> = {}) =>
   app.inject({ method: 'GET', url: '/user', headers }).then((response) => response.json())
+
+const getStatus = (app: FastifyInstance, url: string, headers: Record<string, string> = {}) =>
+  app.inject({ method: 'GET', url, headers }).then((response) => response.statusCode)
 
 describe('apiVisibilityPlugin', () => {
   let app: FastifyInstance
@@ -120,8 +138,7 @@ describe('apiVisibilityPlugin', () => {
   })
 
   it('matches the configured header name case-insensitively', async () => {
-    // Node lowercases incoming header names, so an uppercase `sourceHeader` must
-    // still resolve — otherwise the internal caller below would be seen as public.
+    // Node lowercases incoming header names
     app = await buildApp({ sourceHeader: 'X-API-SOURCE' })
 
     expect(await getUser(app, { 'x-api-source': 'internal' })).toEqual({
@@ -136,9 +153,9 @@ describe('apiVisibilityPlugin', () => {
     app = await buildApp()
 
     const body = await app
-      .inject({ method: 'GET', url: '/plain', headers: { 'x-api-source': 'public' } })
+      .inject({ method: 'GET', url: '/health', headers: { 'x-api-source': 'public' } })
       .then((response) => response.json())
-    expect(body).toEqual({ id: '1' })
+    expect(body).toEqual({ status: 'ok' })
   })
 
   it('selects the encoder by status code and schema-encodes a non-stripping status', async () => {
@@ -150,7 +167,7 @@ describe('apiVisibilityPlugin', () => {
     expect(created).toEqual({ id: '1' })
   })
 
-  it('handles an empty-object status', async () => {
+  it('handles an empty status', async () => {
     app = await buildApp()
 
     const response = await app.inject({
@@ -159,21 +176,26 @@ describe('apiVisibilityPlugin', () => {
       headers: { 'x-api-source': 'public' },
     })
     expect(response.statusCode).toBe(204)
-    // Fastify sends no body for a 204, so there is nothing for the plugin's
-    // serializer to strip — it must not break the empty-body response.
     expect(response.body).toBe('')
   })
 
   it('validates the request through the validator compiler it registers', async () => {
     app = await buildApp()
 
-    // `status` must match the querystring enum; an out-of-range value proves the
-    // plugin-registered Zod validator compiler is active on the request side.
-    const response = await app.inject({
-      method: 'GET',
-      url: '/user?status=bogus',
-      headers: { 'x-api-source': 'public' },
+    expect(await getStatus(app, '/user?status=bogus', { 'x-api-source': 'public' })).toBe(400)
+  })
+
+  describe('legacy routes', () => {
+    it('gates a public caller with a 404', async () => {
+      app = await buildApp()
+
+      expect(await getStatus(app, '/legacy', { 'x-api-source': 'public' })).toBe(404)
     })
-    expect(response.statusCode).toBe(400)
+
+    it('lets an internal caller through', async () => {
+      app = await buildApp()
+
+      expect(await getStatus(app, '/legacy', { 'x-api-source': 'internal' })).toBe(200)
+    })
   })
 })
