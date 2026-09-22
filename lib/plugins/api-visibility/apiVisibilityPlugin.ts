@@ -1,5 +1,5 @@
 import type { RouteVisibility } from '@lokalise/api-contracts'
-import type { FastifyInstance, FastifyPluginCallback, FastifyRequest, FastifySchema } from "fastify";
+import type { FastifyInstance, FastifyPluginCallback, FastifyRequest, FastifySchema } from 'fastify'
 import fp from 'fastify-plugin'
 import { ResponseSerializationError } from 'fastify-type-provider-zod'
 import { z } from 'zod/v4'
@@ -54,11 +54,11 @@ export type ApiVisibilityPluginOptions = {
  * the OpenAPI document cleanup. Audience comes from `sourceHeader`, fail-closed.
  * Register before the routes it should cover.
  */
-function plugin(
+const plugin = (
   fastify: FastifyInstance,
   options: ApiVisibilityPluginOptions,
   next: (error?: Error) => void,
-): void {
+): void => {
   const sourceHeader = (options.sourceHeader ?? DEFAULT_SOURCE_HEADER).toLowerCase()
   const encodersBySchema = new WeakMap<FastifySchema, Record<string, PublicEncoder>>()
 
