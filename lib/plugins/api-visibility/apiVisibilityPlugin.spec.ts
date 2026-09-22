@@ -87,7 +87,11 @@ const getStatus = (app: FastifyInstance, url: string, headers: Record<string, st
 describe('apiVisibilityPlugin', () => {
   let app: FastifyInstance
 
-  afterEach(async () => {
+  beforeAll(async () => {
+    app = await buildApp()
+  })
+
+  afterAll(async () => {
     await app.close()
   })
 
