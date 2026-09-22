@@ -128,8 +128,6 @@ describe('stripInternalFields', () => {
     })
 
     it('drops a property whose `$ref` target component is internal', () => {
-      // ftpz emits a registered internal schema as `{ $ref }`, carrying the
-      // marker on the component rather than inline on the property.
       const document: FreeformRecord = {
         openapi: '3.1.0',
         info: { title: 'X', version: '1.0.0' },
