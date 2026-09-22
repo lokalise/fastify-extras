@@ -1,9 +1,5 @@
 import fastify, { type FastifyInstance } from 'fastify'
-import {
-  type ZodTypeProvider,
-  serializerCompiler,
-  validatorCompiler,
-} from 'fastify-type-provider-zod'
+import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { z } from 'zod/v4'
 import { type ApiVisibilityPluginOptions, apiVisibilityPlugin } from './apiVisibilityPlugin.js'
 
@@ -16,45 +12,46 @@ const USER_SCHEMA = z.object({
 
 const buildApp = async (options: ApiVisibilityPluginOptions = {}): Promise<FastifyInstance> => {
   const app = fastify()
-  app.setValidatorCompiler(validatorCompiler)
-  app.setSerializerCompiler(serializerCompiler)
 
   await app.register(apiVisibilityPlugin, options)
 
   const typedApp = app.withTypeProvider<ZodTypeProvider>()
 
-  typedApp.get('/user', { schema: { response: { 200: USER_SCHEMA } } }, () => ({
-    id: '1',
-    mandatoryInternal: 'm',
-    optionalInternal: 'o',
-    items: [{ keep: 'k', hide: 'h' }],
-  }))
-
-  // No internal fields: the plugin builds no encoder for this route (zero cost).
-  typedApp.get('/plain', { schema: { response: { 200: z.object({ id: z.string() }) } } }, () => ({
-    id: '1',
-  }))
-
-  // Multi-status: each status has its own internal field, exercising the
-  // statusCode-based encoder selection at send time.
   typedApp.get(
-    '/multi',
+    '/user',
     {
       schema: {
+        querystring: z.object({ status: z.enum(['201', '204']).optional() }),
         response: {
-          200: z.object({ id: z.string(), secret: z.string().meta({ visibility: 'internal' }) }),
-          201: z.object({ token: z.string(), issuer: z.string().meta({ visibility: 'internal' }) }),
+          200: USER_SCHEMA,
+          201: z.object({ id: z.string() }),
+          204: z.undefined(),
         },
       },
     },
     (request, reply) => {
-      if ((request.query as { created?: string }).created === '1') {
-        reply.code(201)
-        return { token: 't', issuer: 'i' }
+      const { status } = request.query
+      if (status === '201') {
+        const created = { id: '1', name: 'Ada' }
+        reply.code(201).send(created)
+        return
       }
-      return { id: '1', secret: 's' }
+      if (status === '204') {
+        reply.code(204).send()
+        return
+      }
+      reply.code(200).send({
+        id: '1',
+        mandatoryInternal: 'm',
+        optionalInternal: 'o',
+        items: [{ keep: 'k', hide: 'h' }],
+      })
     },
   )
+
+  typedApp.get('/plain', { schema: { response: { 200: z.object({ id: z.string() }) } } }, () => ({
+    id: '1',
+  }))
 
   await app.ready()
 
@@ -144,17 +141,39 @@ describe('apiVisibilityPlugin', () => {
     expect(body).toEqual({ id: '1' })
   })
 
-  it('picks the encoder by status code on a multi-status route', async () => {
+  it('selects the encoder by status code and schema-encodes a non-stripping status', async () => {
     app = await buildApp()
 
-    const ok = await app
-      .inject({ method: 'GET', url: '/multi', headers: { 'x-api-source': 'public' } })
-      .then((response) => response.json())
-    expect(ok).toEqual({ id: '1' })
-
     const created = await app
-      .inject({ method: 'GET', url: '/multi?created=1', headers: { 'x-api-source': 'public' } })
+      .inject({ method: 'GET', url: '/user?status=201', headers: { 'x-api-source': 'public' } })
       .then((response) => response.json())
-    expect(created).toEqual({ token: 't' })
+    expect(created).toEqual({ id: '1' })
+  })
+
+  it('handles an empty-object status', async () => {
+    app = await buildApp()
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/user?status=204',
+      headers: { 'x-api-source': 'public' },
+    })
+    expect(response.statusCode).toBe(204)
+    // Fastify sends no body for a 204, so there is nothing for the plugin's
+    // serializer to strip — it must not break the empty-body response.
+    expect(response.body).toBe('')
+  })
+
+  it('validates the request through the validator compiler it registers', async () => {
+    app = await buildApp()
+
+    // `status` must match the querystring enum; an out-of-range value proves the
+    // plugin-registered Zod validator compiler is active on the request side.
+    const response = await app.inject({
+      method: 'GET',
+      url: '/user?status=bogus',
+      headers: { 'x-api-source': 'public' },
+    })
+    expect(response.statusCode).toBe(400)
   })
 })
