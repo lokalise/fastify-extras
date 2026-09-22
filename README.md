@@ -17,6 +17,7 @@ Reusable plugins for Fastify.
   - [Datadog Transaction Manager Plugin](#datadog-transaction-manager-plugin)
   - [UnhandledException Plugin](#unhandledexception-plugin)
   - [API Documentation Plugin](#api-documentation-plugin)
+  - [API Visibility Plugin](#api-visibility-plugin)
 
 ## Dependency Management
 
@@ -780,6 +781,55 @@ the visibility metadata to that registry yourself, or the field goes unstripped.
 
 Both documents stay available programmatically, as `app.swagger()` and `app.internalSwagger()`. The
 `internalSwagger` decorator only exists where `exposeInternalDocumentation` is on.
+
+### API Visibility Plugin
+
+The runtime counterpart to the [API Documentation Plugin](#api-documentation-plugin)'s field-level visibility: that
+plugin hides internal fields and routes from the _published document_, this one enforces the same `visibility` markers on
+_live traffic_. A single marker is the source of truth for both.
+
+The caller's audience comes from a gateway-stamped request header (`sourceHeader`, default `x-api-audience`) and is
+**fail-closed**: only an exact `internal` value is treated as internal; anything else — missing, unknown, malformed — is
+public. So a caller whose header is not exactly `internal` is treated as public: it receives a `404` from every
+`internal` endpoint and a stripped response from public ones. The gateway must own this header (strip or overwrite any
+client-provided value), otherwise an external caller could claim to be internal.
+
+Driven by that audience, it does three things:
+
+1. **Response field stripping.** For a public caller, response properties marked `.meta({ visibility: 'internal' })` are
+   removed before serialization — encoded against a derived public schema, so even required internal-only fields never
+   leak. Internal callers get the response untouched, and routes with no internal fields cost nothing.
+2. **Route gating.** A public caller hitting a route marked `internal` gets a `404`, indistinguishable from a route that
+   does not exist so its existence is not leaked. A route's audience comes from its contract
+   (`@lokalise/fastify-api-contracts` exposes it on `config.apiContract`) or, for a non-contract (legacy) route, a direct
+   `config.visibility` marker. Route resolution is **fail-closed**: a route without a valid `public` marker resolves to
+   `internal`, so an unmarked or misconfigured route is never accidentally exposed. Every public route therefore needs an
+   explicit `visibility: 'public'`.
+3. **Zod compiler registration.** It registers `fastify-type-provider-zod`'s validator and serializer compilers, so the
+   host app does not need to. Do not register them yourself; if you need a custom compiler, set it _after_ this plugin.
+
+**Register it before the routes it should protect.** Its hooks only see routes registered later, so an earlier route
+would bypass both gate and stripping — the plugin throws at boot if any route already exists in its scope, turning a
+silent leak into a loud failure.
+
+```typescript
+import { apiVisibilityPlugin } from '@lokalise/fastify-extras'
+
+await app.register(apiVisibilityPlugin) // before your routes
+
+// A contract route carries its visibility already; a legacy route opts in directly:
+app.get('/internal-only', { config: { visibility: 'internal' } }, handler)
+```
+
+The `.meta({ visibility })` marker must live in the registry ftpz reads — same caveat as the document-level
+[Field-level visibility](#field-level-visibility) above. Note: `@lokalise/fastify-api-contracts` currently types
+`config.apiContract` as required, so a bare `config` on a non-contract route may need a cast until that is relaxed.
+
+#### Options
+
+| Option         | Default        | Description                                                                                |
+| -------------- | -------------- | ------------------------------------------------------------------------------------------ |
+| `sourceHeader` | `x-api-audience` | Request header carrying the caller's audience. Only an exact `internal` value is internal |
 
 ## Utilities
 
