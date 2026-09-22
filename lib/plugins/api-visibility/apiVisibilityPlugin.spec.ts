@@ -17,11 +17,15 @@ const USER_CONTRACT = defineApiContract({
   description: 'user',
   summary: 'user',
   pathResolver: () => '/user',
-  requestQuerySchema: z.object({ status: z.enum(['201', '204']).optional() }),
+  requestQuerySchema: z.object({ status: z.enum(['201', '204', '301']).optional() }),
   responsesByStatusCode: {
     200: USER_SCHEMA,
     201: z.object({ id: z.string() }),
     204: z.undefined(),
+    '3xx': z.object({
+      message: z.string(),
+      internal: z.string().meta({ visibility: 'internal' }),
+    }),
   },
 })
 
@@ -47,6 +51,7 @@ const buildApp = async (options: ApiVisibilityPluginOptions = {}): Promise<Fasti
         return { status: 201, body: created }
       }
       if (status === '204') return { status: 204, body: undefined }
+      if (status === '301') return { status: 301, body: { message: 'nope', internal: 'secret' } }
       return {
         status: 200,
         body: {
@@ -186,6 +191,25 @@ describe('apiVisibilityPlugin', () => {
     })
     expect(response.statusCode).toBe(204)
     expect(response.body).toBe('')
+  })
+
+  it('strips internal fields on a wildcard-keyed (3xx) status for a public caller', async () => {
+    app = await buildApp()
+
+    const publicResponse = await app.inject({
+      method: 'GET',
+      url: '/user?status=301',
+      headers: { 'x-api-audience': 'public' },
+    })
+    expect(publicResponse.statusCode).toBe(301)
+    expect(publicResponse.json()).toEqual({ message: 'nope' })
+
+    const internalResponse = await app.inject({
+      method: 'GET',
+      url: '/user?status=301',
+      headers: { 'x-api-audience': 'internal' },
+    })
+    expect(internalResponse.json()).toEqual({ message: 'nope', internal: 'secret' })
   })
 
   it('validates the request through the validator compiler it registers', async () => {

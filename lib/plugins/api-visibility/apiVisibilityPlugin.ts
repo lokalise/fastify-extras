@@ -135,7 +135,8 @@ const plugin = (
     if (!encoders) return done()
 
     reply.serializer((payload: unknown) => {
-      const encode = encoders[String(reply.statusCode)]
+      const statusCode = String(reply.statusCode)
+      const encode = encoders[statusCode] ?? encoders[`${statusCode[0]}xx`]
       return encode ? encode(payload) : JSON.stringify(payload)
     })
 
