@@ -94,7 +94,7 @@ describe('apiVisibilityPlugin', () => {
   it('strips internal fields for a public caller', async () => {
     app = await buildApp()
 
-    expect(await getUser(app, { 'x-api-source': 'public' })).toEqual({
+    expect(await getUser(app, { 'x-api-audience': 'public' })).toEqual({
       id: '1',
       items: [{ keep: 'k' }],
     })
@@ -103,7 +103,7 @@ describe('apiVisibilityPlugin', () => {
   it('keeps internal fields for an internal caller', async () => {
     app = await buildApp()
 
-    expect(await getUser(app, { 'x-api-source': 'internal' })).toEqual({
+    expect(await getUser(app, { 'x-api-audience': 'internal' })).toEqual({
       id: '1',
       mandatoryInternal: 'm',
       optionalInternal: 'o',
@@ -120,7 +120,7 @@ describe('apiVisibilityPlugin', () => {
   it('treats an unknown source value as public (fail-closed)', async () => {
     app = await buildApp()
 
-    expect(await getUser(app, { 'x-api-source': 'anonymous' })).toEqual({
+    expect(await getUser(app, { 'x-api-audience': 'anonymous' })).toEqual({
       id: '1',
       items: [{ keep: 'k' }],
     })
@@ -130,7 +130,7 @@ describe('apiVisibilityPlugin', () => {
     app = await buildApp({ sourceHeader: 'x-caller' })
 
     // The default header no longer applies, so it is treated as public.
-    expect(await getUser(app, { 'x-api-source': 'internal' })).toEqual({
+    expect(await getUser(app, { 'x-api-audience': 'internal' })).toEqual({
       id: '1',
       items: [{ keep: 'k' }],
     })
@@ -144,9 +144,9 @@ describe('apiVisibilityPlugin', () => {
 
   it('matches the configured header name case-insensitively', async () => {
     // Node lowercases incoming header names
-    app = await buildApp({ sourceHeader: 'X-API-SOURCE' })
+    app = await buildApp({ sourceHeader: 'X-API-AUDIENCE' })
 
-    expect(await getUser(app, { 'x-api-source': 'internal' })).toEqual({
+    expect(await getUser(app, { 'x-api-audience': 'internal' })).toEqual({
       id: '1',
       mandatoryInternal: 'm',
       optionalInternal: 'o',
@@ -158,7 +158,7 @@ describe('apiVisibilityPlugin', () => {
     app = await buildApp()
 
     const body = await app
-      .inject({ method: 'GET', url: '/health', headers: { 'x-api-source': 'public' } })
+      .inject({ method: 'GET', url: '/health', headers: { 'x-api-audience': 'public' } })
       .then((response) => response.json())
     expect(body).toEqual({ status: 'ok' })
   })
@@ -167,7 +167,7 @@ describe('apiVisibilityPlugin', () => {
     app = await buildApp()
 
     const created = await app
-      .inject({ method: 'GET', url: '/user?status=201', headers: { 'x-api-source': 'public' } })
+      .inject({ method: 'GET', url: '/user?status=201', headers: { 'x-api-audience': 'public' } })
       .then((response) => response.json())
     expect(created).toEqual({ id: '1' })
   })
@@ -178,7 +178,7 @@ describe('apiVisibilityPlugin', () => {
     const response = await app.inject({
       method: 'GET',
       url: '/user?status=204',
-      headers: { 'x-api-source': 'public' },
+      headers: { 'x-api-audience': 'public' },
     })
     expect(response.statusCode).toBe(204)
     expect(response.body).toBe('')
@@ -187,14 +187,14 @@ describe('apiVisibilityPlugin', () => {
   it('validates the request through the validator compiler it registers', async () => {
     app = await buildApp()
 
-    expect(await getStatus(app, '/user?status=bogus', { 'x-api-source': 'public' })).toBe(400)
+    expect(await getStatus(app, '/user?status=bogus', { 'x-api-audience': 'public' })).toBe(400)
   })
 
   it('fails closed: gates a route whose visibility cannot be resolved', async () => {
     app = await buildApp()
 
-    expect(await getStatus(app, '/unmarked', { 'x-api-source': 'public' })).toBe(404)
-    expect(await getStatus(app, '/unmarked', { 'x-api-source': 'internal' })).toBe(200)
+    expect(await getStatus(app, '/unmarked', { 'x-api-audience': 'public' })).toBe(404)
+    expect(await getStatus(app, '/unmarked', { 'x-api-audience': 'internal' })).toBe(200)
   })
 
   it('throws when registered after a route it should protect', async () => {
@@ -209,13 +209,13 @@ describe('apiVisibilityPlugin', () => {
     it('gates a public caller with a 404', async () => {
       app = await buildApp()
 
-      expect(await getStatus(app, '/legacy', { 'x-api-source': 'public' })).toBe(404)
+      expect(await getStatus(app, '/legacy', { 'x-api-audience': 'public' })).toBe(404)
     })
 
     it('lets an internal caller through', async () => {
       app = await buildApp()
 
-      expect(await getStatus(app, '/legacy', { 'x-api-source': 'internal' })).toBe(200)
+      expect(await getStatus(app, '/legacy', { 'x-api-audience': 'internal' })).toBe(200)
     })
   })
 })

@@ -28,7 +28,7 @@ declare module 'fastify' {
   }
 }
 
-const DEFAULT_SOURCE_HEADER = 'x-api-source' // TODO: discuss default with the team
+const DEFAULT_SOURCE_HEADER = 'x-api-audience'
 
 type PublicEncoder = (payload: unknown) => string
 
@@ -81,7 +81,7 @@ export type ApiVisibilityPluginOptions = {
    * Request header carrying the caller's audience, stamped by the gateway. Only
    * an exact `internal` value is treated as internal; anything else is public.
    *
-   * @default 'x-api-source'
+   * @default 'x-api-audience'
    */
   sourceHeader?: string
 }
