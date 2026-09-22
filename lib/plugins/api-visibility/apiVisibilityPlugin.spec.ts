@@ -201,7 +201,7 @@ describe('apiVisibilityPlugin', () => {
     app = fastify()
     app.get('/early', () => ({ id: '1' }))
     app.register(apiVisibilityPlugin)
-    
+
     await expect(app.ready()).rejects.toThrow(/must be registered before/)
   })
 
