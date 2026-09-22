@@ -1,7 +1,11 @@
 import type { RouteVisibility } from '@lokalise/api-contracts'
 import type { FastifyInstance, FastifyPluginCallback, FastifyRequest, FastifySchema } from 'fastify'
 import fp from 'fastify-plugin'
-import { ResponseSerializationError } from 'fastify-type-provider-zod'
+import {
+  ResponseSerializationError,
+  serializerCompiler,
+  validatorCompiler,
+} from 'fastify-type-provider-zod'
 import { z } from 'zod/v4'
 import { safeEncode } from 'zod/v4/core'
 import { derivePublicSchema } from './derivePublicSchema.js'
@@ -14,14 +18,15 @@ const buildPublicEncoders = (
   method: string | string[],
   url: string,
   responses: Record<string, unknown>,
-): Record<string, PublicEncoder> => {
+): Record<string, PublicEncoder> | null => {
   const encoders: Record<string, PublicEncoder> = {}
+  let hasInternalField = false
 
   for (const [statusCode, maybeSchema] of Object.entries(responses)) {
     if (!(maybeSchema instanceof z.ZodType)) continue
 
     const publicSchema = derivePublicSchema(maybeSchema)
-    if (publicSchema === maybeSchema) continue
+    if (publicSchema !== maybeSchema) hasInternalField = true
 
     encoders[statusCode] = (payload) => {
       const result = safeEncode(publicSchema, payload)
@@ -32,7 +37,8 @@ const buildPublicEncoders = (
     }
   }
 
-  return encoders
+  // Zero cost for routes with no internal fields: no override, no encoders.
+  return hasInternalField ? encoders : null
 }
 
 const isInternalCaller = (request: FastifyRequest, sourceHeader: string) =>
@@ -49,16 +55,19 @@ export type ApiVisibilityPluginOptions = {
 }
 
 /**
- * Strips response properties marked `.meta({ visibility: 'internal' })` for
- * public callers and keeps them for internal ones — the runtime counterpart to
- * the OpenAPI document cleanup. Audience comes from `sourceHeader`, fail-closed.
- * Register before the routes it should cover.
+ * Enforces field-level API visibility at runtime, the counterpart to the
+ * OpenAPI document cleanup. The caller's audience comes from `sourceHeader`
+ * (gateway-stamped) and is fail-closed: only an exact `internal` value is
+ * treated as internal, anything else is public.
  */
 const plugin = (
   fastify: FastifyInstance,
   options: ApiVisibilityPluginOptions,
   next: (error?: Error) => void,
 ): void => {
+  fastify.setValidatorCompiler(validatorCompiler)
+  fastify.setSerializerCompiler(serializerCompiler)
+
   const sourceHeader = (options.sourceHeader ?? DEFAULT_SOURCE_HEADER).toLowerCase()
   const encodersBySchema = new WeakMap<FastifySchema, Record<string, PublicEncoder>>()
 
@@ -67,7 +76,7 @@ const plugin = (
     if (!route.schema || !responses) return
 
     const encoders = buildPublicEncoders(route.method, route.url, responses)
-    if (Object.keys(encoders).length > 0) encodersBySchema.set(route.schema, encoders)
+    if (encoders) encodersBySchema.set(route.schema, encoders)
   })
 
   fastify.addHook('preHandler', (request, reply, done) => {
