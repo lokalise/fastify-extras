@@ -66,9 +66,15 @@ const isInternalCaller = (request: FastifyRequest, sourceHeader: string) =>
  * A route's audience: the contract's `visibility` wins, then the direct
  * `config.visibility` marker. `apiContract` is optional-chained because the
  * augmentation types it as always present, but non-contract routes carry none.
+ *
+ * Fails closed: it only reports `public` for an explicit, valid `public` marker.
+ * Anything else — an unresolved (unmarked) route or an invalid value — resolves
+ * to `internal`, so a route is never accidentally exposed to public callers.
  */
-const resolveVisibility = (config: FastifyContextConfig): RouteVisibility | undefined =>
-  config.apiContract?.visibility ?? config.visibility
+const resolveVisibility = (config: FastifyContextConfig): RouteVisibility => {
+  const visibility = config.apiContract?.visibility ?? config.visibility
+  return visibility === 'public' ? 'public' : 'internal'
+}
 
 export type ApiVisibilityPluginOptions = {
   /**

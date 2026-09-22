@@ -69,6 +69,11 @@ const buildApp = async (options: ApiVisibilityPluginOptions = {}): Promise<Fasti
     () => ({ id: '1' }),
   )
 
+  // No visibility marker anywhere: resolveVisibility fails closed to internal.
+  app.get('/unmarked', { schema: { response: { 200: z.object({ id: z.string() }) } } }, () => ({
+    id: '1',
+  }))
+
   await app.ready()
   return app
 }
@@ -183,6 +188,13 @@ describe('apiVisibilityPlugin', () => {
     app = await buildApp()
 
     expect(await getStatus(app, '/user?status=bogus', { 'x-api-source': 'public' })).toBe(400)
+  })
+
+  it('fails closed: gates a route whose visibility cannot be resolved', async () => {
+    app = await buildApp()
+
+    expect(await getStatus(app, '/unmarked', { 'x-api-source': 'public' })).toBe(404)
+    expect(await getStatus(app, '/unmarked', { 'x-api-source': 'internal' })).toBe(200)
   })
 
   describe('legacy routes', () => {
