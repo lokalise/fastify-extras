@@ -1,4 +1,5 @@
 import { z } from 'zod/v4'
+import { clone } from 'zod/v4/core'
 import type { FieldVisibility } from '../../zod/zodMeta.ts'
 
 /**
@@ -8,6 +9,15 @@ type DerivationCache = Map<z.ZodType, z.ZodType>
 
 const isInternalField = (schema: z.ZodType): boolean =>
   schema.meta()?.visibility === ('internal' satisfies FieldVisibility)
+
+/**
+ * Rebuild a container/composite by cloning it with a child (or children)
+ * swapped, keeping the rest of its definition.
+ */
+const clonedWith = (schema: z.ZodType, defPatch: Record<string, unknown>): z.ZodType => {
+  const def = (schema as unknown as { def: Record<string, unknown> }).def
+  return clone(schema, { ...def, ...defPatch } as never)
+}
 
 const derivePublicObjectSchema = (schema: z.ZodObject, cache: DerivationCache): z.ZodObject => {
   const shape: Record<string, z.ZodType> = {}
@@ -25,7 +35,7 @@ const derivePublicObjectSchema = (schema: z.ZodObject, cache: DerivationCache): 
     shape[key] = derived
   }
 
-  return changed ? z.object(shape) : schema
+  return changed ? (clonedWith(schema, { shape }) as z.ZodObject) : schema
 }
 
 const deriveWrapped = (
@@ -57,7 +67,7 @@ const deriveOptions = (
 
 const derivePublicUnionSchema = (schema: z.ZodUnion, cache: DerivationCache): z.ZodType => {
   const { options, changed } = deriveOptions(schema.options, cache)
-  return changed ? z.union(options) : schema
+  return changed ? clonedWith(schema, { options }) : schema
 }
 
 const derivePublicDiscriminatedUnionSchema = (
@@ -65,9 +75,7 @@ const derivePublicDiscriminatedUnionSchema = (
   cache: DerivationCache,
 ): z.ZodType => {
   const { options, changed } = deriveOptions(schema.options, cache)
-  return changed
-    ? z.discriminatedUnion(schema.def.discriminator, options as [z.ZodObject, ...z.ZodObject[]])
-    : schema
+  return changed ? clonedWith(schema, { options }) : schema
 }
 
 const derivePublicIntersectionSchema = (
@@ -76,7 +84,7 @@ const derivePublicIntersectionSchema = (
 ): z.ZodType => {
   const { options, changed } = deriveOptions([schema.def.left, schema.def.right], cache)
   const [left, right] = options
-  return changed && left && right ? z.intersection(left, right) : schema
+  return changed && left && right ? clonedWith(schema, { left, right }) : schema
 }
 
 const containsInternalField = (schema: z.ZodType, seen: WeakSet<z.ZodType>): boolean => {
@@ -156,21 +164,36 @@ const deriveNode = (schema: z.ZodType, cache: DerivationCache): z.ZodType => {
     return deriveWrapped(schema, schema.unwrap(), (inner) => inner.readonly(), cache)
   }
   if (schema instanceof z.ZodArray) {
-    return deriveWrapped(schema, schema.element, (inner) => z.array(inner), cache)
+    return deriveWrapped(
+      schema,
+      schema.element,
+      (inner) => clonedWith(schema, { element: inner }),
+      cache,
+    )
   }
   if (schema instanceof z.ZodRecord) {
     return deriveWrapped(
       schema,
       schema.valueType,
-      (inner) => z.record(schema.keyType, inner),
+      (inner) => clonedWith(schema, { valueType: inner }),
       cache,
     )
   }
   if (schema instanceof z.ZodMap) {
-    return deriveWrapped(schema, schema.valueType, (inner) => z.map(schema.keyType, inner), cache)
+    return deriveWrapped(
+      schema,
+      schema.valueType,
+      (inner) => clonedWith(schema, { valueType: inner }),
+      cache,
+    )
   }
   if (schema instanceof z.ZodSet) {
-    return deriveWrapped(schema, schema.def.valueType, (inner) => z.set(inner), cache)
+    return deriveWrapped(
+      schema,
+      schema.def.valueType,
+      (inner) => clonedWith(schema, { valueType: inner }),
+      cache,
+    )
   }
   if (schema instanceof z.ZodLazy) {
     return deriveWrapped(schema, schema.unwrap(), (inner) => z.lazy(() => inner), cache)

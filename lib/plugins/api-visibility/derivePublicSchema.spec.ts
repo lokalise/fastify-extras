@@ -338,4 +338,34 @@ describe('derivePublicSchema', () => {
       })
     })
   })
+
+  describe('preserves parent constraints when rewriting a child', () => {
+    it('keeps array checks (e.g. min) when the element is rewritten', () => {
+      const schema = z
+        .array(z.object({ keep: z.string(), secret: z.string().meta({ visibility: 'internal' }) }))
+        .min(1)
+      const derived = derivePublicSchema(schema)
+
+      expect(derived.safeParse([]).success).toBe(false)
+      expect(derived.parse([{ keep: 'k', secret: 's' }])).toEqual([{ keep: 'k' }])
+    })
+
+    it('keeps a strict object rejecting unknown keys after a property is dropped', () => {
+      const schema = z
+        .object({ keep: z.string(), secret: z.string().meta({ visibility: 'internal' }) })
+        .strict()
+      const derived = derivePublicSchema(schema)
+
+      expect(derived.safeParse({ keep: 'k', extra: 'x' }).success).toBe(false)
+    })
+
+    it('keeps an object catchall after a property is dropped', () => {
+      const schema = z
+        .object({ keep: z.string(), secret: z.string().meta({ visibility: 'internal' }) })
+        .catchall(z.string())
+      const derived = derivePublicSchema(schema)
+
+      expect(derived.parse({ keep: 'k', extra: 'x' })).toEqual({ keep: 'k', extra: 'x' })
+    })
+  })
 })
