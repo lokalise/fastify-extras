@@ -298,6 +298,27 @@ describe('derivePublicSchema', () => {
 
       expect(derivePublicSchema(schema)).toBe(schema)
     })
+
+  })
+
+  describe('marker reachable through wrappers and containers', () => {
+    it('drops a field whose marker precedes a wrapper (`.meta()` then `.optional()`)', () => {
+      const schema = z.object({
+        keep: z.string(),
+        x: z.string().meta({ visibility: 'internal' }).optional(),
+      })
+
+      expect(derivePublicSchema(schema).parse({ keep: 'k', x: 's' })).toEqual({ keep: 'k' })
+    })
+
+    it('drops a field that is an array of an internal-marked component', () => {
+      const note = z.object({ a: z.string() }).meta({ visibility: 'internal' })
+      const schema = z.object({ keep: z.string(), notes: z.array(note) })
+
+      expect(derivePublicSchema(schema).parse({ keep: 'k', notes: [{ a: 'x' }] })).toEqual({
+        keep: 'k',
+      })
+    })
   })
 
   describe('nested combinations', () => {

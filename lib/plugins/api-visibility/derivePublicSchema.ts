@@ -7,8 +7,39 @@ import type { FieldVisibility } from '../../zod/zodMeta.ts'
  */
 type DerivationCache = Map<z.ZodType, z.ZodType>
 
-const isInternalField = (schema: z.ZodType): boolean =>
-  schema.meta()?.visibility === ('internal' satisfies FieldVisibility)
+/**
+ * Whether the `visibility: 'internal'` marker sits directly on this schema node.
+ */
+const hasInternalMarker = (schema: z.ZodType | z.core.$ZodType): boolean =>
+  'meta' in schema && schema.meta()?.visibility === ('internal' satisfies FieldVisibility)
+
+/**
+ * Whether a field is internal, looking through the wrappers and containers the
+ * marker can hide behind
+ */
+const isInternalField = (schema: z.core.$ZodType): boolean => {
+  if (hasInternalMarker(schema)) return true
+
+  if (
+    schema instanceof z.ZodOptional ||
+    schema instanceof z.ZodNonOptional ||
+    schema instanceof z.ZodNullable ||
+    schema instanceof z.ZodDefault ||
+    schema instanceof z.ZodPrefault ||
+    schema instanceof z.ZodCatch ||
+    schema instanceof z.ZodReadonly
+  ) {
+    return isInternalField(schema.unwrap())
+  }
+
+  if (schema instanceof z.ZodArray) return isInternalField(schema.element)
+  if (schema instanceof z.ZodRecord || schema instanceof z.ZodMap) {
+    return isInternalField(schema.valueType)
+  }
+  if (schema instanceof z.ZodSet) return isInternalField(schema.def.valueType)
+
+  return false
+}
 
 /**
  * Rebuild a container/composite by cloning it with a child (or children)
@@ -90,7 +121,7 @@ const derivePublicIntersectionSchema = (
 const containsInternalField = (schema: z.ZodType, seen: WeakSet<z.ZodType>): boolean => {
   if (seen.has(schema)) return false
   seen.add(schema)
-  if (isInternalField(schema)) return true
+  if (hasInternalMarker(schema)) return true
 
   const definition = (schema as unknown as { def?: Record<string, unknown> }).def
   return Object.values(definition ?? {}).some((value) => childContainsInternalField(value, seen))
