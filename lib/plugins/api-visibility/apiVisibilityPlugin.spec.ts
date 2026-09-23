@@ -318,14 +318,6 @@ describe('apiVisibilityPlugin', () => {
     expect(response.json()).toEqual({ error: 'not-found' })
   })
 
-  it('throws when registered after a route it should protect', async () => {
-    app = fastify()
-    app.get('/early', () => ({ id: '1' }))
-    app.register(apiVisibilityPlugin)
-
-    await expect(app.ready()).rejects.toThrow(/must be registered before/)
-  })
-
   describe('legacy routes', () => {
     it('gates a public caller with a 404', async () => {
       app = await buildApp()

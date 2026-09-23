@@ -113,12 +113,6 @@ const plugin = (
   options: ApiVisibilityPluginOptions,
   next: (error?: Error) => void,
 ): void => {
-  // A route registered before it would bypass hooks and leak, so fail loud instead.
-  if (fastify.printRoutes().trim() !== '(empty tree)') {
-    next(new Error('apiVisibilityPlugin must be registered before the routes'))
-    return
-  }
-
   fastify.setValidatorCompiler(validatorCompiler)
   fastify.setSerializerCompiler(serializerCompiler)
 

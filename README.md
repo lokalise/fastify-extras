@@ -808,9 +808,10 @@ Driven by that audience, it does three things:
 3. **Zod compiler registration.** It registers `fastify-type-provider-zod`'s validator and serializer compilers, so the
    host app does not need to. Do not register them yourself; if you need a custom compiler, set it _after_ this plugin.
 
-**Register it before the routes it should protect.** Its hooks only see routes registered later, so an earlier route
-would bypass both gate and stripping — the plugin throws at boot if any route already exists in its scope, turning a
-silent leak into a loud failure.
+**Register it before the routes it should protect.** Its hooks only see routes registered later in the same
+encapsulation scope, so a route registered before it bypasses both gate and stripping and would leak. Fastify exposes no
+scope-local way to detect this at boot, so the ordering is yours to get right: register the plugin first in whatever
+scope holds the routes it must protect.
 
 **Routes you do not register carry no marker, so they gate to `internal`.** Because resolution is fail-closed, routes
 registered by other plugins in the same scope have no `config.visibility` and return a `404` to public callers. This
