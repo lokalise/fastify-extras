@@ -35,7 +35,7 @@ const derivePublicObjectSchema = (schema: z.ZodObject, cache: DerivationCache): 
     shape[key] = derived
   }
 
-  return changed ? clonedWith(schema, { shape, catchall: undefined }) as z.ZodObject : schema
+  return changed ? (clonedWith(schema, { shape, catchall: undefined }) as z.ZodObject) : schema
 }
 
 const deriveWrapped = (
