@@ -136,8 +136,20 @@ const plugin = (
 
     reply.serializer((payload: unknown) => {
       const statusCode = String(reply.statusCode)
-      const encode = encoders[statusCode] ?? encoders[`${statusCode[0]}xx`]
-      return encode ? encode(payload) : JSON.stringify(payload)
+      const encode = encoders[statusCode] ?? encoders[`${statusCode[0]}xx`] ?? encoders.default
+      if (!encode)
+        throw new ResponseSerializationError(request.method, request.url, {
+          cause: new z.core.$ZodError([
+            {
+              code: 'custom',
+              path: [],
+              input: undefined,
+              message: `No response encoder for status code ${statusCode}`,
+            },
+          ]),
+        })
+
+      return encode(payload)
     })
 
     done()

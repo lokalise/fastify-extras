@@ -38,6 +38,20 @@ const HEALTH_CONTRACT = defineApiContract({
   responsesByStatusCode: { 200: z.object({ status: z.string() }) },
 })
 
+const DEFAULT_STATUS_CONTRACT = defineApiContract({
+  visibility: 'public',
+  method: 'get',
+  description: 'default-status',
+  summary: 'default-status',
+  pathResolver: () => '/default-status',
+  responsesByStatusCode: {
+    default: z.object({
+      id: z.string(),
+      secret: z.string().meta({ visibility: 'internal' }),
+    }),
+  },
+})
+
 const buildApp = async (options: ApiVisibilityPluginOptions = {}): Promise<FastifyInstance> => {
   const app = fastify()
   await app.register(apiVisibilityPlugin, options)
@@ -79,6 +93,26 @@ const buildApp = async (options: ApiVisibilityPluginOptions = {}): Promise<Fasti
     id: '1',
   }))
 
+  app.route(
+    buildFastifyApiRoute(DEFAULT_STATUS_CONTRACT, () => ({
+      status: 200,
+      body: { id: '1', secret: 's' },
+    })),
+  )
+
+  app.get(
+    '/missing-encoder',
+    {
+      config: { visibility: 'public', apiContract: undefined as any },
+      schema: {
+        response: {
+          201: z.object({ id: z.string(), secret: z.string().meta({ visibility: 'internal' }) }),
+        },
+      },
+    },
+    () => ({ id: '1', secret: 's' }),
+  )
+
   await app.ready()
   return app
 }
@@ -90,14 +124,10 @@ const getStatus = (app: FastifyInstance, url: string, headers: Record<string, st
   app.inject({ method: 'GET', url, headers }).then((response) => response.statusCode)
 
 describe('apiVisibilityPlugin', () => {
-  let app: FastifyInstance
+  let app: FastifyInstance | undefined
 
-  beforeAll(async () => {
-    app = await buildApp()
-  })
-
-  afterAll(async () => {
-    await app.close()
+  afterEach(async () => {
+    await app?.close()
   })
 
   it('strips internal fields for a public caller', async () => {
@@ -210,6 +240,30 @@ describe('apiVisibilityPlugin', () => {
       headers: { 'x-api-audience': 'internal' },
     })
     expect(internalResponse.json()).toEqual({ message: 'nope', internal: 'secret' })
+  })
+
+  it('strips internal fields on a status resolved through `default` for a public caller', async () => {
+    app = await buildApp()
+
+    const publicResponse = await app.inject({
+      method: 'GET',
+      url: '/default-status',
+      headers: { 'x-api-audience': 'public' },
+    })
+    expect(publicResponse.statusCode).toBe(200)
+    expect(publicResponse.json()).toEqual({ id: '1' })
+  })
+
+  it('fails closed when the status has no public encoder for a public caller', async () => {
+    app = await buildApp()
+
+    const publicResponse = await app.inject({
+      method: 'GET',
+      url: '/missing-encoder',
+      headers: { 'x-api-audience': 'public' },
+    })
+    expect(publicResponse.statusCode).toBe(500)
+    expect(publicResponse.body).not.toContain('secret')
   })
 
   it('validates the request through the validator compiler it registers', async () => {
