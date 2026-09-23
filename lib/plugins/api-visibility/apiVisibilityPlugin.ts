@@ -5,7 +5,6 @@ import type {
   FastifyInstance,
   FastifyPluginCallback,
   FastifyRequest,
-  FastifySchema,
 } from 'fastify'
 import fp from 'fastify-plugin'
 import {
@@ -17,8 +16,13 @@ import { z } from 'zod/v4'
 import { safeEncode } from 'zod/v4/core'
 import { derivePublicSchema } from './derivePublicSchema.js'
 
+const DEFAULT_SOURCE_HEADER = 'x-api-audience'
+const PUBLIC_ENCODERS = Symbol('fastify-extras:apiVisibility:encoders')
+type PublicEncoder = (payload: unknown) => string
+
 declare module 'fastify' {
   interface FastifyContextConfig {
+    [PUBLIC_ENCODERS]?: Record<string, PublicEncoder>
     /**
      * Route audience for the visibility gate. Contract routes get it from
      * `@lokalise/fastify-api-contracts` (`config.apiContract`); set it directly
@@ -27,10 +31,6 @@ declare module 'fastify' {
     visibility?: RouteVisibility
   }
 }
-
-const DEFAULT_SOURCE_HEADER = 'x-api-audience'
-
-type PublicEncoder = (payload: unknown) => string
 
 const buildPublicEncoders = (
   method: string | string[],
@@ -107,7 +107,6 @@ const plugin = (
   fastify.setSerializerCompiler(serializerCompiler)
 
   const sourceHeader = (options.sourceHeader ?? DEFAULT_SOURCE_HEADER).toLowerCase()
-  const encodersBySchema = new WeakMap<FastifySchema, Record<string, PublicEncoder>>()
 
   fastify.addHook('onRequest', (request, reply, done) => {
     const isPublicCaller = !isInternalCaller(request, sourceHeader)
@@ -119,19 +118,19 @@ const plugin = (
 
   fastify.addHook('onRoute', (route) => {
     const responses = route.schema?.response as Record<string, unknown> | undefined
-    if (!route.schema || !responses) return
+    if (!responses || !route.config) return
 
     const encoders = buildPublicEncoders(route.method, route.url, responses)
-    if (encoders) encodersBySchema.set(route.schema, encoders)
+    if (!encoders) return
+
+    route.config[PUBLIC_ENCODERS] = encoders
   })
 
   fastify.addHook('preHandler', (request, reply, done) => {
     // Internal callers go through the route's normal serializer untouched.
     if (isInternalCaller(request, sourceHeader)) return done()
 
-    const encoders = request.routeOptions.schema
-      ? encodersBySchema.get(request.routeOptions.schema)
-      : undefined
+    const encoders = request.routeOptions.config[PUBLIC_ENCODERS]
     if (!encoders) return done()
 
     reply.serializer((payload: unknown) => {
