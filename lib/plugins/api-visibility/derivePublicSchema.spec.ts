@@ -280,6 +280,17 @@ describe('derivePublicSchema', () => {
         derived.parse({ label: 'a', secret: 's', next: { label: 'b', secret: 's2' } }),
       ).toEqual({ label: 'a', next: { label: 'b' } })
     })
+
+    it('returns the same schema instance for a recursive schema with no internal fields', () => {
+      const Category: z.ZodType = z.object({
+        name: z.string(),
+        get children() {
+          return z.array(Category)
+        },
+      })
+
+      expect(derivePublicSchema(Category)).toBe(Category)
+    })
   })
 
   describe('unsupported constructs', () => {
