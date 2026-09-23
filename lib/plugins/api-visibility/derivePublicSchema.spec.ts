@@ -309,7 +309,6 @@ describe('derivePublicSchema', () => {
 
       expect(derivePublicSchema(schema)).toBe(schema)
     })
-
   })
 
   describe('marker reachable through wrappers and containers', () => {
