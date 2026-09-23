@@ -349,7 +349,7 @@ describe('derivePublicSchema', () => {
       expect(derived.safeParse([]).success).toBe(false)
       expect(derived.parse([{ keep: 'k', secret: 's' }])).toEqual([{ keep: 'k' }])
     })
-    
+
     describe.each<{ name: string; build: (shape: z.ZodRawShape) => z.ZodObject }>([
       { name: 'strict()', build: (shape) => z.object(shape).strict() },
       { name: 'strictObject', build: (shape) => z.strictObject(shape) },
