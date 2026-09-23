@@ -140,9 +140,6 @@ const preHandlerHook =
       const statusCode = String(reply.statusCode)
       const encode = encoders[statusCode] ?? encoders[`${statusCode[0]}xx`] ?? encoders.default
 
-      // No encoder for this status: the route declared no response schema for it, so
-      // there are no internal fields to strip. Fall back to default JSON serialization
-      // instead of failing the response with a `ResponseSerializationError`.
       return encode ? encode(payload) : JSON.stringify(payload)
     })
 
