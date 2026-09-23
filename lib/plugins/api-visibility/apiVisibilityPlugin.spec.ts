@@ -113,6 +113,11 @@ const buildApp = async (options: ApiVisibilityPluginOptions = {}): Promise<Fasti
     () => ({ id: '1', secret: 's' }),
   )
 
+  // A custom 404 handler the plugin must not hijack for public callers.
+  app.setNotFoundHandler((_request, reply) => {
+    reply.code(404).send({ error: 'not-found' })
+  })
+
   await app.ready()
   return app
 }
@@ -277,6 +282,19 @@ describe('apiVisibilityPlugin', () => {
 
     expect(await getStatus(app, '/unmarked', { 'x-api-audience': 'public' })).toBe(404)
     expect(await getStatus(app, '/unmarked', { 'x-api-audience': 'internal' })).toBe(200)
+  })
+
+  it('does not hijack the 404 handler for a public caller on an unknown route', async () => {
+    app = await buildApp()
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/does-not-exist',
+      headers: { 'x-api-audience': 'public' },
+    })
+    expect(response.statusCode).toBe(404)
+    expect(response.headers['content-type']).toContain('application/json')
+    expect(response.json()).toEqual({ error: 'not-found' })
   })
 
   it('throws when registered after a route it should protect', async () => {

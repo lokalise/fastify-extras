@@ -109,6 +109,8 @@ const plugin = (
   const sourceHeader = (options.sourceHeader ?? DEFAULT_SOURCE_HEADER).toLowerCase()
 
   fastify.addHook('onRequest', (request, reply, done) => {
+    if (request.is404) return done()
+
     const isPublicCaller = !isInternalCaller(request, sourceHeader)
     const visibility = resolveVisibility(request.routeOptions.config)
     if (isPublicCaller && visibility === 'internal') return reply.callNotFound()
