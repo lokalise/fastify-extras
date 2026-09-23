@@ -5,6 +5,8 @@ import type {
   FastifyInstance,
   FastifyPluginCallback,
   FastifyRequest,
+  onRequestHookHandler,
+  preHandlerHookHandler,
 } from 'fastify'
 import fp from 'fastify-plugin'
 import {
@@ -17,12 +19,10 @@ import { safeEncode } from 'zod/v4/core'
 import { derivePublicSchema } from './derivePublicSchema.js'
 
 const DEFAULT_SOURCE_HEADER = 'x-api-audience'
-const PUBLIC_ENCODERS = Symbol('fastify-extras:apiVisibility:encoders')
 type PublicEncoder = (payload: unknown) => string
 
 declare module 'fastify' {
   interface FastifyContextConfig {
-    [PUBLIC_ENCODERS]?: Record<string, PublicEncoder>
     /**
      * Route audience for the visibility gate. Contract routes get it from
      * `@lokalise/fastify-api-contracts` (`config.apiContract`); set it directly
@@ -102,6 +102,59 @@ const isAlwaysPublicPath = (url: string, prefixes: string[]): boolean => {
   return prefixes.some((prefix) => path === prefix || path.startsWith(`${prefix}/`))
 }
 
+/** Append a route-scoped hook, preserving any the host already declared. */
+const appendRouteHook = <Hook>(existing: Hook | Hook[] | undefined, hook: Hook): Hook | Hook[] => {
+  if (existing === undefined) return hook
+  return Array.isArray(existing) ? [...existing, hook] : [existing, hook]
+}
+
+/**
+ * The gate, attached only to `internal` routes: a public caller gets a `404`,
+ * indistinguishable from a missing route, so the route's existence is not leaked.
+ * An internal caller passes through.
+ */
+const onRequestHook =
+  (sourceHeader: string): onRequestHookHandler =>
+  (request, reply, done) => {
+    if (isInternalCaller(request, sourceHeader)) return done()
+    reply.callNotFound()
+  }
+
+/**
+ * The stripper, attached only to public-reachable routes with internal fields: it
+ * encodes a public caller's response through the derived public schema so internal
+ * fields never leave, while an internal caller keeps the route's normal serialization.
+ */
+const preHandlerHook =
+  (sourceHeader: string, encoders: Record<string, PublicEncoder>): preHandlerHookHandler =>
+  (request, reply, done) => {
+    if (isInternalCaller(request, sourceHeader)) return done()
+
+    reply.serializer((payload: unknown) => {
+      // Installing a serializer makes `reply.send` skip the branch that sets the
+      // default content-type, so set it here to match what internal callers get.
+      reply.header('content-type', 'application/json; charset=utf-8')
+
+      const statusCode = String(reply.statusCode)
+      const encode = encoders[statusCode] ?? encoders[`${statusCode[0]}xx`] ?? encoders.default
+      if (!encode)
+        throw new ResponseSerializationError(request.method, request.url, {
+          cause: new z.core.$ZodError([
+            {
+              code: 'custom',
+              path: [],
+              input: undefined,
+              message: `No response encoder for status code ${statusCode}`,
+            },
+          ]),
+        })
+
+      return encode(payload)
+    })
+
+    done()
+  }
+
 /**
  * Enforces field-level API visibility at runtime, the counterpart to the
  * OpenAPI document cleanup. The caller's audience comes from `sourceHeader`
@@ -130,57 +183,18 @@ const plugin = (
   const sourceHeader = (options.sourceHeader ?? DEFAULT_SOURCE_HEADER).toLowerCase()
   const alwaysPublicPathPrefixes = options.alwaysPublicPathPrefixes ?? []
 
-  fastify.addHook('onRequest', (request, reply, done) => {
-    if (request.is404) return done()
-    if (isAlwaysPublicPath(request.url, alwaysPublicPathPrefixes)) return done()
-
-    const isPublicCaller = !isInternalCaller(request, sourceHeader)
-    const visibility = resolveVisibility(request.routeOptions.config)
-    if (isPublicCaller && visibility === 'internal') return reply.callNotFound()
-
-    done()
-  })
-
   fastify.addHook('onRoute', (route) => {
+    const visibility = route.config ? resolveVisibility(route.config) : 'internal'
+    const gated =
+      visibility === 'internal' && !isAlwaysPublicPath(route.url, alwaysPublicPathPrefixes)
+
+    if (gated) route.onRequest = appendRouteHook(route.onRequest, onRequestHook(sourceHeader))
+
     const responses = route.schema?.response as Record<string, unknown> | undefined
-    if (!responses || !route.config) return
-
-    const encoders = buildPublicEncoders(route.method, route.url, responses)
-    if (!encoders) return
-
-    route.config[PUBLIC_ENCODERS] = encoders
-  })
-
-  fastify.addHook('preHandler', (request, reply, done) => {
-    // Internal callers go through the route's normal serializer untouched.
-    if (isInternalCaller(request, sourceHeader)) return done()
-
-    const encoders = request.routeOptions.config[PUBLIC_ENCODERS]
-    if (!encoders) return done()
-
-    reply.serializer((payload: unknown) => {
-      // Installing a serializer makes `reply.send` skip the branch that sets the
-      // default content-type, so set it here to match what internal callers get
-      reply.header('content-type', 'application/json; charset=utf-8')
-
-      const statusCode = String(reply.statusCode)
-      const encode = encoders[statusCode] ?? encoders[`${statusCode[0]}xx`] ?? encoders.default
-      if (!encode)
-        throw new ResponseSerializationError(request.method, request.url, {
-          cause: new z.core.$ZodError([
-            {
-              code: 'custom',
-              path: [],
-              input: undefined,
-              message: `No response encoder for status code ${statusCode}`,
-            },
-          ]),
-        })
-
-      return encode(payload)
-    })
-
-    done()
+    const encoders = responses ? buildPublicEncoders(route.method, route.url, responses) : null
+    if (encoders && !gated) {
+      route.preHandler = appendRouteHook(route.preHandler, preHandlerHook(sourceHeader, encoders))
+    }
   })
 
   next()
