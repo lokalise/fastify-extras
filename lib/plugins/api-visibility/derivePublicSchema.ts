@@ -111,21 +111,6 @@ const assertNoInternalField = (schema: z.ZodType): void => {
   if (!containsInternalField(schema, new WeakSet())) return
 
   const name = schema.constructor?.name ?? 'unknown'
-
-  // The marker sits directly on this leaf, reached by recursing through a wrapper
-  // that lost it: Zod does not carry `.meta()` through `.optional()`, `.array()`,
-  // etc., so a marker placed before the wrapper never reaches it. This is an
-  // ordering mistake, not an unsupported construct — say so.
-  if (isInternalField(schema)) {
-    throw new Error(
-      [
-        `apiVisibilityPlugin: a field marked visibility: 'internal' is a bare ${name}. Zod does not`,
-        'carry .meta() through wrappers, so a marker placed before .optional(), .array(), .nullable(),',
-        '.default() (etc.) is lost. Move .meta({ visibility: \'internal\' }) to the end of the chain.',
-      ].join(' '),
-    )
-  }
-
   throw new Error(
     [
       `apiVisibilityPlugin: a field marked visibility: 'internal' is nested inside an unsupported Zod`,
