@@ -349,23 +349,23 @@ describe('derivePublicSchema', () => {
       expect(derived.safeParse([]).success).toBe(false)
       expect(derived.parse([{ keep: 'k', secret: 's' }])).toEqual([{ keep: 'k' }])
     })
+    
+    describe.each<{ name: string; build: (shape: z.ZodRawShape) => z.ZodObject }>([
+      { name: 'strict()', build: (shape) => z.object(shape).strict() },
+      { name: 'strictObject', build: (shape) => z.strictObject(shape) },
+      { name: 'catchall()', build: (shape) => z.object(shape).catchall(z.string()) },
+      { name: 'looseObject', build: (shape) => z.looseObject(shape) },
+      { name: 'passthrough()', build: (shape) => z.object(shape).passthrough() },
+    ])('strips unknown keys once a $name object drops an internal property', ({ build }) => {
+      it('drops the internal field and any other unknown key', () => {
+        const schema = build({
+          keep: z.string(),
+          secret: z.string().meta({ visibility: 'internal' }),
+        })
+        const derived = derivePublicSchema(schema)
 
-    it('keeps a strict object rejecting unknown keys after a property is dropped', () => {
-      const schema = z
-        .object({ keep: z.string(), secret: z.string().meta({ visibility: 'internal' }) })
-        .strict()
-      const derived = derivePublicSchema(schema)
-
-      expect(derived.safeParse({ keep: 'k', extra: 'x' }).success).toBe(false)
-    })
-
-    it('keeps an object catchall after a property is dropped', () => {
-      const schema = z
-        .object({ keep: z.string(), secret: z.string().meta({ visibility: 'internal' }) })
-        .catchall(z.string())
-      const derived = derivePublicSchema(schema)
-
-      expect(derived.parse({ keep: 'k', extra: 'x' })).toEqual({ keep: 'k', extra: 'x' })
+        expect(derived.parse({ keep: 'k', secret: 's', extra: 'x' })).toEqual({ keep: 'k' })
+      })
     })
   })
 })
