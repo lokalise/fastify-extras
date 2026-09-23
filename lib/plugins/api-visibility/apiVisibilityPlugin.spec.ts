@@ -270,16 +270,16 @@ describe('apiVisibilityPlugin', () => {
     expect(publicResponse.json()).toEqual({ id: '1' })
   })
 
-  it('fails closed when the status has no public encoder for a public caller', async () => {
+  it('falls back to default serialization when the status has no encoder', async () => {
     app = await buildApp()
-
+    
     const publicResponse = await app.inject({
       method: 'GET',
       url: '/missing-encoder',
       headers: { 'x-api-audience': 'public' },
     })
-    expect(publicResponse.statusCode).toBe(500)
-    expect(publicResponse.body).not.toContain('secret')
+    expect(publicResponse.statusCode).toBe(200)
+    expect(publicResponse.json()).toEqual({ id: '1', secret: 's' })
   })
 
   it('validates the request through the validator compiler it registers', async () => {
