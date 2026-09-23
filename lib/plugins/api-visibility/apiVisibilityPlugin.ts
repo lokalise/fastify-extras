@@ -121,9 +121,11 @@ const onRequestHook =
   }
 
 /**
- * The stripper, attached only to public-reachable routes with internal fields: it
- * encodes a public caller's response through the derived public schema so internal
- * fields never leave, while an internal caller keeps the route's normal serialization.
+ * The stripper, attached only to public-reachable routes with internal fields: for a
+ * declared status it encodes a public caller's response through the derived public
+ * schema so internal fields never leave. An internal caller keeps the route's normal
+ * serialization. A status the route did not declare (typically an error-handler body)
+ * has no encoder and falls back to default JSON serialization.
  */
 const preHandlerHook =
   (sourceHeader: string, encoders: Record<string, PublicEncoder>): preHandlerHookHandler =>
@@ -137,19 +139,8 @@ const preHandlerHook =
 
       const statusCode = String(reply.statusCode)
       const encode = encoders[statusCode] ?? encoders[`${statusCode[0]}xx`] ?? encoders.default
-      if (!encode)
-        throw new ResponseSerializationError(request.method, request.url, {
-          cause: new z.core.$ZodError([
-            {
-              code: 'custom',
-              path: [],
-              input: undefined,
-              message: `No response encoder for status code ${statusCode}`,
-            },
-          ]),
-        })
 
-      return encode(payload)
+      return encode ? encode(payload) : JSON.stringify(payload)
     })
 
     done()
