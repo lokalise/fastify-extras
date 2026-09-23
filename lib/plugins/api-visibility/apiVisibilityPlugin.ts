@@ -113,6 +113,17 @@ const plugin = (
   options: ApiVisibilityPluginOptions,
   next: (error?: Error) => void,
 ): void => {
+  // The plugin needs zod's compilers; warn rather than silently replacing existing ones
+  if (fastify.validatorCompiler) {
+    fastify.log.warn(
+      'apiVisibilityPlugin: overwriting an existing validatorCompiler; register this plugin before setting your own',
+    )
+  }
+  if (fastify.serializerCompiler) {
+    fastify.log.warn(
+      'apiVisibilityPlugin: overwriting an existing serializerCompiler; register this plugin before setting your own',
+    )
+  }
   fastify.setValidatorCompiler(validatorCompiler)
   fastify.setSerializerCompiler(serializerCompiler)
 
