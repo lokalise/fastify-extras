@@ -748,6 +748,11 @@ const USER_SCHEMA = z.object({
 })
 ```
 
+**Place `.meta()` at the end of the chain.** Zod does not carry `.meta()` through wrappers, so a marker written
+before `.optional()`, `.array()`, `.nullable()` or `.default()` is lost and the field would leak. The API Visibility
+Plugin fails loudly at boot when it sees this. Write `z.string().optional().meta({ visibility: 'internal' })`, not
+`z.string().meta({ visibility: 'internal' }).optional()`.
+
 On by default. Set `stripInternalFields: false` to publish internal fields verbatim.
 
 **The marker must live in the registry `fastify-type-provider-zod` (ftpz) reads.** Using the global registry is

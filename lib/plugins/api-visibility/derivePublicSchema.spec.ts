@@ -298,6 +298,14 @@ describe('derivePublicSchema', () => {
 
       expect(derivePublicSchema(schema)).toBe(schema)
     })
+
+    it('explains the marker ordering when `.meta()` precedes a wrapper', () => {
+      // Zod does not carry `.meta()` through wrappers, so the marker lands on the
+      // inner leaf and derivation fails. The error must point at the ordering.
+      const schema = z.object({ x: z.string().meta({ visibility: 'internal' }).optional() })
+
+      expect(() => derivePublicSchema(schema)).toThrow(/move .+ to the end of the chain/i)
+    })
   })
 
   describe('nested combinations', () => {
