@@ -84,6 +84,22 @@ export type ApiVisibilityPluginOptions = {
    * @default 'x-api-audience'
    */
   sourceHeader?: string
+
+  /**
+   * Path prefixes exempt from the visibility gate, always reachable by public
+   * callers.
+   *
+   * @default []
+   */
+  alwaysPublicPathPrefixes?: string[]
+}
+
+/** Whether `url` (ignoring any query string) is at or under one of the prefixes. */
+const isAlwaysPublicPath = (url: string, prefixes: string[]): boolean => {
+  if (prefixes.length === 0) return false
+
+  const path = url.split('?', 1)[0] ?? url
+  return prefixes.some((prefix) => path === prefix || path.startsWith(`${prefix}/`))
 }
 
 /**
@@ -107,9 +123,11 @@ const plugin = (
   fastify.setSerializerCompiler(serializerCompiler)
 
   const sourceHeader = (options.sourceHeader ?? DEFAULT_SOURCE_HEADER).toLowerCase()
+  const alwaysPublicPathPrefixes = options.alwaysPublicPathPrefixes ?? []
 
   fastify.addHook('onRequest', (request, reply, done) => {
     if (request.is404) return done()
+    if (isAlwaysPublicPath(request.url, alwaysPublicPathPrefixes)) return done()
 
     const isPublicCaller = !isInternalCaller(request, sourceHeader)
     const visibility = resolveVisibility(request.routeOptions.config)

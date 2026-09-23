@@ -812,6 +812,18 @@ Driven by that audience, it does three things:
 would bypass both gate and stripping — the plugin throws at boot if any route already exists in its scope, turning a
 silent leak into a loud failure.
 
+**Routes you do not register carry no marker, so they gate to `internal`.** Because resolution is fail-closed, routes
+registered by other plugins in the same scope have no `config.visibility` and return a `404` to public callers. This
+includes the [API Documentation Plugin](#api-documentation-plugin)'s Scalar and `@fastify/swagger` routes, healthchecks
+and `/metrics`. List their path prefixes in `alwaysPublicPathPrefixes` to exempt them from the gate (field stripping
+still applies), or, where you control the route options, mark them `config: { visibility: 'public' }`.
+
+```typescript
+await app.register(apiVisibilityPlugin, {
+  alwaysPublicPathPrefixes: ['/documentation', '/health', '/metrics'],
+})
+```
+
 ```typescript
 import { apiVisibilityPlugin } from '@lokalise/fastify-extras'
 
@@ -827,9 +839,10 @@ The `.meta({ visibility })` marker must live in the registry ftpz reads — same
 
 #### Options
 
-| Option         | Default        | Description                                                                                |
-| -------------- | -------------- | ------------------------------------------------------------------------------------------ |
-| `sourceHeader` | `x-api-audience` | Request header carrying the caller's audience. Only an exact `internal` value is internal |
+| Option                     | Default          | Description                                                                                 |
+| -------------------------- | ---------------- | ------------------------------------------------------------------------------------------- |
+| `sourceHeader`             | `x-api-audience` | Request header carrying the caller's audience. Only an exact `internal` value is internal   |
+| `alwaysPublicPathPrefixes` | `[]`             | Path prefixes exempt from the gate, always reachable by public callers (docs, health, etc.) |
 
 ## Utilities
 

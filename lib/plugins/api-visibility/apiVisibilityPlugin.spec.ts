@@ -295,6 +295,16 @@ describe('apiVisibilityPlugin', () => {
     expect(await getStatus(app, '/unmarked', { 'x-api-audience': 'internal' })).toBe(200)
   })
 
+  it('lets a public caller reach a route under an always-public path prefix', async () => {
+    app = await buildApp({ alwaysPublicPathPrefixes: ['/unmarked'] })
+
+    // Without the prefix this route resolves to `internal` and 404s a public
+    // caller; the prefix bypasses the gate so it is reachable.
+    expect(await getStatus(app, '/unmarked', { 'x-api-audience': 'public' })).toBe(200)
+    // Routes outside the prefix stay gated.
+    expect(await getStatus(app, '/legacy', { 'x-api-audience': 'public' })).toBe(404)
+  })
+
   it('does not hijack the 404 handler for a public caller on an unknown route', async () => {
     app = await buildApp()
 
