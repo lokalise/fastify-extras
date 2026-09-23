@@ -210,8 +210,6 @@ describe('apiVisibilityPlugin', () => {
   it('sets a JSON content-type on a stripped public response', async () => {
     app = await buildApp()
 
-    // Installing a reply serializer skips Fastify's default content-type, so a
-    // public caller would otherwise get a response with no (or a bare) type.
     const response = await app.inject({
       method: 'GET',
       url: '/user',
