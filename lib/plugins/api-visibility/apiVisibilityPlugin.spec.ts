@@ -207,6 +207,19 @@ describe('apiVisibilityPlugin', () => {
     expect(body).toEqual({ status: 'ok' })
   })
 
+  it('sets a JSON content-type on a stripped public response', async () => {
+    app = await buildApp()
+
+    // Installing a reply serializer skips Fastify's default content-type, so a
+    // public caller would otherwise get a response with no (or a bare) type.
+    const response = await app.inject({
+      method: 'GET',
+      url: '/user',
+      headers: { 'x-api-audience': 'public' },
+    })
+    expect(response.headers['content-type']).toBe('application/json; charset=utf-8')
+  })
+
   it('selects the encoder by status code and schema-encodes a non-stripping status', async () => {
     app = await buildApp()
 

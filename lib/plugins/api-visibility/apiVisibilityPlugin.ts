@@ -136,6 +136,12 @@ const plugin = (
     if (!encoders) return done()
 
     reply.serializer((payload: unknown) => {
+      // Installing a serializer makes `reply.send` skip the branch that sets the
+      // default content-type, so set it here to match what internal callers get.
+      // Doing it inside the serializer (rather than in the hook) keeps it off
+      // empty responses (e.g. 204), where the serializer never runs.
+      reply.header('content-type', 'application/json; charset=utf-8')
+
       const statusCode = String(reply.statusCode)
       const encode = encoders[statusCode] ?? encoders[`${statusCode[0]}xx`] ?? encoders.default
       if (!encode)
