@@ -272,7 +272,7 @@ describe('apiVisibilityPlugin', () => {
 
   it('falls back to default serialization when the status has no encoder', async () => {
     app = await buildApp()
-    
+
     const publicResponse = await app.inject({
       method: 'GET',
       url: '/missing-encoder',
