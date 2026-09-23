@@ -158,6 +158,64 @@ describe('stripInternalFields', () => {
       expect(schema.required).toEqual(['id'])
     })
 
+    it('drops a property whose array items `$ref` an internal component and removes the component', () => {
+      const document: FreeformRecord = {
+        openapi: '3.1.0',
+        info: { title: 'X', version: '1.0.0' },
+        paths: {
+          '/x': {
+            get: {
+              responses: {
+                '200': {
+                  content: {
+                    'application/json': {
+                      schema: objectSchema(
+                        {
+                          id: { type: 'string' },
+                          notes: { type: 'array', items: { $ref: '#/components/schemas/Note' } },
+                        },
+                        ['id', 'notes'],
+                      ),
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            Note: {
+              type: 'object',
+              visibility: 'internal',
+              properties: { text: { type: 'string' } },
+            },
+          },
+        },
+      }
+
+      const result = stripInternalFieldsFromDocument(document, 'public')
+      const schema = result.paths['/x'].get.responses['200'].content['application/json'].schema
+      expect(Object.keys(schema.properties)).toEqual(['id'])
+      expect(schema.required).toEqual(['id'])
+      expect(result.components.schemas.Note).toBeUndefined()
+    })
+
+    it('drops a parameter whose `schema` is a `$ref` to an internal component', () => {
+      const document: FreeformRecord = {
+        parameters: [
+          { in: 'query', name: 'page', schema: { type: 'number' } },
+          { in: 'query', name: 'secretRef', schema: { $ref: '#/components/schemas/Secret' } },
+        ],
+        components: { schemas: { Secret: { type: 'string', visibility: 'internal' } } },
+      }
+
+      const result = stripInternalFieldsFromDocument(document, 'public')
+      expect((result.parameters as FreeformRecord[]).map((parameter) => parameter.name)).toEqual([
+        'page',
+      ])
+    })
+
     it('drops internal query parameters', () => {
       expect(parameters(strip()).map((parameter) => parameter.name)).toEqual(['page'])
     })
@@ -190,7 +248,7 @@ describe('stripInternalFields', () => {
     it('leaves a parameter without a schema untouched', () => {
       const document = { parameters: [{ in: 'query', name: 'ref', $ref: '#/x' }] }
 
-      const result = stripInternalFieldsFromDocument(document, 'public') as FreeformRecord
+      const result = stripInternalFieldsFromDocument(document, 'public')
       expect(result.parameters).toEqual([{ in: 'query', name: 'ref', $ref: '#/x' }])
     })
   })
@@ -232,6 +290,23 @@ describe('stripInternalFields', () => {
 
       const result = stripInternalFieldsFromDocument(document, 'internal') as FreeformRecord
       expect(result.parameters[0].schema).toEqual({ type: 'string' })
+    })
+
+    it('scrubs the `visibility` marker from a kept internal component node', () => {
+      const document = {
+        components: {
+          schemas: {
+            Note: {
+              type: 'object',
+              visibility: 'internal',
+              properties: { text: { type: 'string' } },
+            },
+          },
+        },
+      }
+
+      const result = stripInternalFieldsFromDocument(document, 'internal')
+      expect(result.components.schemas.Note.visibility).toBeUndefined()
     })
   })
 })
