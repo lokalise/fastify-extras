@@ -68,7 +68,7 @@ const isInternalCaller = (request: FastifyRequest, sourceHeader: string) =>
  * augmentation types it as always present, but non-contract routes carry none.
  *
  * Fails closed: it only reports `public` for an explicit, valid `public` marker.
- * Anything else — an unresolved (unmarked) route or an invalid value — resolves
+ * Anything else (an unresolved (unmarked) route or an invalid value) resolves
  * to `internal`, so a route is never accidentally exposed to public callers.
  */
 const resolveVisibility = (config: FastifyContextConfig): RouteVisibility => {

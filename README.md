@@ -789,7 +789,7 @@ plugin hides internal fields and routes from the _published document_, this one 
 _live traffic_. A single marker is the source of truth for both.
 
 The caller's audience comes from a gateway-stamped request header (`sourceHeader`, default `x-api-audience`) and is
-**fail-closed**: only an exact `internal` value is treated as internal; anything else — missing, unknown, malformed — is
+**fail-closed**: only an exact `internal` value is treated as internal; anything else (missing, unknown, malformed) is
 public. So a caller whose header is not exactly `internal` is treated as public: it receives a `404` from every
 `internal` endpoint and a stripped response from public ones. The gateway must own this header (strip or overwrite any
 client-provided value), otherwise an external caller could claim to be internal.
@@ -797,7 +797,7 @@ client-provided value), otherwise an external caller could claim to be internal.
 Driven by that audience, it does three things:
 
 1. **Response field stripping.** For a public caller, response properties marked `.meta({ visibility: 'internal' })` are
-   removed before serialization — encoded against a derived public schema, so even required internal-only fields never
+   removed before serialization, encoded against a derived public schema, so even required internal-only fields never
    leak. Internal callers get the response untouched, and routes with no internal fields cost nothing.
 2. **Route gating.** A public caller hitting a route marked `internal` gets a `404`, indistinguishable from a route that
    does not exist so its existence is not leaked. A route's audience comes from its contract
@@ -834,7 +834,7 @@ await app.register(apiVisibilityPlugin) // before your routes
 app.get('/internal-only', { config: { visibility: 'internal' } }, handler)
 ```
 
-The `.meta({ visibility })` marker must live in the registry ftpz reads — same caveat as the document-level
+The `.meta({ visibility })` marker must live in the registry ftpz reads, the same caveat as the document-level
 [Field-level visibility](#field-level-visibility) above. Note: `@lokalise/fastify-api-contracts` currently types
 `config.apiContract` as required, so a bare `config` on a non-contract route may need a cast until that is relaxed.
 
