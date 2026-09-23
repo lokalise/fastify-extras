@@ -1,3 +1,4 @@
+import type { FreeformRecord } from '@lokalise/node-core'
 import fastify, { type FastifyInstance } from 'fastify'
 import {
   type ZodTypeProvider,
@@ -713,6 +714,149 @@ describe('apiDocumentationPlugin', () => {
       expect(response.json<{ openapi?: string; swagger?: string }>().openapi).toMatch(/^3./)
 
       await app.close()
+    })
+  })
+
+  describe('field-level visibility', () => {
+    const WIDGET_SCHEMA = z
+      .object({ id: z.string(), internalRef: z.string().meta({ visibility: 'internal' }) })
+      .meta({ id: 'Widget' })
+
+    const buildApp = async (
+      options: Partial<ApiDocumentationPluginOptions> = {},
+    ): Promise<DocumentedApp> => {
+      const app = fastify()
+      app.setValidatorCompiler(validatorCompiler)
+      app.setSerializerCompiler(serializerCompiler)
+
+      await app.register(apiDocumentationPlugin, {
+        openapi: { info: { title: 'Widgets API', version: '1.0.0' } },
+        exposeInternalDocumentation: true,
+        transform: createJsonSchemaTransform({}),
+        transformObject: createJsonSchemaTransformObject({}),
+        logLevel: 'silent',
+        ...options,
+      })
+
+      const typedApp = app.withTypeProvider<ZodTypeProvider>()
+
+      // Inline schemas: an internal response field and an internal query param.
+      typedApp.get(
+        '/gadgets',
+        {
+          schema: {
+            querystring: z.object({
+              page: z.number().optional(),
+              internalCursor: z.string().optional().meta({ visibility: 'internal' }),
+            }),
+            response: {
+              200: z.object({
+                id: z.string(),
+                internalInline: z.string().meta({ visibility: 'internal' }),
+              }),
+            },
+          },
+        },
+        () => ({ id: '1', internalInline: 'x' }),
+      )
+
+      // Registered schema: the internal field lives in `components.schemas.Widget`,
+      // reached only through a `$ref` from the response.
+      typedApp.get('/widgets', { schema: { response: { 200: WIDGET_SCHEMA } } }, () => ({
+        id: '1',
+        internalRef: 'x',
+      }))
+
+      await app.ready()
+
+      return app as DocumentedApp
+    }
+
+    const operation = (document: OpenApiDocument | undefined, path: string): FreeformRecord =>
+      (document?.paths?.[path] as FreeformRecord).get
+
+    const responsePropertyNames = (
+      document: OpenApiDocument | undefined,
+      path: string,
+    ): string[] => {
+      const schema = operation(document, path).responses['200'].content['application/json'].schema
+      return Object.keys(schema.properties ?? {})
+    }
+
+    const parameterNames = (document: OpenApiDocument | undefined, path: string): string[] =>
+      (operation(document, path).parameters as FreeformRecord[]).map((parameter) => parameter.name)
+
+    const componentPropertyNames = (
+      document: OpenApiDocument | undefined,
+      name: string,
+    ): string[] => Object.keys((document?.components?.schemas?.[name] as FreeformRecord).properties)
+
+    let app: DocumentedApp | undefined
+
+    afterEach(async () => {
+      await app?.close()
+      app = undefined
+    })
+
+    describe('public document', () => {
+      it('drops internal fields from an inline response schema', async () => {
+        app = await buildApp()
+
+        expect(responsePropertyNames(publicDocument(app), '/gadgets')).toStrictEqual(['id'])
+      })
+
+      it('drops internal query parameters', async () => {
+        app = await buildApp()
+
+        expect(parameterNames(publicDocument(app), '/gadgets')).toStrictEqual(['page'])
+      })
+
+      it('drops internal fields from a registered component schema', async () => {
+        app = await buildApp()
+
+        expect(componentPropertyNames(publicDocument(app), 'Widget')).toStrictEqual(['id'])
+      })
+    })
+
+    describe('internal document', () => {
+      it('keeps internal fields in the inline response schema', async () => {
+        app = await buildApp()
+
+        expect(responsePropertyNames(internalDocument(app), '/gadgets')).toStrictEqual([
+          'id',
+          'internalInline',
+        ])
+      })
+
+      it('keeps internal query parameters', async () => {
+        app = await buildApp()
+
+        expect(parameterNames(internalDocument(app), '/gadgets')).toStrictEqual([
+          'page',
+          'internalCursor',
+        ])
+      })
+
+      it('keeps internal fields in a registered component schema', async () => {
+        app = await buildApp()
+
+        expect(componentPropertyNames(internalDocument(app), 'Widget')).toStrictEqual([
+          'id',
+          'internalRef',
+        ])
+      })
+    })
+
+    describe('stripInternalFields: false', () => {
+      it('keeps internal fields and the visibility marker in the public document', async () => {
+        app = await buildApp({ stripInternalFields: false })
+
+        expect(componentPropertyNames(publicDocument(app), 'Widget')).toStrictEqual([
+          'id',
+          'internalRef',
+        ])
+        expect(JSON.stringify(publicDocument(app))).toContain('visibility')
+      })
     })
   })
 })

@@ -17,6 +17,7 @@ Reusable plugins for Fastify.
   - [Datadog Transaction Manager Plugin](#datadog-transaction-manager-plugin)
   - [UnhandledException Plugin](#unhandledexception-plugin)
   - [API Documentation Plugin](#api-documentation-plugin)
+  - [API Visibility Plugin](#api-visibility-plugin)
 
 ## Dependency Management
 
@@ -733,6 +734,27 @@ reference, which would hide every internal endpoint from the document that exist
 when passed as `internalMarkerKey`, along with any key without the `x-` prefix, which `@fastify/swagger` drops before
 it reaches the document. `internalMarkerKey: false` turns the marking off.
 
+#### Field-level visibility
+
+Whole operations split by audience through `schema.hide`; individual response and request _fields_ split through a Zod
+`.meta({ visibility: 'internal' })` marker. A field carrying it is dropped from the public document and kept in the
+internal one. It covers response bodies, request bodies and the query, path and header parameters, and recurses through
+nested objects, arrays and `components.schemas`, so a field behind a shared `$ref` is stripped too.
+
+```typescript
+const USER_SCHEMA = z.object({
+  id: z.string(),
+  internalNote: z.string().meta({ visibility: 'internal' }), // absent from the public document
+})
+```
+
+On by default. Set `stripInternalFields: false` to publish internal fields verbatim.
+
+**The marker must live in the registry `fastify-type-provider-zod` (ftpz) reads.** Using the global registry is
+recommended, since that is where Zod's `.meta()` writes and ftpz reads from it by default. With a custom registry, add
+the visibility metadata to that registry yourself, or the field goes unstripped. See the
+[Zod metadata docs](https://zod.dev/metadata).
+
 #### Options
 
 | Option                        | Default                                       | Description                                                                  |
@@ -747,6 +769,7 @@ it reaches the document. `internalMarkerKey: false` turns the marking off.
 | `transform`                   | -                                             | Route-level transform, typically `jsonSchemaTransform`                        |
 | `transformObject`             | -                                             | Document-level transform, typically `jsonSchemaTransformObject`               |
 | `pruneUnreferencedComponents` | `true`                                        | Drop `components` entries no operation of the document references             |
+| `stripInternalFields`         | `true`                                        | Drop response/request fields marked `visibility: 'internal'`, audience-aware  |
 | `pruneUnreferencedTags`       | `true`                                        | Drop top-level `tags` no operation of the document references                 |
 | `scalarConfiguration`         | -                                             | Passed through to Scalar for both references                                  |
 | `internalScalarConfiguration` | -                                             | Scalar configuration for the internal reference only                          |
@@ -758,6 +781,72 @@ it reaches the document. `internalMarkerKey: false` turns the marking off.
 
 Both documents stay available programmatically, as `app.swagger()` and `app.internalSwagger()`. The
 `internalSwagger` decorator only exists where `exposeInternalDocumentation` is on.
+
+### API Visibility Plugin
+
+The runtime counterpart to the [API Documentation Plugin](#api-documentation-plugin)'s field-level visibility: that
+plugin hides internal fields and routes from the _published document_, this one enforces the same `visibility` markers on
+_live traffic_. A single marker is the source of truth for both.
+
+The caller's audience comes from a gateway-stamped request header (`sourceHeader`, default `x-api-audience`) and is
+**fail-closed**: only an exact `internal` value is treated as internal; anything else (missing, unknown, malformed) is
+public. So a caller whose header is not exactly `internal` is treated as public: it receives a `404` from every
+`internal` endpoint and a stripped response from public ones. The gateway must own this header (strip or overwrite any
+client-provided value), otherwise an external caller could claim to be internal.
+
+Driven by that audience, it does three things:
+
+1. **Response field stripping.** For a public caller, response properties marked `.meta({ visibility: 'internal' })` are
+   removed before serialization, encoded against a derived public schema, so even required internal-only fields never
+   leak. Internal callers get the response untouched, and routes with no internal fields cost nothing.
+2. **Route gating.** A public caller hitting a route marked `internal` gets a `404`, indistinguishable from a route that
+   does not exist so its existence is not leaked. A route's audience comes from its contract
+   (`@lokalise/fastify-api-contracts` exposes it on `config.apiContract`) or, for a non-contract (legacy) route, a direct
+   `config.visibility` marker. Route resolution is **fail-closed**: a route without a valid `public` marker resolves to
+   `internal`, so an unmarked or misconfigured route is never accidentally exposed. Every public route therefore needs an
+   explicit `visibility: 'public'`.
+3. **Zod compiler registration.** The plugin works entirely in terms of Zod schemas: it derives the public schema and
+   encodes public responses with Zod, so it needs `fastify-type-provider-zod`'s validator and serializer compilers to be
+   the active ones. Zod schemas are a hard requirement of this plugin, not a per-route choice, so it registers those
+   compilers for you instead of making every consumer wire them up by hand. If you need a custom compiler, set it _after_
+   this plugin; it logs a warning if it finds one already installed when it loads (register this plugin first).
+
+**Register it before the routes it should protect.** Its hooks only see routes registered later in the same
+encapsulation scope, so a route registered before it bypasses both gate and stripping and would leak. Fastify exposes no
+scope-local way to detect this at boot, so the ordering is yours to get right: register the plugin first in whatever
+scope holds the routes it must protect.
+
+**Routes you do not register carry no marker, so they gate to `internal`.** Because resolution is fail-closed, routes
+registered by other plugins in the same scope have no `config.visibility` and return a `404` to public callers. This
+includes the [API Documentation Plugin](#api-documentation-plugin)'s Scalar and `@fastify/swagger` routes, healthchecks
+and `/metrics`. List their path prefixes in `alwaysPublicPathPrefixes` to exempt them from the gate (field stripping
+still applies), or, where you control the route options, mark them `config: { visibility: 'public' }`.
+
+```typescript
+await app.register(apiVisibilityPlugin, {
+  alwaysPublicPathPrefixes: ['/documentation', '/health', '/metrics'],
+})
+```
+
+```typescript
+import { apiVisibilityPlugin } from '@lokalise/fastify-extras'
+
+await app.register(apiVisibilityPlugin) // before your routes
+
+// A contract route carries its visibility already; a legacy route opts in directly:
+app.get('/internal-only', { config: { visibility: 'internal' } }, handler)
+```
+
+The `.meta({ visibility })` marker must live in the registry ftpz reads, the same caveat as the document-level
+[Field-level visibility](#field-level-visibility) above. Note: `@lokalise/fastify-api-contracts` currently types
+`config.apiContract` as required, so a bare `config` on a non-contract route may need a cast until that is relaxed.
+
+#### Options
+
+| Option                     | Default          | Description                                                                                 |
+| -------------------------- | ---------------- | ------------------------------------------------------------------------------------------- |
+| `sourceHeader`             | `x-api-audience` | Request header carrying the caller's audience. Only an exact `internal` value is internal   |
+| `alwaysPublicPathPrefixes` | `[]`             | Path prefixes exempt from the gate, always reachable by public callers (docs, health, etc.) |
 
 ## Utilities
 

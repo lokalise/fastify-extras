@@ -116,6 +116,8 @@ export {
   type CommonFastifyInstance,
 } from './plugins/pluginsCommon.js'
 
+export * from './zod/zodMeta.js'
+
 export {
   type ApiDocumentationAudience,
   type ApiDocumentationHooks,
@@ -138,3 +140,5 @@ export {
   pruneUnreachableComponents,
   pruneUnreferencedTags,
 } from './plugins/openapi/index.js'
+
+export * from './plugins/api-visibility/index.js'
