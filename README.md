@@ -805,8 +805,11 @@ Driven by that audience, it does three things:
    `config.visibility` marker. Route resolution is **fail-closed**: a route without a valid `public` marker resolves to
    `internal`, so an unmarked or misconfigured route is never accidentally exposed. Every public route therefore needs an
    explicit `visibility: 'public'`.
-3. **Zod compiler registration.** It registers `fastify-type-provider-zod`'s validator and serializer compilers, so the
-   host app does not need to. Do not register them yourself; if you need a custom compiler, set it _after_ this plugin.
+3. **Zod compiler registration.** The plugin works entirely in terms of Zod schemas: it derives the public schema and
+   encodes public responses with Zod, so it needs `fastify-type-provider-zod`'s validator and serializer compilers to be
+   the active ones. Zod schemas are a hard requirement of this plugin, not a per-route choice, so it registers those
+   compilers for you instead of making every consumer wire them up by hand. If you need a custom compiler, set it _after_
+   this plugin; it logs a warning if it finds one already installed when it loads (register this plugin first).
 
 **Register it before the routes it should protect.** Its hooks only see routes registered later in the same
 encapsulation scope, so a route registered before it bypasses both gate and stripping and would leak. Fastify exposes no
