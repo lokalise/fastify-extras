@@ -171,7 +171,7 @@ describe('apiVisibilityPlugin', () => {
   })
 
   it('resolves the audience from a configured header name', async () => {
-    app = await buildApp({ sourceHeader: 'x-caller' })
+    app = await buildApp({ audienceHeader: 'x-caller' })
 
     // The default header no longer applies, so it is treated as public.
     expect(await getUser(app, { 'x-api-audience': 'internal' })).toEqual({
@@ -186,16 +186,45 @@ describe('apiVisibilityPlugin', () => {
     })
   })
 
-  it('matches the configured header name case-insensitively', async () => {
-    // Node lowercases incoming header names
-    app = await buildApp({ sourceHeader: 'X-API-AUDIENCE' })
+  it('still honours the deprecated `sourceHeader` option', async () => {
+    app = await buildApp({ sourceHeader: 'x-caller' })
 
+    expect(await getStatus(app, '/legacy', { 'x-caller': 'internal' })).toBe(200)
+    expect(await getStatus(app, '/legacy', { 'x-api-audience': 'internal' })).toBe(404)
+  })
+
+  it('prefers `audienceHeader` over the deprecated `sourceHeader`', async () => {
+    app = await buildApp({ audienceHeader: 'x-audience', sourceHeader: 'x-caller' })
+
+    expect(await getStatus(app, '/legacy', { 'x-audience': 'internal' })).toBe(200)
+    expect(await getStatus(app, '/legacy', { 'x-caller': 'internal' })).toBe(404)
+  })
+
+  it('treats any configured internal header value as internal', async () => {
+    app = await buildApp({ internalAudienceValues: ['backoffice', 'service'] })
+
+    for (const value of ['backoffice', 'service']) {
+      expect(await getUser(app, { 'x-api-audience': value })).toEqual({
+        id: '1',
+        mandatoryInternal: 'm',
+        optionalInternal: 'o',
+        items: [{ keep: 'k', hide: 'h' }],
+      })
+    }
+    // The default value no longer applies, so it is treated as public.
     expect(await getUser(app, { 'x-api-audience': 'internal' })).toEqual({
       id: '1',
-      mandatoryInternal: 'm',
-      optionalInternal: 'o',
-      items: [{ keep: 'k', hide: 'h' }],
+      items: [{ keep: 'k' }],
     })
+    expect(await getStatus(app, '/legacy', { 'x-api-audience': 'service' })).toBe(200)
+    expect(await getStatus(app, '/legacy', { 'x-api-audience': 'internal' })).toBe(404)
+  })
+
+  it('accepts a single internal header value as a string', async () => {
+    app = await buildApp({ internalAudienceValues: 'service' })
+
+    expect(await getStatus(app, '/legacy', { 'x-api-audience': 'service' })).toBe(200)
+    expect(await getStatus(app, '/legacy', { 'x-api-audience': 'internal' })).toBe(404)
   })
 
   it('leaves a route without internal fields untouched for a public caller', async () => {
