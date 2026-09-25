@@ -18,8 +18,10 @@ import { z } from 'zod/v4'
 import { safeEncode } from 'zod/v4/core'
 import { derivePublicSchema } from './derivePublicSchema.js'
 
-const DEFAULT_SOURCE_HEADER = 'x-api-audience'
+const DEFAULT_AUDIENCE_HEADER = 'x-api-audience'
+const DEFAULT_INTERNAL_AUDIENCE_VALUES: string[] = ['internal' satisfies RouteVisibility]
 type PublicEncoder = (payload: unknown) => string
+type InternalCallerCheck = (request: FastifyRequest) => boolean
 
 declare module 'fastify' {
   interface FastifyContextConfig {
@@ -59,8 +61,22 @@ const buildPublicEncoders = (
   return hasInternalField ? encoders : null
 }
 
-const isInternalCaller = (request: FastifyRequest, sourceHeader: string) =>
-  request.headers[sourceHeader] === ('internal' satisfies RouteVisibility)
+const buildInternalCallerCheck = (
+  audienceHeader: string,
+  internalAudienceValues: string | string[],
+): InternalCallerCheck => {
+  const values = new Set(
+    (Array.isArray(internalAudienceValues) ? internalAudienceValues : [internalAudienceValues]).map(
+      (v) => v.toLowerCase(),
+    ),
+  )
+
+  return (request) => {
+    const value = request.headers[audienceHeader]
+
+    return typeof value === 'string' && values.has(value)
+  }
+}
 
 /**
  * A route's audience: the contract's `visibility` wins, then the direct
@@ -79,11 +95,26 @@ const resolveVisibility = (config: FastifyContextConfig): RouteVisibility => {
 export type ApiVisibilityPluginOptions = {
   /**
    * Request header carrying the caller's audience, stamped by the gateway. Only
-   * an exact `internal` value is treated as internal; anything else is public.
+   * an exact match against `internalAudienceValues` is treated as internal;
+   * anything else is public.
    *
    * @default 'x-api-audience'
    */
+  audienceHeader?: string
+
+  /**
+   * @deprecated Use `audienceHeader` instead. Ignored when `audienceHeader` is set.
+   */
   sourceHeader?: string
+
+  /**
+   * `audienceHeader` value(s) that identify an internal caller, as a single value
+   * or a list. Matching is exact and case-sensitive; any other value (or a
+   * missing header) is public.
+   *
+   * @default ['internal']
+   */
+  internalAudienceValues?: string | string[]
 
   /**
    * Path prefixes exempt from the visibility gate, always reachable by public
@@ -114,9 +145,9 @@ const appendRouteHook = <Hook>(existing: Hook | Hook[] | undefined, hook: Hook):
  * An internal caller passes through.
  */
 const onRequestHook =
-  (sourceHeader: string): onRequestHookHandler =>
+  (isInternalCaller: InternalCallerCheck): onRequestHookHandler =>
   (request, reply, done) => {
-    if (isInternalCaller(request, sourceHeader)) return done()
+    if (isInternalCaller(request)) return done()
     reply.callNotFound()
   }
 
@@ -128,9 +159,12 @@ const onRequestHook =
  * has no encoder and falls back to default JSON serialization.
  */
 const preHandlerHook =
-  (sourceHeader: string, encoders: Record<string, PublicEncoder>): preHandlerHookHandler =>
+  (
+    isInternalCaller: InternalCallerCheck,
+    encoders: Record<string, PublicEncoder>,
+  ): preHandlerHookHandler =>
   (request, reply, done) => {
-    if (isInternalCaller(request, sourceHeader)) return done()
+    if (isInternalCaller(request)) return done()
 
     reply.serializer((payload: unknown) => {
       // Installing a serializer makes `reply.send` skip the branch that sets the
@@ -148,9 +182,9 @@ const preHandlerHook =
 
 /**
  * Enforces field-level API visibility at runtime, the counterpart to the
- * OpenAPI document cleanup. The caller's audience comes from `sourceHeader`
- * (gateway-stamped) and is fail-closed: only an exact `internal` value is
- * treated as internal, anything else is public.
+ * OpenAPI document cleanup. The caller's audience comes from `audienceHeader`
+ * (gateway-stamped) and is fail-closed: only an exact match against
+ * `internalAudienceValues` is treated as internal, anything else is public.
  */
 const plugin = (
   fastify: FastifyInstance,
@@ -171,7 +205,11 @@ const plugin = (
   fastify.setValidatorCompiler(validatorCompiler)
   fastify.setSerializerCompiler(serializerCompiler)
 
-  const sourceHeader = (options.sourceHeader ?? DEFAULT_SOURCE_HEADER).toLowerCase()
+  const audienceHeader = options.audienceHeader?.toLowerCase() ?? options.sourceHeader?.toLowerCase() ?? DEFAULT_AUDIENCE_HEADER
+  const isInternalCaller = buildInternalCallerCheck(
+    audienceHeader,
+    options.internalAudienceValues ?? DEFAULT_INTERNAL_AUDIENCE_VALUES,
+  )
   const alwaysPublicPathPrefixes = options.alwaysPublicPathPrefixes ?? []
 
   fastify.addHook('onRoute', (route) => {
@@ -179,12 +217,15 @@ const plugin = (
     const gated =
       visibility === 'internal' && !isAlwaysPublicPath(route.url, alwaysPublicPathPrefixes)
 
-    if (gated) route.onRequest = appendRouteHook(route.onRequest, onRequestHook(sourceHeader))
+    if (gated) route.onRequest = appendRouteHook(route.onRequest, onRequestHook(isInternalCaller))
 
     const responses = route.schema?.response as Record<string, unknown> | undefined
     const encoders = responses ? buildPublicEncoders(route.method, route.url, responses) : null
     if (encoders && !gated) {
-      route.preHandler = appendRouteHook(route.preHandler, preHandlerHook(sourceHeader, encoders))
+      route.preHandler = appendRouteHook(
+        route.preHandler,
+        preHandlerHook(isInternalCaller, encoders),
+      )
     }
   })
 
