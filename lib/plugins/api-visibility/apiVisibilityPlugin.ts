@@ -205,7 +205,10 @@ const plugin = (
   fastify.setValidatorCompiler(validatorCompiler)
   fastify.setSerializerCompiler(serializerCompiler)
 
-  const audienceHeader = options.audienceHeader?.toLowerCase() ?? options.sourceHeader?.toLowerCase() ?? DEFAULT_AUDIENCE_HEADER
+  const audienceHeader =
+    options.audienceHeader?.toLowerCase() ??
+    options.sourceHeader?.toLowerCase() ??
+    DEFAULT_AUDIENCE_HEADER
   const isInternalCaller = buildInternalCallerCheck(
     audienceHeader,
     options.internalAudienceValues ?? DEFAULT_INTERNAL_AUDIENCE_VALUES,
