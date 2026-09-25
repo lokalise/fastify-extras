@@ -789,9 +789,10 @@ plugin hides internal fields and routes from the _published document_, this one 
 _live traffic_. A single marker is the source of truth for both.
 
 The caller's audience comes from a gateway-stamped request header (`audienceHeader`, default `x-api-audience`) and is
-**fail-closed**: only an exact `internal` value is treated as internal; anything else (missing, unknown, malformed) is
-public. So a caller whose header is not exactly `internal` is treated as public: it receives a `404` from every
-`internal` endpoint and a stripped response from public ones. The gateway must own this header (strip or overwrite any
+**fail-closed**: only a value that exactly matches one of `internalAudienceValues` (default `['internal']`) is treated
+as internal; anything else (missing, unknown, malformed) is public. So a caller whose header does not exactly match a
+configured value is treated as public: it receives a `404` from every `internal` endpoint and a stripped response from
+public ones. The gateway must own this header (strip or overwrite any
 client-provided value), otherwise an external caller could claim to be internal.
 
 Driven by that audience, it does three things:
