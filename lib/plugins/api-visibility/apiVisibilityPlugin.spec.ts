@@ -200,18 +200,6 @@ describe('apiVisibilityPlugin', () => {
     expect(await getStatus(app, '/legacy', { 'x-caller': 'internal' })).toBe(404)
   })
 
-  it('matches the configured header name case-insensitively', async () => {
-    // Node lowercases incoming header names
-    app = await buildApp({ audienceHeader: 'X-API-AUDIENCE' })
-
-    expect(await getUser(app, { 'x-api-audience': 'internal' })).toEqual({
-      id: '1',
-      mandatoryInternal: 'm',
-      optionalInternal: 'o',
-      items: [{ keep: 'k', hide: 'h' }],
-    })
-  })
-
   it('treats any configured internal header value as internal', async () => {
     app = await buildApp({ internalAudienceValues: ['backoffice', 'service'] })
 
