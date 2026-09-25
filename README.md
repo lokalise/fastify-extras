@@ -788,7 +788,7 @@ The runtime counterpart to the [API Documentation Plugin](#api-documentation-plu
 plugin hides internal fields and routes from the _published document_, this one enforces the same `visibility` markers on
 _live traffic_. A single marker is the source of truth for both.
 
-The caller's audience comes from a gateway-stamped request header (`sourceHeader`, default `x-api-audience`) and is
+The caller's audience comes from a gateway-stamped request header (`audienceHeader`, default `x-api-audience`) and is
 **fail-closed**: only an exact `internal` value is treated as internal; anything else (missing, unknown, malformed) is
 public. So a caller whose header is not exactly `internal` is treated as public: it receives a `404` from every
 `internal` endpoint and a stripped response from public ones. The gateway must own this header (strip or overwrite any
@@ -843,10 +843,11 @@ The `.meta({ visibility })` marker must live in the registry ftpz reads, the sam
 
 #### Options
 
-| Option                     | Default          | Description                                                                                 |
-| -------------------------- | ---------------- | ------------------------------------------------------------------------------------------- |
-| `sourceHeader`             | `x-api-audience` | Request header carrying the caller's audience. Only an exact `internal` value is internal   |
-| `alwaysPublicPathPrefixes` | `[]`             | Path prefixes exempt from the gate, always reachable by public callers (docs, health, etc.) |
+| Option                     | Default          | Description                                                                                         |
+| -------------------------- | ---------------- | --------------------------------------------------------------------------------------------------- |
+| `audienceHeader`           | `x-api-audience` | Request header carrying the caller's audience. Only a value in `internalAudienceValues` is internal |
+| `internalAudienceValues`   | `['internal']`   | `audienceHeader` value(s) identifying an internal caller: a string or an array (exact match)        |
+| `alwaysPublicPathPrefixes` | `[]`             | Path prefixes exempt from the gate, always reachable by public callers (docs, health, etc.)         |
 
 ## Utilities
 
