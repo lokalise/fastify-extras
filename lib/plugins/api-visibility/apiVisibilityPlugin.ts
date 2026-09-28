@@ -101,11 +101,6 @@ export type ApiVisibilityPluginOptions = {
   audienceHeader?: string
 
   /**
-   * @deprecated Use `audienceHeader` instead. Ignored when `audienceHeader` is set.
-   */
-  sourceHeader?: string
-
-  /**
    * `audienceHeader` value(s) that identify an internal caller, as a single value
    * or a list. Matching is exact and case-sensitive; any other value (or a
    * missing header) is public.
@@ -203,7 +198,7 @@ const plugin = (
   fastify.setValidatorCompiler(validatorCompiler)
   fastify.setSerializerCompiler(serializerCompiler)
 
-  const audienceHeader = options.audienceHeader ?? options.sourceHeader ?? DEFAULT_AUDIENCE_HEADER
+  const audienceHeader = options.audienceHeader ?? DEFAULT_AUDIENCE_HEADER
   const isInternalCaller = buildInternalCallerCheck(
     audienceHeader,
     options.internalAudienceValues ?? DEFAULT_INTERNAL_AUDIENCE_VALUES,

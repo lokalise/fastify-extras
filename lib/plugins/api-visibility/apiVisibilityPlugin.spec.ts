@@ -186,20 +186,6 @@ describe('apiVisibilityPlugin', () => {
     })
   })
 
-  it('still honours the deprecated `sourceHeader` option', async () => {
-    app = await buildApp({ sourceHeader: 'x-caller' })
-
-    expect(await getStatus(app, '/legacy', { 'x-caller': 'internal' })).toBe(200)
-    expect(await getStatus(app, '/legacy', { 'x-api-audience': 'internal' })).toBe(404)
-  })
-
-  it('prefers `audienceHeader` over the deprecated `sourceHeader`', async () => {
-    app = await buildApp({ audienceHeader: 'x-audience', sourceHeader: 'x-caller' })
-
-    expect(await getStatus(app, '/legacy', { 'x-audience': 'internal' })).toBe(200)
-    expect(await getStatus(app, '/legacy', { 'x-caller': 'internal' })).toBe(404)
-  })
-
   it('treats any configured internal header value as internal', async () => {
     app = await buildApp({ internalAudienceValues: ['backoffice', 'service'] })
 
