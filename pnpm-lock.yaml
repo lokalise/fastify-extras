@@ -34,7 +34,7 @@ importers:
         version: 1.69.0
       '@splitsoftware/splitio':
         specifier: ^11.6.0
-        version: 11.11.2
+        version: 11.12.0
       '@supercharge/promise-pool':
         specifier: ^3.2.0
         version: 3.3.0
@@ -386,9 +386,6 @@ packages:
 
   '@fastify/swagger@9.9.0':
     resolution: {integrity: sha512-d21Im1l3KoF2kmzJHOYL50Erjhj1qUUudQsW9hzwYTE7likjvMx7AQKpClyZbdhrqGXbl+fU4dI2S7BaLpFIvw==}
-
-  '@ioredis/commands@1.10.0':
-    resolution: {integrity: sha512-UmeW7z4LfctwoQ5wkhVzgq8tXkreED2xZGpX+Bg+zA+WJFZCT6c062AfCK/Dfk81xZnnwdhJCUMkitihRaoC2Q==}
 
   '@ioredis/commands@2.0.0':
     resolution: {integrity: sha512-vrx0AE/T0h7cRZwfo1M39Cr+ZhZrkf0V8mQN75wucKCxCLD9l/VX6no3gFvrLqD1IlG/1LtzWovqEw3t0Vr9zg==}
@@ -848,16 +845,16 @@ packages:
     resolution: {integrity: sha512-j3s9XPv8Wo1EG5/naBi4XGF0uXYQ2A3QZNI0NKWgCMxRHVrDJGlZEYymcHDHY7fquRm73P8U3c8xqJqB5yad6w==}
     engines: {node: '>=20'}
 
-  '@splitsoftware/splitio-commons@2.12.1':
-    resolution: {integrity: sha512-hoyY2TyG6rY3s622oVPzWT5y7FfQ/pZHIcdnGm5RCOyrr4GZBDiNHf8ftyurFlsXBLqIuSPDVj6L7n+z2LJuFQ==}
+  '@splitsoftware/splitio-commons@2.13.0':
+    resolution: {integrity: sha512-zEHsE9NjYFzyBWRfsQmMX57bR+R83GtMwVFTalomhW0Omo/hdGoObsyV82asFoV2iZL3kk9N2PtO5h9EEzsLbQ==}
     peerDependencies:
-      ioredis: ^4.28.0 || ^5.0.0
+      ioredis: ^4.28.0 || ^5.0.0 || ^6.0.0
     peerDependenciesMeta:
       ioredis:
         optional: true
 
-  '@splitsoftware/splitio@11.11.2':
-    resolution: {integrity: sha512-zvHHmell53sulBRgtiMDrjqf2u4i0VGFdYz8cWZh210otDmjkpaZjBi9Kw1GrTaREAj7WG7mJgumkp6/cXj6VQ==}
+  '@splitsoftware/splitio@11.12.0':
+    resolution: {integrity: sha512-newy6ER63BAlEWUiE2vUXYlQalXGo3Fvh3j9x+S0obYXsJnETXIbSEIYhcAukatm9jPV72NqIyci75STmVu1RA==}
     engines: {node: '>=14.0.0'}
 
   '@standard-schema/spec@1.1.0':
@@ -878,9 +875,6 @@ packages:
 
   '@types/estree@1.0.9':
     resolution: {integrity: sha512-GhdPgy1el4/ImP05X05Uw4cw2/M93BCUmnEvWZNStlCzEKME4Fkk+YpoA5OiHNQmoS7Cafb8Xa3Pya8m1Qrzeg==}
-
-  '@types/ioredis@4.28.10':
-    resolution: {integrity: sha512-69LyhUgrXdgcNDv7ogs1qXZomnfOEnSmrmMFqKgt1XMJxmoOSG/u3wYy13yACIfKuMJ8IhKgHafDO3sx19zVQQ==}
 
   '@types/node@24.13.3':
     resolution: {integrity: sha512-Dh8vAsV36ig5wa9OX4pXvMc9D3Veibfw2wix0CUwYODLD8nkj9UsLjASr49nPg+2eKzxhBV+v7L8pXvT4e639Q==}
@@ -1239,10 +1233,6 @@ packages:
   inherits@2.0.4:
     resolution: {integrity: sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==}
 
-  ioredis@5.11.1:
-    resolution: {integrity: sha512-ehuGcf94bQXhfagULNXrJdfnWO38v070jxSx/qE87Kjzmu2fU7ro5EFAb+OPituLqgfyuQaym5DlrNydW2sJ9A==}
-    engines: {node: '>=12.22.0'}
-
   ioredis@6.0.0:
     resolution: {integrity: sha512-f+Dtubxfpf6KYFq7WVXJoOLn0bk4TJrMrN9SzeE+jrWrCWj7XX3fA6vkryafhADX+GMymRxgDJDOI33COkJc0w==}
     engines: {node: '>=20.0.0'}
@@ -1574,10 +1564,6 @@ packages:
 
   redis-errors@1.2.0:
     resolution: {integrity: sha512-1qny3OExCf0UvUV/5wpYKf2YwPcOqXzkwKKSmKHiE6ZMQs5heeE/c8eXK+PNllPvmjgAbfnsbpkGZWy8cBpn9w==}
-    engines: {node: '>=4'}
-
-  redis-parser@3.0.0:
-    resolution: {integrity: sha512-DJnGAeenTdpMEH6uAJRK/uiyEIH9WVsUmoLwzudwGJUwZPp80PDBWPHXSAGNPwNvIXAbe7MSUB1zQFugFml66A==}
     engines: {node: '>=4'}
 
   redis-semaphore@5.8.0:
@@ -2212,8 +2198,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@ioredis/commands@1.10.0': {}
-
   '@ioredis/commands@2.0.0': {}
 
   '@jridgewell/resolve-uri@3.1.2': {}
@@ -2567,18 +2551,18 @@ snapshots:
 
   '@scalar/validation@0.6.3': {}
 
-  '@splitsoftware/splitio-commons@2.12.1(ioredis@5.11.1)':
+  '@splitsoftware/splitio-commons@2.13.0(ioredis@6.0.0)':
     dependencies:
-      '@types/ioredis': 4.28.10
+      '@types/node': 24.13.3
       tslib: 2.8.1
     optionalDependencies:
-      ioredis: 5.11.1
+      ioredis: 6.0.0
 
-  '@splitsoftware/splitio@11.11.2':
+  '@splitsoftware/splitio@11.12.0':
     dependencies:
-      '@splitsoftware/splitio-commons': 2.12.1(ioredis@5.11.1)
+      '@splitsoftware/splitio-commons': 2.13.0(ioredis@6.0.0)
       bloom-filters: 3.0.4
-      ioredis: 5.11.1
+      ioredis: 6.0.0
       js-yaml: 4.3.2
       node-fetch: 2.7.0
       tslib: 2.8.1
@@ -2604,10 +2588,6 @@ snapshots:
   '@types/deep-eql@4.0.2': {}
 
   '@types/estree@1.0.9': {}
-
-  '@types/ioredis@4.28.10':
-    dependencies:
-      '@types/node': 24.13.3
 
   '@types/node@24.13.3':
     dependencies:
@@ -2965,18 +2945,6 @@ snapshots:
 
   inherits@2.0.4: {}
 
-  ioredis@5.11.1:
-    dependencies:
-      '@ioredis/commands': 1.10.0
-      cluster-key-slot: 1.1.1
-      debug: 4.4.3
-      denque: 2.1.0
-      redis-errors: 1.2.0
-      redis-parser: 3.0.0
-      standard-as-callback: 2.1.0
-    transitivePeerDependencies:
-      - supports-color
-
   ioredis@6.0.0:
     dependencies:
       '@ioredis/commands': 2.0.0
@@ -3302,10 +3270,6 @@ snapshots:
   real-require@1.0.0: {}
 
   redis-errors@1.2.0: {}
-
-  redis-parser@3.0.0:
-    dependencies:
-      redis-errors: 1.2.0
 
   redis-semaphore@5.8.0(ioredis@6.0.0):
     dependencies:
