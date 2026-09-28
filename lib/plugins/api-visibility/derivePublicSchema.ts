@@ -1,6 +1,6 @@
+import type { FieldVisibility } from '@lokalise/api-contracts'
 import { z } from 'zod/v4'
 import { clone } from 'zod/v4/core'
-import type { FieldVisibility } from '../../zod/zodMeta.ts'
 
 /**
  * Per-derivation cache keyed by the source schema.
