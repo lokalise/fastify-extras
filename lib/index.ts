@@ -116,8 +116,6 @@ export {
   type CommonFastifyInstance,
 } from './plugins/pluginsCommon.js'
 
-export * from './zod/zodMeta.js'
-
 export {
   type ApiDocumentationAudience,
   type ApiDocumentationHooks,
