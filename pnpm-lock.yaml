@@ -67,8 +67,8 @@ importers:
         specifier: ^8.1.0
         version: 8.1.0(zod@4.6.5)
       '@lokalise/backend-http-client':
-        specifier: 12.0.0
-        version: 12.0.0(@lokalise/api-contracts@8.1.0(zod@4.6.5))(@lokalise/node-core@14.9.1(zod@4.6.5))(zod@4.6.5)
+        specifier: 12.2.0
+        version: 12.2.0(@lokalise/api-contracts@8.1.0(zod@4.6.5))(@lokalise/node-core@14.9.1(zod@4.6.5))(zod@4.6.5)
       '@lokalise/background-jobs-common':
         specifier: ^17.0.0
         version: 17.0.1(bullmq@6.3.8(ioredis@6.0.0))(ioredis@6.0.0)(pino@10.3.1)(toad-scheduler@4.1.0)(zod@4.6.5)
@@ -411,10 +411,10 @@ packages:
     peerDependencies:
       zod: '>=3.25.56'
 
-  '@lokalise/backend-http-client@12.0.0':
-    resolution: {integrity: sha512-JKhyW27ndRq8z27FxWH4VCr7yq1y7hlNJI/jjwIxoU8KT8R9vQed1UdycoyshVldUciMh+ERAZvBEMcw8rAMTA==}
+  '@lokalise/backend-http-client@12.2.0':
+    resolution: {integrity: sha512-B0lSVLFm4iOkqGE8WIWYWyoPqGfBEO3uM4+PS8UKOS32y2SdYi8xfG/CcR0TGVUw5yA4I3/AchdFi7iP2L22ZA==}
     peerDependencies:
-      '@lokalise/api-contracts': '>=6.9.0'
+      '@lokalise/api-contracts': '>=7.2.0'
       '@lokalise/node-core': '>=13.1.0'
       zod: '>=3.25.56'
 
@@ -1757,8 +1757,8 @@ packages:
     resolution: {integrity: sha512-IDxfleLmmbSskfWSUATiN1nfn2rDuvnMOqb5CWR92iIfojA0Ud+ulOAAEQ57LPr9rWmsreUyf5lwyao+7GNNVw==}
     engines: {node: '>=20.18.1'}
 
-  undici@8.10.0:
-    resolution: {integrity: sha512-HvltHd7avK13QIw/oLe4qoOLyoVSoafqJ2jYOrtMRBkbYT31eiBQ8O0ehRKZiEZCMEyLFQNIADpgCWC5fALvYQ==}
+  undici@8.11.2:
+    resolution: {integrity: sha512-u4UB2/IrKdU6lFxumHmmo1a3fCQO5tzQllRorfoRS63txhrB7xTpSn1PftwC4qEHkOaqP95fCWW4lJzwErwzhQ==}
     engines: {node: '>=22.19.0'}
 
   unfetch@4.2.0:
@@ -2236,12 +2236,12 @@ snapshots:
     dependencies:
       zod: 4.6.5
 
-  '@lokalise/backend-http-client@12.0.0(@lokalise/api-contracts@8.1.0(zod@4.6.5))(@lokalise/node-core@14.9.1(zod@4.6.5))(zod@4.6.5)':
+  '@lokalise/backend-http-client@12.2.0(@lokalise/api-contracts@8.1.0(zod@4.6.5))(@lokalise/node-core@14.9.1(zod@4.6.5))(zod@4.6.5)':
     dependencies:
       '@lokalise/api-contracts': 8.1.0(zod@4.6.5)
       '@lokalise/node-core': 14.9.1(zod@4.6.5)
       parse-sse: 0.1.0
-      undici: 8.10.0
+      undici: 8.11.2
       zod: 4.6.5
 
   '@lokalise/background-jobs-common@17.0.1(bullmq@6.3.8(ioredis@6.0.0))(ioredis@6.0.0)(pino@10.3.1)(toad-scheduler@4.1.0)(zod@4.6.5)':
@@ -3451,7 +3451,7 @@ snapshots:
 
   undici@7.29.0: {}
 
-  undici@8.10.0: {}
+  undici@8.11.2: {}
 
   unfetch@4.2.0: {}
 
