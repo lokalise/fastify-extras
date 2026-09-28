@@ -10,7 +10,7 @@ importers:
     dependencies:
       '@amplitude/analytics-node':
         specifier: ^1.5.7
-        version: 1.5.72
+        version: 1.5.74
       '@bugsnag/js':
         specifier: ^8.4.0
         version: 8.10.0
@@ -144,11 +144,11 @@ packages:
   '@amplitude/analytics-connector@1.6.8':
     resolution: {integrity: sha512-ryZUsakytEZZ+g/O5mTsObckhCKtZrNdZw+KKcbuzVCZa1LJFPWHvKj+jwQpPO0ngsbb6oEpC5laaIEM5B4XKQ==}
 
-  '@amplitude/analytics-core@2.56.0':
-    resolution: {integrity: sha512-c/9rp9aCcG84V/PF2DAZ6I12zkZ91/IKcgkkZt7gLF7Gbx6yzX9+BPc7hKRMb5QNu20ka7nZb1sKF+Iw5WaELw==}
+  '@amplitude/analytics-core@2.58.0':
+    resolution: {integrity: sha512-ZFd271l2UZrR0gXXcgRqV1fj6nURIemovV7EDTdO8z+9rVobV7P+mjs4srqLwEJl3YfNX/ma1IgfFFriFEmXSQ==}
 
-  '@amplitude/analytics-node@1.5.72':
-    resolution: {integrity: sha512-43/A4l6VH8nIYTO7d3b8UyWayvN041DJQOhQvR8yYOk3f6cgKnEmzWBVJ9AP3DQqhheDT+U+zLSFH9HHlClGlA==}
+  '@amplitude/analytics-node@1.5.74':
+    resolution: {integrity: sha512-WlTa7UpivebOquGicmGiQhDPc6DmNyTRYqvnQZ9tKUnE4HR/1hn2IcZTQ7ms3EOf8SK0PlW0ysZonXERUfzwBg==}
 
   '@amplitude/analytics-types@2.11.1':
     resolution: {integrity: sha512-wFEgb0t99ly2uJKm5oZ28Lti0Kh5RecR5XBkwfUpDzn84IoCIZ8GJTsMw/nThu8FZFc7xFDA4UAt76zhZKrs9A==}
@@ -1896,7 +1896,7 @@ snapshots:
 
   '@amplitude/analytics-connector@1.6.8': {}
 
-  '@amplitude/analytics-core@2.56.0':
+  '@amplitude/analytics-core@2.58.0':
     dependencies:
       '@amplitude/analytics-connector': 1.6.8
       '@types/zen-observable': 0.8.3
@@ -1904,9 +1904,9 @@ snapshots:
       tslib: 2.8.1
       zen-observable: 0.10.0
 
-  '@amplitude/analytics-node@1.5.72':
+  '@amplitude/analytics-node@1.5.74':
     dependencies:
-      '@amplitude/analytics-core': 2.56.0
+      '@amplitude/analytics-core': 2.58.0
       tslib: 2.8.1
 
   '@amplitude/analytics-types@2.11.1': {}
