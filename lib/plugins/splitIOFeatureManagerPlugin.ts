@@ -1,5 +1,4 @@
 import * as path from 'node:path'
-import * as process from 'node:process'
 
 import { SplitFactory } from '@splitsoftware/splitio'
 import type {
@@ -40,18 +39,27 @@ export class SplitIOFeatureManager {
     debugMode: boolean,
     localhostFilePath?: string,
   ) {
-    if (isSplitIOEnabled) {
-      const factory: SplitIO.ISDK = SplitFactory({
-        core: {
-          authorizationKey: localhostFilePath ? 'localhost' : apiKey,
-        },
-        features: localhostFilePath ? path.join(process.cwd(), localhostFilePath) : undefined,
-        debug: debugMode,
-      })
-      this.splitIOClient = factory.client()
-    }
-
     this.isEnabled = isSplitIOEnabled
+    if (!this.isEnabled) return
+
+    // The SDK internally registers a SIGTERM listener to clean itself up on process shutdown. We
+    // don't want it: cleanup is handled by `shutdown()`, which destroys the client from the plugin's
+    // onClose hook. The listener is registered synchronously while the factory and its main client
+    // are created, so any SIGTERM listener added in between belongs to the SDK and is removed here.
+    const sigtermListenersBefore = new Set(process.listeners('SIGTERM'))
+    const factory: SplitIO.ISDK = SplitFactory({
+      core: {
+        authorizationKey: localhostFilePath ? 'localhost' : apiKey,
+      },
+      features: localhostFilePath ? path.join(process.cwd(), localhostFilePath) : undefined,
+      debug: debugMode,
+    })
+    this.splitIOClient = factory.client()
+    for (const listener of process.listeners('SIGTERM')) {
+      if (!sigtermListenersBefore.has(listener)) {
+        process.removeListener('SIGTERM', listener)
+      }
+    }
   }
 
   public async init() {
