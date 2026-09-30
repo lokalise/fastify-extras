@@ -2,7 +2,10 @@ import type { FastifyInstance } from 'fastify'
 import fastify from 'fastify'
 
 import type { SplitIOOptions } from './splitIOFeatureManagerPlugin.js'
-import { splitIOFeatureManagerPlugin } from './splitIOFeatureManagerPlugin.js'
+import {
+  SplitIOFeatureManager,
+  splitIOFeatureManagerPlugin,
+} from './splitIOFeatureManagerPlugin.js'
 
 async function initApp(opts: SplitIOOptions) {
   const app = fastify()
@@ -104,5 +107,30 @@ describe('splitIOFeatureManagerPlugin', () => {
     const treatment = app.splitIOFeatureManager.getTreatment('', '')
 
     expect(treatment).toBe('control')
+  })
+
+  describe('SIGTERM listener', () => {
+    // Standalone mode (a real SDK key) is the one where the SDK registers its SIGTERM listener
+    const createStandaloneManager = () => new SplitIOFeatureManager(true, 'fake-sdk-key', false)
+
+    it('does not leave the SDK SIGTERM listener registered', async () => {
+      const listenersBefore = process.listeners('SIGTERM')
+
+      const manager = createStandaloneManager()
+
+      expect(process.listeners('SIGTERM')).toStrictEqual(listenersBefore)
+      await manager.shutdown()
+    })
+
+    it('keeps SIGTERM listeners registered by others', async () => {
+      const myListener = () => {}
+      process.once('SIGTERM', myListener)
+
+      const manager = createStandaloneManager()
+
+      expect(process.listeners('SIGTERM')).toContain(myListener)
+      process.removeListener('SIGTERM', myListener)
+      await manager.shutdown()
+    })
   })
 })
