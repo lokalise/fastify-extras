@@ -25,7 +25,7 @@ importers:
         version: 10.2.1
       '@lokalise/error-utils':
         specifier: ^4.0.0
-        version: 4.0.0(@lokalise/node-core@14.9.1(zod@4.6.5))
+        version: 4.0.0(@lokalise/node-core@14.10.0(zod@4.6.5))
       '@prometheus-io/client':
         specifier: ^0.16.1
         version: 0.16.1
@@ -68,7 +68,7 @@ importers:
         version: 8.1.0(zod@4.6.5)
       '@lokalise/backend-http-client':
         specifier: 12.2.0
-        version: 12.2.0(@lokalise/api-contracts@8.1.0(zod@4.6.5))(@lokalise/node-core@14.9.1(zod@4.6.5))(zod@4.6.5)
+        version: 12.2.0(@lokalise/api-contracts@8.1.0(zod@4.6.5))(@lokalise/node-core@14.10.0(zod@4.6.5))(zod@4.6.5)
       '@lokalise/background-jobs-common':
         specifier: ^17.0.0
         version: 17.0.1(bullmq@6.3.8(ioredis@6.0.0))(ioredis@6.0.0)(pino@10.3.1)(toad-scheduler@4.1.0)(zod@4.6.5)
@@ -80,10 +80,10 @@ importers:
         version: 2.1.0(zod@4.6.5)
       '@lokalise/fastify-api-contracts':
         specifier: ^7.0.1
-        version: 7.0.1(@fastify/sse@0.6.0(fastify@5.12.5))(@lokalise/api-contracts@8.1.0(zod@4.6.5))(@lokalise/node-core@14.9.1(zod@4.6.5))(fastify-type-provider-zod@7.0.0(@fastify/swagger@9.9.0)(fastify@5.12.5)(openapi-types@12.1.3)(zod@4.6.5))(fastify@5.12.5)(zod@4.6.5)
+        version: 7.0.1(@fastify/sse@0.6.0(fastify@5.12.5))(@lokalise/api-contracts@8.1.0(zod@4.6.5))(@lokalise/node-core@14.10.0(zod@4.6.5))(fastify-type-provider-zod@7.0.0(@fastify/swagger@9.9.0)(fastify@5.12.5)(openapi-types@12.1.3)(zod@4.6.5))(fastify@5.12.5)(zod@4.6.5)
       '@lokalise/node-core':
         specifier: ^14.4.2
-        version: 14.9.1(zod@4.6.5)
+        version: 14.10.0(zod@4.6.5)
       '@lokalise/tsconfig':
         specifier: ^3.0.0
         version: 3.1.0
@@ -457,8 +457,8 @@ packages:
   '@lokalise/id-utils@3.0.1':
     resolution: {integrity: sha512-XgqjroAQi1RAEi2bRvC/7Fc/jM9UpFL1i+Wi1dJLJ0RwwJU/5lNtqv6XnkcHEWIwMTwbGulqvp0yHaZ8biEsaA==}
 
-  '@lokalise/node-core@14.9.1':
-    resolution: {integrity: sha512-gI8pcmRXytPLbc6fBWJwhBB7IW8XxcGBz9ozhf1lneR9SrosWto/2GAQdCFVSiiRm9GLdrhfC+M7OuxKOvbvSQ==}
+  '@lokalise/node-core@14.10.0':
+    resolution: {integrity: sha512-1M6x2FwpPRVfqHkTmV5YMiY14kYbY5xc6LI2vAIjDCPlqjcb0eo7435+vT1HLj1pygSvGEkCYjs1Wo5nfjn2hQ==}
     peerDependencies:
       zod: '>=3.25.76 <5.0.0'
 
@@ -2240,10 +2240,10 @@ snapshots:
     dependencies:
       zod: 4.6.5
 
-  '@lokalise/backend-http-client@12.2.0(@lokalise/api-contracts@8.1.0(zod@4.6.5))(@lokalise/node-core@14.9.1(zod@4.6.5))(zod@4.6.5)':
+  '@lokalise/backend-http-client@12.2.0(@lokalise/api-contracts@8.1.0(zod@4.6.5))(@lokalise/node-core@14.10.0(zod@4.6.5))(zod@4.6.5)':
     dependencies:
       '@lokalise/api-contracts': 8.1.0(zod@4.6.5)
-      '@lokalise/node-core': 14.9.1(zod@4.6.5)
+      '@lokalise/node-core': 14.10.0(zod@4.6.5)
       parse-sse: 0.1.0
       undici: 8.11.2
       zod: 4.6.5
@@ -2251,7 +2251,7 @@ snapshots:
   '@lokalise/background-jobs-common@17.0.1(bullmq@6.3.8(ioredis@6.0.0))(ioredis@6.0.0)(pino@10.3.1)(toad-scheduler@4.1.0)(zod@4.6.5)':
     dependencies:
       '@lokalise/id-utils': 3.0.1
-      '@lokalise/node-core': 14.9.1(zod@4.6.5)
+      '@lokalise/node-core': 14.10.0(zod@4.6.5)
       bullmq: 6.3.8(ioredis@6.0.0)
       ioredis: 6.0.0
       pino: 10.3.1
@@ -2264,20 +2264,20 @@ snapshots:
 
   '@lokalise/biome-config@2.0.0': {}
 
-  '@lokalise/error-utils@4.0.0(@lokalise/node-core@14.9.1(zod@4.6.5))':
+  '@lokalise/error-utils@4.0.0(@lokalise/node-core@14.10.0(zod@4.6.5))':
     dependencies:
       '@bugsnag/node': 8.10.0
-      '@lokalise/node-core': 14.9.1(zod@4.6.5)
+      '@lokalise/node-core': 14.10.0(zod@4.6.5)
       pino-std-serializers: 7.1.0
 
   '@lokalise/errors@2.1.0(zod@4.6.5)':
     dependencies:
       zod: 4.6.5
 
-  '@lokalise/fastify-api-contracts@7.0.1(@fastify/sse@0.6.0(fastify@5.12.5))(@lokalise/api-contracts@8.1.0(zod@4.6.5))(@lokalise/node-core@14.9.1(zod@4.6.5))(fastify-type-provider-zod@7.0.0(@fastify/swagger@9.9.0)(fastify@5.12.5)(openapi-types@12.1.3)(zod@4.6.5))(fastify@5.12.5)(zod@4.6.5)':
+  '@lokalise/fastify-api-contracts@7.0.1(@fastify/sse@0.6.0(fastify@5.12.5))(@lokalise/api-contracts@8.1.0(zod@4.6.5))(@lokalise/node-core@14.10.0(zod@4.6.5))(fastify-type-provider-zod@7.0.0(@fastify/swagger@9.9.0)(fastify@5.12.5)(openapi-types@12.1.3)(zod@4.6.5))(fastify@5.12.5)(zod@4.6.5)':
     dependencies:
       '@lokalise/api-contracts': 8.1.0(zod@4.6.5)
-      '@lokalise/node-core': 14.9.1(zod@4.6.5)
+      '@lokalise/node-core': 14.10.0(zod@4.6.5)
       fastify: 5.12.5
       fastify-type-provider-zod: 7.0.0(@fastify/swagger@9.9.0)(fastify@5.12.5)(openapi-types@12.1.3)(zod@4.6.5)
       light-my-request: 6.6.0
@@ -2292,7 +2292,7 @@ snapshots:
       ulidx: 2.4.1
       uuidv7: 1.2.1
 
-  '@lokalise/node-core@14.9.1(zod@4.6.5)':
+  '@lokalise/node-core@14.10.0(zod@4.6.5)':
     dependencies:
       dot-prop: 6.0.1
       pino: 10.3.1
