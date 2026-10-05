@@ -71,7 +71,7 @@ importers:
         version: 12.2.0(@lokalise/api-contracts@8.1.0(zod@4.6.5))(@lokalise/node-core@14.10.0(zod@4.6.5))(zod@4.6.5)
       '@lokalise/background-jobs-common':
         specifier: ^17.0.0
-        version: 17.0.1(bullmq@6.3.8(ioredis@6.0.0))(ioredis@6.0.0)(pino@10.3.1)(toad-scheduler@4.1.0)(zod@4.6.5)
+        version: 17.0.1(bullmq@6.3.11(ioredis@6.0.0))(ioredis@6.0.0)(pino@10.3.1)(toad-scheduler@4.1.0)(zod@4.6.5)
       '@lokalise/biome-config':
         specifier: ^2.0.0
         version: 2.0.0
@@ -104,7 +104,7 @@ importers:
         version: 4.1.10(vitest@4.1.10)
       bullmq:
         specifier: ^6.2.0
-        version: 6.3.8(ioredis@6.0.0)
+        version: 6.3.11(ioredis@6.0.0)
       dd-trace:
         specifier: ^6.0.0
         version: 6.19.0
@@ -993,8 +993,8 @@ packages:
     resolution: {integrity: sha512-ScQ4IuvIEF1TMlP7Zt+vjJ//9zlPb2SDcxWxM3bk8s6t6GGdJ7KO1dCcTidOPJKePW30LE/2cT7wCyPho9/Wxg==}
     engines: {node: 20 || >=22}
 
-  bullmq@6.3.8:
-    resolution: {integrity: sha512-09zcOQ1uycyCK2C9iY2Pm+/JPa/gIXiZqGBUiIlO1v3VshwBgarmAgWRTWDL/IAvI8NFE1zqrkdKFgRfXHHM5A==}
+  bullmq@6.3.11:
+    resolution: {integrity: sha512-ylSY3FYil6E9IjqVtT+WHcZvS1rgTZ0L3Aev62u45NXQFe+H37a1AuC3WDATR7ScNDet1Ah8MnP3lf8XaUbPUw==}
     engines: {node: '>=14.17.0'}
     peerDependencies:
       bullmq-otel: '>=2.0.0'
@@ -2248,11 +2248,11 @@ snapshots:
       undici: 8.11.2
       zod: 4.6.5
 
-  '@lokalise/background-jobs-common@17.0.1(bullmq@6.3.8(ioredis@6.0.0))(ioredis@6.0.0)(pino@10.3.1)(toad-scheduler@4.1.0)(zod@4.6.5)':
+  '@lokalise/background-jobs-common@17.0.1(bullmq@6.3.11(ioredis@6.0.0))(ioredis@6.0.0)(pino@10.3.1)(toad-scheduler@4.1.0)(zod@4.6.5)':
     dependencies:
       '@lokalise/id-utils': 3.0.1
       '@lokalise/node-core': 14.10.0(zod@4.6.5)
-      bullmq: 6.3.8(ioredis@6.0.0)
+      bullmq: 6.3.11(ioredis@6.0.0)
       ioredis: 6.0.0
       pino: 10.3.1
       redis-semaphore: 5.8.0(ioredis@6.0.0)
@@ -2744,7 +2744,7 @@ snapshots:
     dependencies:
       balanced-match: 4.0.4
 
-  bullmq@6.3.8(ioredis@6.0.0):
+  bullmq@6.3.11(ioredis@6.0.0):
     dependencies:
       cron-parser: 5.10.1
       msgpackr: 2.1.0
