@@ -13,7 +13,7 @@ importers:
         version: 1.5.74
       '@bugsnag/js':
         specifier: ^9.0.0
-        version: 9.0.0
+        version: 9.1.0
       '@bugsnag/node':
         specifier: ^9.0.0
         version: 9.1.0
@@ -231,8 +231,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@bugsnag/browser@9.0.0':
-    resolution: {integrity: sha512-RWMKovU6DsxpqDsHhlXOaV1bqUZ9HWfw1JDQb9g5/qVx8HfQ7hkak2NbguQOWS5Eqawn/UrZ8H6wD2wTTdvU4A==}
+  '@bugsnag/browser@9.1.0':
+    resolution: {integrity: sha512-/E0tirRq32QMGtl7bELWkDlNlJkY9GjKWoT5uUrsd1IcreUJj8k/eIqTYwuPRkveL/Mmm2qBKI+OMn2SnC7ifw==}
 
   '@bugsnag/core@8.9.0':
     resolution: {integrity: sha512-SrXO0isIZfrCem06/WDvC5MSd1Tj6Yjm4Wqdlv6jyjTvsow+cppvt7rS9Bps3qOeXfYCqWHN4ev02OdwnfZ1PQ==}
@@ -243,8 +243,8 @@ packages:
   '@bugsnag/cuid@3.2.2':
     resolution: {integrity: sha512-7onuYLTMqMmHE9BBPG0YER4nFsU1rB+me1/YIeMusqcLbVbKKuG9u9+BDVDpje5e0llkkrVNOKYwmzM9DRIo7A==}
 
-  '@bugsnag/js@9.0.0':
-    resolution: {integrity: sha512-XLFkeapRDDV+tlbSl792BnVchiRvX55s3QxL/Ph13CD+90h4riFG1+dYzfLgTeTwuz4Yi0FijDkI9A/zCkLnMg==}
+  '@bugsnag/js@9.1.0':
+    resolution: {integrity: sha512-4y0LIbnF/ej5tniAXptWNc73fGbuq0L8KV73vWcEu1IS+WZizmVmBNsU1f+I0p4OrdJPetenLlUy8/X6Bj9hRQ==}
 
   '@bugsnag/node@8.10.0':
     resolution: {integrity: sha512-xLDSk3EBUDIAwYyECxzdEpsgZv6Mwn/WAV57vQBiKsTgia7cnjE83VeR9O6uu4oAUhye160LAVzRCvmJNac+nw==}
@@ -1932,7 +1932,7 @@ snapshots:
   '@biomejs/cli-win32-x64@1.9.4':
     optional: true
 
-  '@bugsnag/browser@9.0.0':
+  '@bugsnag/browser@9.1.0':
     dependencies:
       '@bugsnag/core': 9.1.0
 
@@ -1954,9 +1954,9 @@ snapshots:
 
   '@bugsnag/cuid@3.2.2': {}
 
-  '@bugsnag/js@9.0.0':
+  '@bugsnag/js@9.1.0':
     dependencies:
-      '@bugsnag/browser': 9.0.0
+      '@bugsnag/browser': 9.1.0
       '@bugsnag/node': 9.1.0
 
   '@bugsnag/node@8.10.0':
