@@ -34,7 +34,7 @@ importers:
         version: 1.73.1
       '@splitsoftware/splitio':
         specifier: ^11.12.0
-        version: 11.12.0
+        version: 11.12.1
       '@supercharge/promise-pool':
         specifier: ^3.2.0
         version: 3.3.0
@@ -831,16 +831,16 @@ packages:
     resolution: {integrity: sha512-ur7Oyr1vJmvX9+GTXfDXTvVOJD6JRgMtwV44hI6uUFja4IUDvSzuZ+qDpZYQ32uhV/50oT8siFE6JfiZbeJwng==}
     engines: {node: '>=20'}
 
-  '@splitsoftware/splitio-commons@2.13.0':
-    resolution: {integrity: sha512-zEHsE9NjYFzyBWRfsQmMX57bR+R83GtMwVFTalomhW0Omo/hdGoObsyV82asFoV2iZL3kk9N2PtO5h9EEzsLbQ==}
+  '@splitsoftware/splitio-commons@2.13.1':
+    resolution: {integrity: sha512-eH4o+5N9gF51Z8lnbJWaVjTDexNVovWNVT5eAU6B9SCWdbSpsFIF51zaKe9ke7OJl5nxg8DEJRWKmF4CvW2kEg==}
     peerDependencies:
       ioredis: ^4.28.0 || ^5.0.0 || ^6.0.0
     peerDependenciesMeta:
       ioredis:
         optional: true
 
-  '@splitsoftware/splitio@11.12.0':
-    resolution: {integrity: sha512-newy6ER63BAlEWUiE2vUXYlQalXGo3Fvh3j9x+S0obYXsJnETXIbSEIYhcAukatm9jPV72NqIyci75STmVu1RA==}
+  '@splitsoftware/splitio@11.12.1':
+    resolution: {integrity: sha512-jQ6mVgVfc0CzYUgkhMSbDCBQ7I1KJNZm6slnVmhw3//AL2t/iiSGXqWEV7wIn7LsvcvnsHDu9ykv/4oMu/IP/w==}
     engines: {node: '>=14.0.0'}
 
   '@standard-schema/spec@1.1.0':
@@ -2523,16 +2523,16 @@ snapshots:
 
   '@scalar/validation@0.6.6': {}
 
-  '@splitsoftware/splitio-commons@2.13.0(ioredis@6.0.0)':
+  '@splitsoftware/splitio-commons@2.13.1(ioredis@6.0.0)':
     dependencies:
       '@types/node': 24.13.3
       tslib: 2.8.1
     optionalDependencies:
       ioredis: 6.0.0
 
-  '@splitsoftware/splitio@11.12.0':
+  '@splitsoftware/splitio@11.12.1':
     dependencies:
-      '@splitsoftware/splitio-commons': 2.13.0(ioredis@6.0.0)
+      '@splitsoftware/splitio-commons': 2.13.1(ioredis@6.0.0)
       bloom-filters: 3.0.4
       ioredis: 6.0.0
       js-yaml: 4.3.2
