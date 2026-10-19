@@ -19,7 +19,7 @@ importers:
         version: 9.1.0
       '@fastify/error':
         specifier: ^4.2.0
-        version: 4.2.0
+        version: 4.2.1
       '@fastify/jwt':
         specifier: '>=9.1.0'
         version: 10.2.1
@@ -368,6 +368,9 @@ packages:
 
   '@fastify/error@4.2.0':
     resolution: {integrity: sha512-RSo3sVDXfHskiBZKBPRgnQTtIqpi/7zhJOEmAxCiBcM7d0uwdGdxLlsCaLzGs8v8NnxIRlfG0N51p5yFaOentQ==}
+
+  '@fastify/error@4.2.1':
+    resolution: {integrity: sha512-MYBumuIwP+5MIpXSyKm6/o1Eigcoij186lWUssX3LH5U8KWqU0ktZhzC4CErIX9EJeQeRGI+zJZQWakBlFbUcg==}
 
   '@fastify/fast-json-stringify-compiler@5.1.0':
     resolution: {integrity: sha512-PxcYtKLbQ8Z+yApiqjK8FwxIwvEj38k2OiLc17u8dkJSlmfi2wHHPaSnaoqBPQqtvF8YVsDgDpP2snDCfFrpfw==}
@@ -2163,6 +2166,8 @@ snapshots:
 
   '@fastify/error@4.2.0': {}
 
+  '@fastify/error@4.2.1': {}
+
   '@fastify/fast-json-stringify-compiler@5.1.0':
     dependencies:
       fast-json-stringify: 7.0.1
@@ -2188,7 +2193,7 @@ snapshots:
 
   '@fastify/sse@0.6.0(fastify@5.12.5)':
     dependencies:
-      '@fastify/error': 4.2.0
+      '@fastify/error': 4.2.1
       fastify: 5.12.5
       fastify-plugin: 6.0.1
 
@@ -2658,7 +2663,7 @@ snapshots:
 
   avvio@9.3.0:
     dependencies:
-      '@fastify/error': 4.2.0
+      '@fastify/error': 4.2.1
       fastq: 1.20.3
 
   balanced-match@4.0.4: {}
@@ -2838,7 +2843,7 @@ snapshots:
 
   fastify-type-provider-zod@7.0.0(@fastify/swagger@9.9.2)(fastify@5.12.5)(openapi-types@12.1.3)(zod@4.6.5):
     dependencies:
-      '@fastify/error': 4.2.0
+      '@fastify/error': 4.2.1
       '@fastify/swagger': 9.9.2
       fastify: 5.12.5
       openapi-types: 12.1.3
@@ -2847,7 +2852,7 @@ snapshots:
   fastify@5.12.5:
     dependencies:
       '@fastify/ajv-compiler': 4.0.6
-      '@fastify/error': 4.2.0
+      '@fastify/error': 4.2.1
       '@fastify/fast-json-stringify-compiler': 5.1.0
       '@fastify/proxy-addr': 5.1.1
       abstract-logging: 2.0.1
