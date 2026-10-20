@@ -11,19 +11,9 @@
         "type": "git",
         "url": "git://github.com/lokalise/fastify-extras.git"
     },
-    "keywords": [
-        "fastify",
-        "bugsnag",
-        "request-context",
-        "request-id",
-        "split-io"
-    ],
+    "keywords": ["fastify", "bugsnag", "request-context", "request-id", "split-io"],
     "homepage": "https://github.com/lokalise/fastify-extras",
-    "files": [
-        "dist/**",
-        "LICENSE",
-        "README.md"
-    ],
+    "files": ["dist/**", "LICENSE", "README.md"],
     "type": "module",
     "main": "./dist/index.js",
     "exports": {
