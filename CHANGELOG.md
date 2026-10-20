@@ -1,5 +1,12 @@
 # @lokalise/fastify-extras
 
+## 36.0.2
+
+### Patch Changes
+
+- 03f0b34: Fix errors reported via `reportErrorToBugsnag` / `bugsnagErrorReporter` being silently dropped. `bugsnagPlugin` now
+  starts Bugsnag through `@lokalise/error-utils`, so the started client and the reporting client are the same one.
+
 ## 36.0.1
 
 ### Patch Changes
