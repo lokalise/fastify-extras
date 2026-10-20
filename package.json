@@ -37,8 +37,6 @@
     },
     "dependencies": {
         "@amplitude/analytics-node": "^1.5.7",
-        "@bugsnag/js": "^9.0.0",
-        "@bugsnag/node": "^9.0.0",
         "@fastify/error": "^4.2.0",
         "@lokalise/error-utils": "^4.0.0",
         "@prometheus-io/client": "^0.16.1",
@@ -80,6 +78,7 @@
         "@lokalise/fastify-api-contracts": "^7.0.1",
         "@lokalise/node-core": "^14.4.2",
         "@lokalise/tsconfig": "^3.0.0",
+        "@lokalise/universal-ts-utils": "^4.12.0",
         "@opentelemetry/api": "^1.9.0",
         "@opentelemetry/context-async-hooks": "^2.10.0",
         "@opentelemetry/sdk-trace-base": "^2.10.0",

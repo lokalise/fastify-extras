@@ -4,7 +4,7 @@ export {
   bugsnagErrorReporter,
   addFeatureFlag,
 } from './plugins/bugsnagPlugin.js'
-export type { ErrorReport } from './plugins/bugsnagPlugin.js'
+export type { BugsnagConfig, ErrorReport } from './plugins/bugsnagPlugin.js'
 
 export {
   requestContextProviderPlugin,

@@ -28,7 +28,7 @@ The following needs to be taken into consideration when adding new runtime depen
 
 ### Dependencies
 
-- `@bugsnag/js`;
+- `@lokalise/error-utils`;
 - `@scalar/fastify-api-reference`;
 - `@splitsoftware/splitio`;
 - `fastify-metrics`;
