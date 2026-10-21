@@ -1,9 +1,9 @@
-import { TEST_OPTIONS, buildClient, sendGet } from '@lokalise/backend-http-client'
+import { buildClient, sendGet, TEST_OPTIONS } from '@lokalise/backend-http-client'
 import type { FastifyInstance } from 'fastify'
 import fastify from 'fastify'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import { metricsPlugin } from './metricsPlugin.js'
+import { metricsPlugin } from './metricsPlugin.ts'
 
 async function initApp(errorObjectResolver = (err: unknown) => err) {
   const app = fastify()

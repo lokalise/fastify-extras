@@ -4,9 +4,9 @@ import type { MockInstance } from 'vitest'
 import { describe, expect, it, vi } from 'vitest'
 import { z } from 'zod/v4'
 
-import { Amplitude } from './Amplitude.js'
-import { AMPLITUDE_BASE_MESSAGE_SCHEMA, AmplitudeAdapter } from './AmplitudeAdapter.js'
-import type { AmplitudeMessage } from './AmplitudeAdapter.js'
+import { Amplitude } from './Amplitude.ts'
+import type { AmplitudeMessage } from './AmplitudeAdapter.ts'
+import { AMPLITUDE_BASE_MESSAGE_SCHEMA, AmplitudeAdapter } from './AmplitudeAdapter.ts'
 
 const testMessages = {
   myEvent: {

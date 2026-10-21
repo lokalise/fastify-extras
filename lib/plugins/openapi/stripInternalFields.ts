@@ -1,4 +1,4 @@
-import type { ApiDocumentationAudience } from './apiDocumentationTransform.js'
+import type { ApiDocumentationAudience } from './apiDocumentationTransform.ts'
 
 const isPlainObject = (value: unknown): value is Record<string, unknown> => {
   return typeof value === 'object' && value !== null && !Array.isArray(value)

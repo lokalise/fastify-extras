@@ -16,7 +16,7 @@ import {
 } from 'fastify-type-provider-zod'
 import { z } from 'zod/v4'
 import { safeEncode } from 'zod/v4/core'
-import { derivePublicSchema } from './derivePublicSchema.js'
+import { derivePublicSchema } from './derivePublicSchema.ts'
 
 const DEFAULT_AUDIENCE_HEADER = 'x-api-audience'
 const DEFAULT_INTERNAL_AUDIENCE_VALUES: string[] = ['internal' satisfies RouteVisibility]

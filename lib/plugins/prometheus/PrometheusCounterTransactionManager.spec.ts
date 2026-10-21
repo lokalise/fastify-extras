@@ -1,8 +1,8 @@
-import { TEST_OPTIONS, buildClient, sendGet } from '@lokalise/backend-http-client'
+import { buildClient, sendGet, TEST_OPTIONS } from '@lokalise/backend-http-client'
 import fastify, { type FastifyInstance } from 'fastify'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { metricsPlugin } from '../metricsPlugin.js'
-import { PrometheusCounterTransactionManager } from './PrometheusCounterTransactionManager.js'
+import { metricsPlugin } from '../metricsPlugin.ts'
+import { PrometheusCounterTransactionManager } from './PrometheusCounterTransactionManager.ts'
 
 describe('PrometheusCounterTransactionManager', () => {
   describe('appMetrics is undefined', () => {

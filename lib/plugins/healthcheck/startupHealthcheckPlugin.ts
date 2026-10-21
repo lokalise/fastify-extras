@@ -2,8 +2,8 @@ import { type Either, isError } from '@lokalise/node-core'
 import type { FastifyPluginCallback } from 'fastify'
 import fp from 'fastify-plugin'
 import { stdSerializers } from 'pino'
-import { type HealthCheck, resolveHealthcheckResults } from './commonHealthcheckPlugin.js'
-import type { HealthChecker } from './healthcheckCommons.js'
+import { type HealthCheck, resolveHealthcheckResults } from './commonHealthcheckPlugin.ts'
+import type { HealthChecker } from './healthcheckCommons.ts'
 
 async function executeHealthCheck(
   checker: HealthChecker,

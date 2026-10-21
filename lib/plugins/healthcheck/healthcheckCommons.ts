@@ -1,5 +1,5 @@
 import type { Either } from '@lokalise/node-core'
-import type { AnyFastifyInstance } from '../pluginsCommon.js'
+import type { AnyFastifyInstance } from '../pluginsCommon.ts'
 
 export type HealthChecker = (app: AnyFastifyInstance) => Promise<Either<Error, true>>
 

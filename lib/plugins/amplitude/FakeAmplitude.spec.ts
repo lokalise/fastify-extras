@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { FakeAmplitude } from './FakeAmplitude.js'
+import { FakeAmplitude } from './FakeAmplitude.ts'
 
 describe('FakeAmplitude', () => {
   it('constructs successfully', () => {

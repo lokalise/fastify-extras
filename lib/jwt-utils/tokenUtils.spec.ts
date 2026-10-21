@@ -3,7 +3,7 @@ import fastify from 'fastify'
 
 const ACCESS_TOKEN_TTL_IN_SECONDS = 60
 
-import { decodeJwtToken, generateJwtToken } from './tokenUtils.js'
+import { decodeJwtToken, generateJwtToken } from './tokenUtils.ts'
 
 describe('tokenUtils', () => {
   describe('generateJwtToken', () => {

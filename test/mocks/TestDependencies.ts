@@ -1,6 +1,6 @@
 import type { BackgroundJobProcessorDependencies } from '@lokalise/background-jobs-common'
 import { CommonBullmqFactory } from '@lokalise/background-jobs-common'
-import { type RedisConfig, globalLogger } from '@lokalise/node-core'
+import { globalLogger, type RedisConfig } from '@lokalise/node-core'
 import type { MockInstance } from 'vitest'
 
 const testLogger = globalLogger

@@ -1,12 +1,12 @@
 import type { FastifyInstance } from 'fastify'
-import { type RouteHandlerMethod, fastify } from 'fastify'
+import { fastify, type RouteHandlerMethod } from 'fastify'
 
 import pino from 'pino'
 import type { RequestContext } from '../index.ts'
 import {
   getRequestIdFastifyAppConfig,
   requestContextProviderPlugin,
-} from './requestContextProviderPlugin.js'
+} from './requestContextProviderPlugin.ts'
 
 type TestApp = FastifyInstance<any, any, any, pino.Logger, any>
 

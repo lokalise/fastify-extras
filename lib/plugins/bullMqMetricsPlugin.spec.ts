@@ -10,16 +10,16 @@ import fastify from 'fastify'
 import { Redis } from 'ioredis'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { z } from 'zod/v4'
-import { TestBackgroundJobProcessor } from '../../test/mocks/TestBackgroundJobProcessor.js'
-import { TestDependencies } from '../../test/mocks/TestDependencies.js'
-import { ObservableQueue } from './bull-mq-metrics/ObservableQueue.js'
+import { TestBackgroundJobProcessor } from '../../test/mocks/TestBackgroundJobProcessor.ts'
+import { TestDependencies } from '../../test/mocks/TestDependencies.ts'
+import { ObservableQueue } from './bull-mq-metrics/ObservableQueue.ts'
 import {
   BackgroundJobsBasedQueueDiscoverer,
   RedisBasedQueueDiscoverer,
-} from './bull-mq-metrics/queueDiscoverers.js'
-import type { BullMqMetricsPluginOptions } from './bullMqMetricsPlugin.js'
-import { bullMqMetricsPlugin } from './bullMqMetricsPlugin.js'
-import { metricsPlugin } from './metricsPlugin.js'
+} from './bull-mq-metrics/queueDiscoverers.ts'
+import type { BullMqMetricsPluginOptions } from './bullMqMetricsPlugin.ts'
+import { bullMqMetricsPlugin } from './bullMqMetricsPlugin.ts'
+import { metricsPlugin } from './metricsPlugin.ts'
 
 type TestOptions = {
   enableMetricsPlugin: boolean
@@ -259,11 +259,11 @@ describe.each([true, false])('bullMqMetricsPlugin', (useGenericRedisQueueDiscove
           await app.bullMqMetrics.collect()
           const responseAfter = await getMetrics()
           if (
-            // @ts-ignore
+            // @ts-expect-error
             responseAfter.result.body.includes(
               'bullmq_jobs_finished_duration_count{status="completed",queue="test_job"} 1',
             ) &&
-            // @ts-ignore
+            // @ts-expect-error
             responseAfter.result.body.includes(
               'bullmq_jobs_finished_duration_count{status="completed",queue="test_job2"} 1',
             )

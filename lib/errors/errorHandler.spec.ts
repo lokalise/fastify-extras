@@ -1,21 +1,20 @@
 import createError from '@fastify/error'
 import fastifySSE from '@fastify/sse'
 import {
+  definePublicError,
   ErrorType,
   InternalError as LokaliseInternalError,
   PublicError,
-  definePublicError,
 } from '@lokalise/errors'
 import type { ErrorReport } from '@lokalise/node-core'
 import { InternalError, PublicNonRecoverableError } from '@lokalise/node-core'
-import { type FastifyInstance, type RouteHandlerMethod, fastify } from 'fastify'
-import { type ServerSentEvent, parseServerSentEvents } from 'parse-sse'
-import { type MockInstance, afterEach, describe, expect, it, vitest } from 'vitest'
-import { type ZodSchema, z } from 'zod/v4'
-
+import { type FastifyInstance, fastify, type RouteHandlerMethod } from 'fastify'
 import { serializerCompiler, validatorCompiler } from 'fastify-type-provider-zod'
-import type { ErrorHandlerParams, FreeformRecord } from './errorHandler.js'
-import { createErrorHandler, defaultResolveResponseObject } from './errorHandler.js'
+import { parseServerSentEvents, type ServerSentEvent } from 'parse-sse'
+import { afterEach, describe, expect, it, type MockInstance, vitest } from 'vitest'
+import { type ZodSchema, z } from 'zod/v4'
+import type { ErrorHandlerParams, FreeformRecord } from './errorHandler.ts'
+import { createErrorHandler, defaultResolveResponseObject } from './errorHandler.ts'
 
 async function initApp(
   routeHandler: RouteHandlerMethod,

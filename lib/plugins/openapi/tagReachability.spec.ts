@@ -1,4 +1,4 @@
-import { pruneUnreferencedTags } from './tagReachability.js'
+import { pruneUnreferencedTags } from './tagReachability.ts'
 
 describe('tagReachability', () => {
   describe('pruneUnreferencedTags', () => {

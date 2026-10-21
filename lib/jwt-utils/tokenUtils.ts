@@ -1,7 +1,7 @@
 import type { JWT } from '@fastify/jwt'
 import { AuthFailedError } from '@lokalise/node-core'
 
-import { EmptyTokenError } from '../errors/publicErrors.js'
+import { EmptyTokenError } from '../errors/publicErrors.ts'
 
 export function generateJwtToken(
   jwt: JWT,

@@ -1,8 +1,8 @@
 import { globalLogger } from '@lokalise/node-core'
 import fastify, { type FastifyInstance, type FastifyReply, type FastifyRequest } from 'fastify'
 import { beforeEach, describe } from 'vitest'
-import { createErrorHandler } from '../errors/errorHandler.js'
-import { createStaticTokenAuthPreHandler } from './authPreHandlers.js'
+import { createErrorHandler } from '../errors/errorHandler.ts'
+import { createStaticTokenAuthPreHandler } from './authPreHandlers.ts'
 
 const SECRET_TOKEN = 'my_secret'
 

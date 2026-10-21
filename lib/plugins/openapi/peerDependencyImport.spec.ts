@@ -1,4 +1,4 @@
-import { importPeerDependency } from './peerDependencyImport.js'
+import { importPeerDependency } from './peerDependencyImport.ts'
 
 const moduleNotFound = (specifier: string): NodeJS.ErrnoException => {
   const error: NodeJS.ErrnoException = new Error(

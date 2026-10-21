@@ -1,11 +1,11 @@
 import type { FastifyInstance } from 'fastify'
 import fastify from 'fastify'
 
-import type { SplitIOOptions } from './splitIOFeatureManagerPlugin.js'
+import type { SplitIOOptions } from './splitIOFeatureManagerPlugin.ts'
 import {
   SplitIOFeatureManager,
   splitIOFeatureManagerPlugin,
-} from './splitIOFeatureManagerPlugin.js'
+} from './splitIOFeatureManagerPlugin.ts'
 
 async function initApp(opts: SplitIOOptions) {
   const app = fastify()

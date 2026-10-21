@@ -18,7 +18,7 @@ export function createStaticTokenAuthPreHandler(
 
     const authHeaderValue = req.headers[authHeaderName]
     const authHeader =
-      !!authHeaderValue && Array.isArray(authHeaderValue) ? authHeaderValue[0] : authHeaderValue
+      authHeaderValue && Array.isArray(authHeaderValue) ? authHeaderValue[0] : authHeaderValue
 
     if (!authHeader?.startsWith(BEARER_PREFIX)) {
       logger.error('Token not present')

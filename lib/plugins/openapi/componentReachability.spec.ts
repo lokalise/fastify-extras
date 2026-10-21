@@ -1,4 +1,4 @@
-import { pruneUnreachableComponents } from './componentReachability.js'
+import { pruneUnreachableComponents } from './componentReachability.ts'
 
 describe('componentReachability', () => {
   describe('pruneUnreachableComponents', () => {

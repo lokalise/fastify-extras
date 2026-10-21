@@ -1,21 +1,21 @@
 import type { FastifyDynamicSwaggerOptions, SwaggerTransformObject } from '@fastify/swagger'
 import type { FastifyPluginAsync, onRequestHookHandler, preHandlerHookHandler } from 'fastify'
 import fp from 'fastify-plugin'
-import type { AnyFastifyInstance } from '../pluginsCommon.js'
+import type { AnyFastifyInstance } from '../pluginsCommon.ts'
 import {
   type ApiDocumentationAudience,
   type ApiDocumentationTransform,
-  type ChainedApiDocumentationTransform,
   apiDocumentationTransform,
-} from './apiDocumentationTransform.js'
-import { pruneUnreachableComponents } from './componentReachability.js'
+  type ChainedApiDocumentationTransform,
+} from './apiDocumentationTransform.ts'
+import { pruneUnreachableComponents } from './componentReachability.ts'
 import {
   DEFAULT_HIDDEN_ROUTES,
   type DocumentationRouteMatcher,
-} from './documentationRouteMatchers.js'
-import { importPeerDependency } from './peerDependencyImport.js'
-import { stripInternalFieldsFromDocument } from './stripInternalFields.js'
-import { pruneUnreferencedTags } from './tagReachability.js'
+} from './documentationRouteMatchers.ts'
+import { importPeerDependency } from './peerDependencyImport.ts'
+import { stripInternalFieldsFromDocument } from './stripInternalFields.ts'
+import { pruneUnreferencedTags } from './tagReachability.ts'
 
 const DEFAULT_PUBLIC_ROUTE_PREFIX = '/documentation'
 const DEFAULT_INTERNAL_ROUTE_PREFIX = '/documentation/internal'

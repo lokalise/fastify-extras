@@ -1,10 +1,10 @@
 import type { FastifyInstance } from 'fastify'
-import { type RouteHandlerMethod, fastify } from 'fastify'
+import { fastify, type RouteHandlerMethod } from 'fastify'
 
 import {
   getRequestIdFastifyAppConfig,
   requestContextProviderPlugin,
-} from './requestContextProviderPlugin.js'
+} from './requestContextProviderPlugin.ts'
 
 declare module 'fastify' {
   interface RequestContext {
