@@ -21,7 +21,7 @@ import pino from 'pino'
 import type { ZodError } from 'zod/v4'
 import type { AnyFastifyInstance } from '../plugins/pluginsCommon.ts'
 
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+// biome-ignore lint/suspicious/noExplicitAny: free-form record, value types are up to the caller
 export type FreeformRecord = Record<string, any>
 
 const knownAuthErrors = new Set([

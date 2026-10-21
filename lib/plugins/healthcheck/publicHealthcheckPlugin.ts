@@ -38,7 +38,7 @@ function plugin(
       hide: true,
     },
 
-    // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: <explanation>
+    // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: handler aggregates the results of every configured healthcheck
     handler: async (_, reply) => {
       let isFullyHealthy = true
       let isPartiallyHealthy = false

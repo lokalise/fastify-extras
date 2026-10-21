@@ -773,7 +773,7 @@ describe('apiDocumentationPlugin', () => {
     }
 
     const operation = (document: OpenApiDocument | undefined, path: string): FreeformRecord =>
-      (document?.paths?.[path] as FreeformRecord).get
+      (document?.paths?.[path] as FreeformRecord | undefined)?.get
 
     const responsePropertyNames = (
       document: OpenApiDocument | undefined,
@@ -789,7 +789,8 @@ describe('apiDocumentationPlugin', () => {
     const componentPropertyNames = (
       document: OpenApiDocument | undefined,
       name: string,
-    ): string[] => Object.keys((document?.components?.schemas?.[name] as FreeformRecord).properties)
+    ): string[] =>
+      Object.keys((document?.components?.schemas?.[name] as FreeformRecord | undefined)?.properties)
 
     let app: DocumentedApp | undefined
 

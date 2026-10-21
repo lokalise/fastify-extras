@@ -32,7 +32,7 @@ export class ObservableQueue {
     try {
       const job = await this.queue.getJob(jobId)
 
-      if (!job || !job.finishedOn) {
+      if (!job?.finishedOn) {
         return
       }
 

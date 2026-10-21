@@ -26,10 +26,10 @@ export function generateJwtToken(
 const hasCode = (error: unknown): error is { code: unknown } =>
   typeof error === 'object' && error !== null && 'code' in error
 
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+// biome-ignore lint/suspicious/noExplicitAny: decoded payload shape is defined by the token issuer
 export function decodeJwtToken(jwt: JWT, encodedToken: string): Promise<any> {
   return new Promise((resolve, reject) => {
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    // biome-ignore lint/suspicious/noExplicitAny: matches the untyped payload returned by decodeJwtToken
     jwt.verify(encodedToken, (err: Error | null, decoded: any) => {
       /* v8 ignore next 3 */
       if (err) {

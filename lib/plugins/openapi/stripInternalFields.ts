@@ -124,7 +124,6 @@ const walk = (
   cleanProperties(node, audience, internalComponents)
   cleanParameters(node, audience, internalComponents)
   // Fully remove the marker rather than leave a `visibility: undefined` tombstone.
-  // biome-ignore lint/performance/noDelete: one-shot document transform, not a hot path.
   if ('visibility' in node) delete node.visibility
 
   for (const value of Object.values(node)) walk(value, audience, seen, internalComponents)

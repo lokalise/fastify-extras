@@ -11,6 +11,7 @@ import { unhandledExceptionPlugin } from './unhandledExceptionPlugin.ts'
 const errors: ErrorReport[] = []
 
 process.on('unhandledRejection', (error) => {
+  // biome-ignore lint/suspicious/noConsole: surface unhandled rejections in the test output
   console.error('Unhandled Rejection:', error)
   // Optionally throw an error here to fail the test
 })
