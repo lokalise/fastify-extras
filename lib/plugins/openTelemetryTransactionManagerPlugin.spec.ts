@@ -1,4 +1,4 @@
-import { type Span, SpanStatusCode, TraceFlags, context, trace } from '@opentelemetry/api'
+import { context, type Span, SpanStatusCode, TraceFlags, trace } from '@opentelemetry/api'
 import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks'
 import {
   BasicTracerProvider,
@@ -9,7 +9,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   OpenTelemetryTransactionManager,
   openTelemetryTransactionManagerPlugin,
-} from './openTelemetryTransactionManagerPlugin.js'
+} from './openTelemetryTransactionManagerPlugin.ts'
 
 const AMBIENT_SPAN_CONTEXT = {
   traceId: 'a'.repeat(32),

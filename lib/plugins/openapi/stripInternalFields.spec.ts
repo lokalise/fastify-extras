@@ -1,5 +1,5 @@
 import type { FreeformRecord } from '@lokalise/node-core'
-import { stripInternalFieldsFromDocument } from './stripInternalFields.js'
+import { stripInternalFieldsFromDocument } from './stripInternalFields.ts'
 
 const responseSchema = (document: FreeformRecord): FreeformRecord =>
   document.paths['/users'].get.responses['200'].content['application/json'].schema

@@ -1,19 +1,19 @@
 import type { FreeformRecord } from '@lokalise/node-core'
 import fastify, { type FastifyInstance } from 'fastify'
 import {
-  type ZodTypeProvider,
   createJsonSchemaTransform,
   createJsonSchemaTransformObject,
   serializerCompiler,
   validatorCompiler,
+  type ZodTypeProvider,
 } from 'fastify-type-provider-zod'
 import { z } from 'zod'
 import {
   type ApiDocumentationPluginOptions,
   apiDocumentationPlugin,
-} from './apiDocumentationPlugin.js'
-import { DEFAULT_INTERNAL_MARKER_KEY } from './apiDocumentationTransform.js'
-import { DEFAULT_HIDDEN_ROUTES } from './documentationRouteMatchers.js'
+} from './apiDocumentationPlugin.ts'
+import { DEFAULT_INTERNAL_MARKER_KEY } from './apiDocumentationTransform.ts'
+import { DEFAULT_HIDDEN_ROUTES } from './documentationRouteMatchers.ts'
 
 /**
  * A registry of its own rather than `z.globalRegistry`, so the model
@@ -773,7 +773,7 @@ describe('apiDocumentationPlugin', () => {
     }
 
     const operation = (document: OpenApiDocument | undefined, path: string): FreeformRecord =>
-      (document?.paths?.[path] as FreeformRecord).get
+      (document?.paths?.[path] as FreeformRecord | undefined)?.get
 
     const responsePropertyNames = (
       document: OpenApiDocument | undefined,
@@ -789,7 +789,8 @@ describe('apiDocumentationPlugin', () => {
     const componentPropertyNames = (
       document: OpenApiDocument | undefined,
       name: string,
-    ): string[] => Object.keys((document?.components?.schemas?.[name] as FreeformRecord).properties)
+    ): string[] =>
+      Object.keys((document?.components?.schemas?.[name] as FreeformRecord | undefined)?.properties)
 
     let app: DocumentedApp | undefined
 

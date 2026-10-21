@@ -1,9 +1,9 @@
 import { sanitizeRedisConfig } from '@lokalise/background-jobs-common'
 import type { RedisConfig } from '@lokalise/node-core'
-import { Queue, QueueEvents } from 'bullmq'
 import type { FinishedStatus, JobType } from 'bullmq'
+import { Queue, QueueEvents } from 'bullmq'
 import type { FastifyBaseLogger } from 'fastify'
-import type { Metrics } from './MetricsCollector.js'
+import type { Metrics } from './MetricsCollector.ts'
 
 /**
  * bullmq v6 dropped the `paused` job state - pausing no longer moves jobs onto a separate
@@ -32,7 +32,7 @@ export class ObservableQueue {
     try {
       const job = await this.queue.getJob(jobId)
 
-      if (!job || !job.finishedOn) {
+      if (!job?.finishedOn) {
         return
       }
 

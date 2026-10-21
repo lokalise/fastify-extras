@@ -1,9 +1,9 @@
 import type { FastifyInstance } from 'fastify'
 import fastify from 'fastify'
 
-import type { HealthChecker } from './healthcheckCommons.js'
-import type { PublicHealthcheckPluginOptions } from './publicHealthcheckPlugin.js'
-import { publicHealthcheckPlugin } from './publicHealthcheckPlugin.js'
+import type { HealthChecker } from './healthcheckCommons.ts'
+import type { PublicHealthcheckPluginOptions } from './publicHealthcheckPlugin.ts'
+import { publicHealthcheckPlugin } from './publicHealthcheckPlugin.ts'
 
 const positiveHealthcheckChecker: HealthChecker = () => {
   return Promise.resolve({ result: true })

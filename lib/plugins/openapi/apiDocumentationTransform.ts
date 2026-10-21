@@ -2,9 +2,9 @@ import type { SwaggerTransform } from '@fastify/swagger'
 import {
   type DocumentationRouteMatcher,
   type DocumentedRoute,
-  type OpenApiRouteSchema,
   matchesAnyRoute,
-} from './documentationRouteMatchers.js'
+  type OpenApiRouteSchema,
+} from './documentationRouteMatchers.ts'
 
 /** Which of the two generated documents a transform is producing. */
 export type ApiDocumentationAudience = 'public' | 'internal'

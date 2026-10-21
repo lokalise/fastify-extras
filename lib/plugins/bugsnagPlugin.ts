@@ -1,19 +1,19 @@
 import {
-  type ErrorReport,
-  type Severity,
   addFeatureFlag,
   bugsnagErrorReporter,
+  type ErrorReport,
   reportErrorToBugsnag,
+  type Severity,
   startBugsnag,
 } from '@lokalise/error-utils'
 import type { FastifyInstance, FastifyPluginCallback } from 'fastify'
 import fp from 'fastify-plugin'
 
 export {
-  reportErrorToBugsnag,
   addFeatureFlag,
   bugsnagErrorReporter,
   type ErrorReport,
+  reportErrorToBugsnag,
   type Severity,
 }
 

@@ -2,7 +2,7 @@ import { defineApiContract } from '@lokalise/api-contracts'
 import { buildFastifyApiRoute } from '@lokalise/fastify-api-contracts'
 import fastify, { type FastifyInstance } from 'fastify'
 import { z } from 'zod/v4'
-import { type ApiVisibilityPluginOptions, apiVisibilityPlugin } from './apiVisibilityPlugin.js'
+import { type ApiVisibilityPluginOptions, apiVisibilityPlugin } from './apiVisibilityPlugin.ts'
 
 const USER_SCHEMA = z.object({
   id: z.string(),

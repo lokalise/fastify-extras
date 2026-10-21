@@ -2,11 +2,11 @@ import type { FastifyInstance } from 'fastify'
 import fastify from 'fastify'
 
 import { describe } from 'vitest'
-import type { HealthChecker } from './healthcheckCommons.js'
+import type { HealthChecker } from './healthcheckCommons.ts'
 import {
   type StartupHealthcheckPluginOptions,
   startupHealthcheckPlugin,
-} from './startupHealthcheckPlugin.js'
+} from './startupHealthcheckPlugin.ts'
 
 const positiveHealthcheckChecker: HealthChecker = () => {
   return Promise.resolve({ result: true })

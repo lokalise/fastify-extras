@@ -1,8 +1,8 @@
 import * as prometheus from '@prometheus-io/client'
 import type { FastifyBaseLogger } from 'fastify'
 import { describe, expect, it } from 'vitest'
-import type { MetricCollectorOptions } from './MetricsCollector.js'
-import { MetricsCollector } from './MetricsCollector.js'
+import type { MetricCollectorOptions } from './MetricsCollector.ts'
+import { MetricsCollector } from './MetricsCollector.ts'
 
 const options = {
   bullMqPrefix: 'bull',

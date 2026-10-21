@@ -1,8 +1,8 @@
 import { type Either, isError } from '@lokalise/node-core'
 import type { FastifyPluginCallback } from 'fastify'
 import fp from 'fastify-plugin'
-import type { AnyFastifyInstance } from '../pluginsCommon.js'
-import type { HealthChecker } from './healthcheckCommons.js'
+import type { AnyFastifyInstance } from '../pluginsCommon.ts'
+import type { HealthChecker } from './healthcheckCommons.ts'
 
 export interface CommonHealthcheckPluginOptions {
   responsePayload?: Record<string, unknown>

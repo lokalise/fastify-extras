@@ -1,4 +1,4 @@
-import type { OpenApiDocumentLike } from './componentReachability.js'
+import type { OpenApiDocumentLike } from './componentReachability.ts'
 
 /**
  * The string tag names an operation's `callbacks` reference.

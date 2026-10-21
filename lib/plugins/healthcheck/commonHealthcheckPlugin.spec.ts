@@ -5,8 +5,8 @@ import { describe } from 'vitest'
 import {
   type CommonHealthcheckPluginOptions,
   commonHealthcheckPlugin,
-} from './commonHealthcheckPlugin.js'
-import type { HealthChecker } from './healthcheckCommons.js'
+} from './commonHealthcheckPlugin.ts'
+import type { HealthChecker } from './healthcheckCommons.ts'
 
 const positiveHealthcheckChecker: HealthChecker = () => {
   return Promise.resolve({ result: true })

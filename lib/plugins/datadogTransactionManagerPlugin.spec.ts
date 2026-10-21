@@ -24,7 +24,7 @@ vi.mock('dd-trace', () => ({
 import {
   DatadogTransactionManager,
   datadogTransactionManagerPlugin,
-} from './datadogTransactionManagerPlugin.js'
+} from './datadogTransactionManagerPlugin.ts'
 
 describe('datadogTransactionManagerPlugin', () => {
   it('should be a valid fastify plugin', () => {

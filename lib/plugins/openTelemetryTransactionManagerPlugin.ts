@@ -1,6 +1,6 @@
 import type { TransactionObservabilityManager } from '@lokalise/node-core'
 import type { Link, Span, Tracer } from '@opentelemetry/api'
-import { SpanStatusCode, context, isSpanContextValid, trace } from '@opentelemetry/api'
+import { context, isSpanContextValid, SpanStatusCode, trace } from '@opentelemetry/api'
 import type { FastifyInstance, FastifyPluginCallback } from 'fastify'
 import fp from 'fastify-plugin'
 import { FifoMap } from 'toad-cache'

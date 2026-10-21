@@ -5,8 +5,8 @@ import { describe } from 'vitest'
 import {
   type CommonSyncHealthcheckPluginOptions,
   commonSyncHealthcheckPlugin,
-} from './commonSyncHealthcheckPlugin.js'
-import type { HealthCheckerSync } from './healthcheckCommons.js'
+} from './commonSyncHealthcheckPlugin.ts'
+import type { HealthCheckerSync } from './healthcheckCommons.ts'
 
 const positiveHealthcheckChecker: HealthCheckerSync = () => {
   return null

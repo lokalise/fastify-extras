@@ -2,8 +2,8 @@ import * as prometheus from '@prometheus-io/client'
 import { PromisePool } from '@supercharge/promise-pool'
 import type { FastifyBaseLogger } from 'fastify'
 
-import { ObservableQueue } from './ObservableQueue.js'
-import type { QueueDiscoverer } from './queueDiscoverers.js'
+import { ObservableQueue } from './ObservableQueue.ts'
+import type { QueueDiscoverer } from './queueDiscoverers.ts'
 
 export type Metrics = {
   countGauge: prometheus.Gauge<'status' | 'queue'>

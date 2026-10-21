@@ -53,16 +53,12 @@ export class RedisBasedQueueDiscoverer extends AbstractRedisBasedQueueDiscoverer
 
     const queues = new Set<string>()
     for await (const chunk of scanStream) {
-      // biome-ignore lint/complexity/noForEach: <explanation>
-      ;(chunk as string[])
-        .map((key) => {
-          const parts = key.split(':')
-          if (parts.length < 3) return undefined
-          return parts[parts.length - 2] // we need the part before to meta
-        })
-        .filter((value) => !!value)
-        // biome-ignore lint/style/noNonNullAssertion: undefined removed in previous filter
-        .forEach((queue) => queues.add(queue!))
+      for (const key of chunk as string[]) {
+        const parts = key.split(':')
+        if (parts.length < 3) continue
+        const queue = parts[parts.length - 2] // we need the part before to meta
+        if (queue) queues.add(queue)
+      }
     }
     await redis.quit()
 
@@ -77,11 +73,10 @@ export class RedisBasedQueueDiscoverer extends AbstractRedisBasedQueueDiscoverer
 
 export class BackgroundJobsBasedQueueDiscoverer extends AbstractRedisBasedQueueDiscoverer {
   protected async discoverQueuesForInstance(redisConfig: RedisConfig): Promise<RedisQueue[]> {
-    return backgroundJobProcessorGetActiveQueueIds(redisConfig).then((queueNames) =>
-      queueNames.map((queueName) => ({
-        redisConfig,
-        queueName,
-      })),
-    )
+    const queueNames = await backgroundJobProcessorGetActiveQueueIds(redisConfig)
+    return queueNames.map((queueName) => ({
+      redisConfig,
+      queueName,
+    }))
   }
 }

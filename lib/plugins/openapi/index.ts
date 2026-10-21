@@ -1,28 +1,28 @@
 export {
   type ApiDocumentationHooks,
-  apiDocumentationPlugin,
   type ApiDocumentationPluginOptions,
+  apiDocumentationPlugin,
   type ChainedApiDocumentationTransformObject,
   type OpenApiDocumentDefinition,
-} from './apiDocumentationPlugin.js'
+} from './apiDocumentationPlugin.ts'
 export {
   type ApiDocumentationAudience,
   type ApiDocumentationTransform,
-  apiDocumentationTransform,
   type ApiDocumentationTransformInput,
   type ApiDocumentationTransformOptions,
   type ApiDocumentationTransformResult,
+  apiDocumentationTransform,
   type ChainedApiDocumentationTransform,
   DEFAULT_INTERNAL_MARKER_KEY,
-} from './apiDocumentationTransform.js'
+} from './apiDocumentationTransform.ts'
 export {
   type OpenApiDocumentLike,
   pruneUnreachableComponents,
-} from './componentReachability.js'
+} from './componentReachability.ts'
 export {
   DEFAULT_HIDDEN_ROUTES,
   type DocumentationRouteMatcher,
   type DocumentedRoute,
   type OpenApiRouteSchema,
-} from './documentationRouteMatchers.js'
-export { pruneUnreferencedTags } from './tagReachability.js'
+} from './documentationRouteMatchers.ts'
+export { pruneUnreferencedTags } from './tagReachability.ts'

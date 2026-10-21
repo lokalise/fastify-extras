@@ -1,8 +1,8 @@
 import { type Either, isError } from '@lokalise/node-core'
 import type { FastifyPluginCallback } from 'fastify'
 import fp from 'fastify-plugin'
-import type { AnyFastifyInstance } from '../pluginsCommon.js'
-import type { HealthChecker } from './healthcheckCommons.js'
+import type { AnyFastifyInstance } from '../pluginsCommon.ts'
+import type { HealthChecker } from './healthcheckCommons.ts'
 
 export interface PublicHealthcheckPluginOptions {
   responsePayload?: Record<string, unknown>
@@ -38,7 +38,7 @@ function plugin(
       hide: true,
     },
 
-    // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: <explanation>
+    // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: handler aggregates the results of every configured healthcheck
     handler: async (_, reply) => {
       let isFullyHealthy = true
       let isPartiallyHealthy = false

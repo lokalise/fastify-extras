@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify'
 import fastify from 'fastify'
 
-import { stripTrailingSlashPlugin } from './stripTrailingSlashPlugin.js'
+import { stripTrailingSlashPlugin } from './stripTrailingSlashPlugin.ts'
 
 const initApp = async () => {
   const app = fastify()

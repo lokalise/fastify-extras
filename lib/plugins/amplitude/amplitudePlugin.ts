@@ -9,7 +9,7 @@ import type {
 } from 'fastify'
 import fp from 'fastify-plugin'
 
-import { Amplitude } from './Amplitude.js'
+import { Amplitude } from './Amplitude.ts'
 
 declare module 'fastify' {
   interface FastifyInstance {

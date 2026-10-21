@@ -1,1 +1,1 @@
-export * from './apiVisibilityPlugin.js'
+export * from './apiVisibilityPlugin.ts'

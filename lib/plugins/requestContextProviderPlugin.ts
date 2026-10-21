@@ -13,7 +13,6 @@ import fp from 'fastify-plugin'
 // Augment existing FastifyRequest interface with new fields
 declare module 'fastify' {
   interface FastifyRequest {
-    // biome-ignore lint/correctness/noUndeclaredVariables: TS resolves this correctly from the fastify module
     reqContext: RequestContext
   }
 }

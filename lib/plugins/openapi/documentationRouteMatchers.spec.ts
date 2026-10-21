@@ -2,7 +2,7 @@ import {
   DEFAULT_HIDDEN_ROUTES,
   type DocumentedRoute,
   matchesAnyRoute,
-} from './documentationRouteMatchers.js'
+} from './documentationRouteMatchers.ts'
 
 const route = (url: string, method: string | string[] = 'GET'): DocumentedRoute => ({
   url,

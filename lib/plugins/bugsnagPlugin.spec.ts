@@ -5,12 +5,12 @@ import fastify from 'fastify'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import {
-  type BugsnagConfig,
   addFeatureFlag,
+  type BugsnagConfig,
   bugsnagErrorReporter,
   bugsnagPlugin,
   reportErrorToBugsnag,
-} from './bugsnagPlugin.js'
+} from './bugsnagPlugin.ts'
 
 type ReceivedEvent = {
   exceptions: { message: string }[]

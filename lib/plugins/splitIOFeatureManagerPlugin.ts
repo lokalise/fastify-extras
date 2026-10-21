@@ -8,7 +8,7 @@ import type {
   SplitKey,
   Treatment,
   TreatmentWithConfig,
-  //@ts-ignore
+  //@ts-expect-error
 } from '@splitsoftware/splitio/types/splitio'
 import type { FastifyInstance, FastifyPluginAsync } from 'fastify'
 import fp from 'fastify-plugin'

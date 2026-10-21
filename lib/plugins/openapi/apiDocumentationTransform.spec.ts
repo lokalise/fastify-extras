@@ -1,9 +1,9 @@
 import {
   type ApiDocumentationTransform,
-  DEFAULT_INTERNAL_MARKER_KEY,
   apiDocumentationTransform,
-} from './apiDocumentationTransform.js'
-import type { OpenApiRouteSchema } from './documentationRouteMatchers.js'
+  DEFAULT_INTERNAL_MARKER_KEY,
+} from './apiDocumentationTransform.ts'
+import type { OpenApiRouteSchema } from './documentationRouteMatchers.ts'
 
 /**
  * `SwaggerTransform` declares a full `RouteOptions` and an always-present

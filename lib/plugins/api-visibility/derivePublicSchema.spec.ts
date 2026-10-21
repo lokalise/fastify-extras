@@ -1,5 +1,5 @@
 import { z } from 'zod/v4'
-import { derivePublicSchema } from './derivePublicSchema.js'
+import { derivePublicSchema } from './derivePublicSchema.ts'
 
 describe('derivePublicSchema', () => {
   describe('ZodObject', () => {

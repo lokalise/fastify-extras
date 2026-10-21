@@ -12,3 +12,4 @@ minimumReleaseAgeExclude:
   - fastify-metrics@14.0.0
   - '@lokalise/error-utils@4.0.0'
   - '@lokalise/api-contracts@8.1.0'
+  - '@lokalise/biome-config@4.0.0'
