@@ -104,7 +104,7 @@ importers:
         version: 6.4.0(ioredis@6.0.0)
       dd-trace:
         specifier: ^6.0.0
-        version: 6.20.1
+        version: 6.21.0
       fastify:
         specifier: ^5.10.0
         version: 5.12.7
@@ -331,8 +331,8 @@ packages:
     resolution: {integrity: sha512-rS6Qc8WAbOgbrtDYdqK15gi2xbuIEyfuquUH05g+2DOdiNAswNAGrlIuSdJZQF/qoJzjcFvxb9kCHu8BjiPfQQ==}
     engines: {node: '>=18'}
 
-  '@datadog/pprof@5.19.0':
-    resolution: {integrity: sha512-0ACUNjUdZ254ay7ZeAm8A3iO1t+jdPzAV8DuVHzqsuxV72KqygwT6ydq4/tm4LqIq51m1pQXEPT1L+j9myzn6g==}
+  '@datadog/pprof@5.20.0':
+    resolution: {integrity: sha512-el72sY8ipZsA6dPFqNhXtXbA0e189U+eyYUWl2bBz4+qEIheIgmpLzDrF2F7gxu/Cn87pLLYnj+oNcySKBdylQ==}
     engines: {node: '>=16'}
 
   '@datadog/wasm-js-rewriter@5.0.4':
@@ -1026,8 +1026,8 @@ packages:
     resolution: {integrity: sha512-TyyeGcjx0YeThAI9fTFtgsvj5qd4R+aGfVmXiUhevbgzWFDr7IK4tv4YjE6jaGzLHQTchk4h7DHdr5q4WGgaZw==}
     engines: {node: '>=12.17'}
 
-  dd-trace@6.20.1:
-    resolution: {integrity: sha512-Jc+XYOERl7f5IogVlDR6mfGrweJmjKrIhz6aXkk4DDgTihecLmYuehVhlGzVFUZhVX1kCquRqvCDuY4HDGltkQ==}
+  dd-trace@6.21.0:
+    resolution: {integrity: sha512-ogetRDBx5jWacXSlGNVCscxZcQObwbTjrqVBfSdKM6Eozrlwu6zn0bZApWj99cEkGAIiQtSxNvK7/GuKxcG6lw==}
     engines: {node: '>=22'}
 
   debug@4.4.3:
@@ -1067,8 +1067,8 @@ packages:
   es-module-lexer@2.3.1:
     resolution: {integrity: sha512-shc1dbU90Yl/xq1QrC7QRtfcwURZuVRfPhZbDoldJ1cn1gzDvBaBWlv0eFolj5+0znnPJz5TXLxsN77X/12KTA==}
 
-  es-module-lexer@3.0.3:
-    resolution: {integrity: sha512-yWGe1O/j+almnV4hOYrmZo8u58JdnmXEMneRQAYkWtqSiT86yoMIEKF4rpqEDj52tbYl3xceBD3DQIBwcsC9Pw==}
+  es-module-lexer@3.0.4:
+    resolution: {integrity: sha512-BldNY5mwkVu+cQ5Ymn3e6hB9Sx8XHx4ZevWbiUyZbfKxJxYO27Hf0wfzkxIaD5CAJMaGl3YspKELj0ff/7nCMA==}
 
   estree-walker@3.0.3:
     resolution: {integrity: sha512-7RUKfXgSMMkzt6ZuXmqapOurLGPPfgj6l9uRZ7lRGolvk0y2yocc35LdcxKC5PQZdn2DMqioAQ2NoWcrTKmm6g==}
@@ -2074,7 +2074,7 @@ snapshots:
       node-gyp-build: 3.9.0
     optional: true
 
-  '@datadog/pprof@5.19.0':
+  '@datadog/pprof@5.20.0':
     dependencies:
       node-gyp-build: 4.8.4
       pprof-format: 2.3.2
@@ -2678,7 +2678,7 @@ snapshots:
 
   dc-polyfill@0.1.11: {}
 
-  dd-trace@6.20.1:
+  dd-trace@6.21.0:
     dependencies:
       dc-polyfill: 0.1.11
       import-in-the-middle: 3.5.1
@@ -2689,7 +2689,7 @@ snapshots:
       '@datadog/native-appsec': 11.0.3
       '@datadog/native-iast-taint-tracking': 4.2.1
       '@datadog/native-metrics': 4.0.0
-      '@datadog/pprof': 5.19.0
+      '@datadog/pprof': 5.20.0
       '@datadog/wasm-js-rewriter': 5.0.4
       '@opentelemetry/api': 1.9.1
       '@opentelemetry/api-logs': 0.223.0
@@ -2723,7 +2723,7 @@ snapshots:
 
   es-module-lexer@2.3.1: {}
 
-  es-module-lexer@3.0.3: {}
+  es-module-lexer@3.0.4: {}
 
   estree-walker@3.0.3:
     dependencies:
@@ -2858,7 +2858,7 @@ snapshots:
   import-in-the-middle@3.5.1:
     dependencies:
       cjs-module-lexer: 2.3.0
-      es-module-lexer: 3.0.3
+      es-module-lexer: 3.0.4
       module-details-from-path: 1.0.4
 
   import-meta-resolve@4.2.0: {}
