@@ -10,7 +10,7 @@ importers:
     dependencies:
       '@amplitude/analytics-node':
         specifier: ^1.5.7
-        version: 1.5.74
+        version: 1.5.81
       '@fastify/error':
         specifier: ^4.2.0
         version: 4.2.1
@@ -138,14 +138,14 @@ importers:
 
 packages:
 
-  '@amplitude/analytics-connector@1.6.8':
-    resolution: {integrity: sha512-ryZUsakytEZZ+g/O5mTsObckhCKtZrNdZw+KKcbuzVCZa1LJFPWHvKj+jwQpPO0ngsbb6oEpC5laaIEM5B4XKQ==}
+  '@amplitude/analytics-connector@1.7.0':
+    resolution: {integrity: sha512-HTnunOzcN+CdJUxdaim3E/CA5xbYRng4rpYvobjzl2ud2BXtpJdRnGuVmPKskYYyUTkz7X6QIOQPYlAgcGaWcg==}
 
-  '@amplitude/analytics-core@2.58.0':
-    resolution: {integrity: sha512-ZFd271l2UZrR0gXXcgRqV1fj6nURIemovV7EDTdO8z+9rVobV7P+mjs4srqLwEJl3YfNX/ma1IgfFFriFEmXSQ==}
+  '@amplitude/analytics-core@2.61.0':
+    resolution: {integrity: sha512-emwBT39vq/kjaXt2HoRkeSG4shjLmDgrZUDpIXCQdgI3Xvi9GwjMG3T6xjtjf+/THCB4NIhHrJhqbqx7tq+hMw==}
 
-  '@amplitude/analytics-node@1.5.74':
-    resolution: {integrity: sha512-WlTa7UpivebOquGicmGiQhDPc6DmNyTRYqvnQZ9tKUnE4HR/1hn2IcZTQ7ms3EOf8SK0PlW0ysZonXERUfzwBg==}
+  '@amplitude/analytics-node@1.5.81':
+    resolution: {integrity: sha512-ZmbFmjFeZ3FJc9MaIfmg2rkKcnsx2DoYoESQSaL4StUKqto1JzLyK4UN37p9ki4ltfukGJyzazegFZ8/fOoBvg==}
 
   '@amplitude/analytics-types@2.11.1':
     resolution: {integrity: sha512-wFEgb0t99ly2uJKm5oZ28Lti0Kh5RecR5XBkwfUpDzn84IoCIZ8GJTsMw/nThu8FZFc7xFDA4UAt76zhZKrs9A==}
@@ -1843,19 +1843,19 @@ packages:
 
 snapshots:
 
-  '@amplitude/analytics-connector@1.6.8': {}
+  '@amplitude/analytics-connector@1.7.0': {}
 
-  '@amplitude/analytics-core@2.58.0':
+  '@amplitude/analytics-core@2.61.0':
     dependencies:
-      '@amplitude/analytics-connector': 1.6.8
+      '@amplitude/analytics-connector': 1.7.0
       '@types/zen-observable': 0.8.3
       safe-json-stringify: 1.2.0
       tslib: 2.8.1
       zen-observable: 0.10.0
 
-  '@amplitude/analytics-node@1.5.74':
+  '@amplitude/analytics-node@1.5.81':
     dependencies:
-      '@amplitude/analytics-core': 2.58.0
+      '@amplitude/analytics-core': 2.61.0
       tslib: 2.8.1
 
   '@amplitude/analytics-types@2.11.1': {}
