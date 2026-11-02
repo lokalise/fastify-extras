@@ -25,7 +25,7 @@ importers:
         version: 0.16.1
       '@scalar/fastify-api-reference':
         specifier: ^1.66.1
-        version: 1.76.0
+        version: 1.76.3
       '@splitsoftware/splitio':
         specifier: ^11.12.0
         version: 11.12.1
@@ -795,12 +795,12 @@ packages:
   '@rolldown/pluginutils@1.0.1':
     resolution: {integrity: sha512-2j9bGt5Jh8hj+vPtgzPtl72j0yRxHAyumoo6TNfAjsLB04UtpSvPbPcDcBMxz7n+9CYB0c1GxQFxYRg2jimqGw==}
 
-  '@scalar/client-side-rendering@0.4.13':
-    resolution: {integrity: sha512-XkFct3IMx+WS2+WsRVDESEwYDy8e3lpbbMPYKo/75WsFgYVaPSjNB9wU5fu7NDgCEn5B+UnmCQ+2rQcD7LBrzw==}
+  '@scalar/client-side-rendering@0.4.16':
+    resolution: {integrity: sha512-C6g3yGa6DwK++L0yxB6oebTc4fCdU/n/FrOK+08UdK4RK24bTvgcCcvjh8k6OVXDMyCodSf73ZERwVWYlnkaxA==}
     engines: {node: '>=22'}
 
-  '@scalar/fastify-api-reference@1.76.0':
-    resolution: {integrity: sha512-zNmOkCXMqmUYqtAJJkIzQUIKdKAXowibLMHFhdfzJgfI16jDJtAjqWD0Z65E7GKNERcgnFU3bmUz4ktcle0DpQ==}
+  '@scalar/fastify-api-reference@1.76.3':
+    resolution: {integrity: sha512-TIqAr1voUI4JY8AvK0dwZuD6fSU72gSc3qM9ZH1Tfu51NIOjXIC09WO/zizl73Orrj5mzk0zEV8MQagOXkt2QA==}
     engines: {node: '>=22'}
 
   '@scalar/helpers@0.16.4':
@@ -811,12 +811,12 @@ packages:
     resolution: {integrity: sha512-YmJAO9NoGCcU/vx7P4Dy9DGv+Vntp+ny3Fh99slHOOh/IZxvbdK5hWeZdzQ3x+ezab9XJNscFoX8H/P6W+H8lA==}
     engines: {node: '>=22.19.0'}
 
-  '@scalar/schemas@0.15.0':
-    resolution: {integrity: sha512-YxvmWVymAC536CFC84SGyt8PD57UqB5GOvr73y7Oj1Bjf8HMUUowzEt3AM3w9s21sR8ZKkncbt1R3r8sYsASnA==}
+  '@scalar/schemas@0.16.0':
+    resolution: {integrity: sha512-SHhRIH/9x86mRmJcyMgnMMWxDNzRtuyb93anz5zfWV2XuV7gZ1Br6E5Ll2Ygoc3HoKjOQkSdSVs11oKQxjvKMw==}
     engines: {node: '>=22'}
 
-  '@scalar/types@0.25.0':
-    resolution: {integrity: sha512-EdwOVV5ajKks4MX5BorHIdMLG0L8EAxfz+NisAPV8l7Rsic50+YoWnqkY1eqB6K96iyreIKUdl7B/PIFGLqylg==}
+  '@scalar/types@0.26.0':
+    resolution: {integrity: sha512-T78Dj1Q+W0E1RsMyPoydfR+L+p9IUIkntBCRYlWaRibM98jAxABRYGQoU/qDHX0PR1IAFdE+d7ZqslypZbJzcg==}
     engines: {node: '>=22'}
 
   '@scalar/validation@0.6.7':
@@ -2439,16 +2439,16 @@ snapshots:
 
   '@rolldown/pluginutils@1.0.1': {}
 
-  '@scalar/client-side-rendering@0.4.13':
+  '@scalar/client-side-rendering@0.4.16':
     dependencies:
       '@scalar/helpers': 0.16.4
-      '@scalar/schemas': 0.15.0
-      '@scalar/types': 0.25.0
+      '@scalar/schemas': 0.16.0
+      '@scalar/types': 0.26.0
       '@scalar/validation': 0.6.7
 
-  '@scalar/fastify-api-reference@1.76.0':
+  '@scalar/fastify-api-reference@1.76.3':
     dependencies:
-      '@scalar/client-side-rendering': 0.4.13
+      '@scalar/client-side-rendering': 0.4.16
       '@scalar/json-magic': 0.17.0
       fastify-plugin: 6.0.1
       github-slugger: 2.0.0
@@ -2463,12 +2463,13 @@ snapshots:
       undici: 8.12.3
       yaml: 2.9.1
 
-  '@scalar/schemas@0.15.0':
+  '@scalar/schemas@0.16.0':
     dependencies:
       '@scalar/helpers': 0.16.4
+      '@scalar/types': 0.26.0
       '@scalar/validation': 0.6.7
 
-  '@scalar/types@0.25.0':
+  '@scalar/types@0.26.0':
     dependencies:
       '@scalar/helpers': 0.16.4
       nanoid: 5.1.16
