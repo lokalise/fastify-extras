@@ -22,8 +22,6 @@ export class TestBackgroundJobProcessor<
       ownerName: 'test',
       isTest: true,
       workerOptions: { concurrency: 1 },
-      // TODO: pass redisConfig as is once background-jobs-common takes ioredis RedisOptions instead of
-      // node-core's RedisConfig, which requires `useTls`. The library ignores that flag.
       redisConfig: { ...redisConfig, useTls: redisConfig.tls !== undefined },
     })
     this.returnValue = returnValue
