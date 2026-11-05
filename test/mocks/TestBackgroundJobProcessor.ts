@@ -3,8 +3,7 @@ import type {
   BaseJobPayload,
 } from '@lokalise/background-jobs-common'
 import { AbstractBackgroundJobProcessor } from '@lokalise/background-jobs-common'
-
-import type { RedisConfig } from '@lokalise/node-core'
+import type { RedisOptions } from 'ioredis'
 
 export class TestBackgroundJobProcessor<
   JobData extends BaseJobPayload,
@@ -16,7 +15,7 @@ export class TestBackgroundJobProcessor<
     dependencies: BackgroundJobProcessorDependencies<JobData, JobReturn>,
     returnValue: JobReturn,
     queueId: string,
-    redisConfig: RedisConfig,
+    redisConfig: RedisOptions,
   ) {
     super(dependencies, {
       queueId,

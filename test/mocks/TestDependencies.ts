@@ -1,6 +1,7 @@
 import type { BackgroundJobProcessorDependencies } from '@lokalise/background-jobs-common'
 import { CommonBullmqFactory } from '@lokalise/background-jobs-common'
-import { globalLogger, type RedisConfig } from '@lokalise/node-core'
+import { globalLogger } from '@lokalise/node-core'
+import type { RedisOptions } from 'ioredis'
 import type { MockInstance } from 'vitest'
 
 const testLogger = globalLogger
@@ -32,7 +33,7 @@ export class TestDependencies {
     }
   }
 
-  getRedisConfig(): RedisConfig {
+  getRedisConfig(): RedisOptions {
     const host = process.env.REDIS_HOST
     const keyPrefix = process.env.REDIS_KEY_PREFIX
     const port = process.env.REDIS_PORT ? Number(process.env.REDIS_PORT) : undefined
@@ -63,7 +64,6 @@ export class TestDependencies {
       commandTimeout,
       enableReadyCheck: false,
       maxRetriesPerRequest: null,
-      useTls: false,
     }
   }
 }

@@ -305,7 +305,7 @@ If you rely on the default `BackgroundJobsBasedQueueDiscoverer`, pairing `bullmq
 
 Add the plugin to your Fastify instance by registering it with the following possible options:
 
-- `redisConfigs`, Redis configurations used for BullMQ. Plugin uses them to discover the queues.
+- `redisConfigs`, ioredis `RedisOptions` for each Redis instance used by BullMQ. Plugin uses them to discover the queues. To read them from env vars, use `createRedisConfigSchema()` from `@lokalise/config`.
 - `bullMqPrefix` (optional, default: `bull`). The prefix used by BullMQ to store the queues in Redis;
 - `metricsPrefix` (optional, default: `bullmq`). The prefix for the metrics in Prometheus;
 - `queueDiscoverer` (optional, default: `BackgroundJobsBasedQueueDiscoverer`). The queue discoverer to use. The default one relies on the logic implemented by `@lokalise/background-jobs-common` where queue names are registered by the background job processors; If you are not using `@lokalise/background-jobs-common`, you can use your own queue discoverer by instantiating a `RedisBasedQueueDiscoverer` or implementing a `QueueDiscoverer` interface;

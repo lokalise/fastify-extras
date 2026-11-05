@@ -1,23 +1,22 @@
 import { backgroundJobProcessorGetActiveQueueIds } from '@lokalise/background-jobs-common'
-import type { RedisConfig } from '@lokalise/node-core'
 import { PromisePool } from '@supercharge/promise-pool'
-import { Redis } from 'ioredis'
+import { Redis, type RedisOptions } from 'ioredis'
 
 export type QueueDiscoverer = {
   discoverQueues: () => Promise<RedisQueue[]>
 }
 
 type RedisQueue = {
-  redisConfig: RedisConfig
+  redisConfig: RedisOptions
   queueName: string
 }
 
 const QUEUE_DISCOVERY_CONCURRENCY = 3
 
 export abstract class AbstractRedisBasedQueueDiscoverer implements QueueDiscoverer {
-  protected readonly redisConfigs: RedisConfig[]
+  protected readonly redisConfigs: RedisOptions[]
 
-  constructor(redisConfigs: RedisConfig[]) {
+  constructor(redisConfigs: RedisOptions[]) {
     this.redisConfigs = redisConfigs
   }
 
@@ -34,18 +33,18 @@ export abstract class AbstractRedisBasedQueueDiscoverer implements QueueDiscover
     return results.flat()
   }
 
-  protected abstract discoverQueuesForInstance(redisConfig: RedisConfig): Promise<RedisQueue[]>
+  protected abstract discoverQueuesForInstance(redisConfig: RedisOptions): Promise<RedisQueue[]>
 }
 
 export class RedisBasedQueueDiscoverer extends AbstractRedisBasedQueueDiscoverer {
   private readonly queuesPrefix: string
 
-  constructor(redisConfigs: RedisConfig[], queuesPrefix: string) {
+  constructor(redisConfigs: RedisOptions[], queuesPrefix: string) {
     super(redisConfigs)
     this.queuesPrefix = queuesPrefix
   }
 
-  protected async discoverQueuesForInstance(redisConfig: RedisConfig): Promise<RedisQueue[]> {
+  protected async discoverQueuesForInstance(redisConfig: RedisOptions): Promise<RedisQueue[]> {
     const redis = new Redis(redisConfig)
     const scanStream = redis.scanStream({
       match: `${this.queuesPrefix}:*:meta`,
@@ -72,7 +71,7 @@ export class RedisBasedQueueDiscoverer extends AbstractRedisBasedQueueDiscoverer
 }
 
 export class BackgroundJobsBasedQueueDiscoverer extends AbstractRedisBasedQueueDiscoverer {
-  protected async discoverQueuesForInstance(redisConfig: RedisConfig): Promise<RedisQueue[]> {
+  protected async discoverQueuesForInstance(redisConfig: RedisOptions): Promise<RedisQueue[]> {
     const queueNames = await backgroundJobProcessorGetActiveQueueIds(redisConfig)
     return queueNames.map((queueName) => ({
       redisConfig,
