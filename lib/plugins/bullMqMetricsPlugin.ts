@@ -1,8 +1,8 @@
 import type { FastifyInstance, FastifyPluginCallback } from 'fastify'
 import 'fastify-metrics'
 
-import type { RedisConfig } from '@lokalise/node-core'
 import fp from 'fastify-plugin'
+import type { RedisOptions } from 'ioredis'
 import type { CollectionScheduler } from './bull-mq-metrics/CollectionScheduler.ts'
 import { PromiseBasedCollectionScheduler } from './bull-mq-metrics/CollectionScheduler.ts'
 import type { MetricCollectorOptions } from './bull-mq-metrics/MetricsCollector.ts'
@@ -19,7 +19,7 @@ declare module 'fastify' {
 }
 
 export type BullMqMetricsPluginOptions = {
-  redisConfigs: RedisConfig[]
+  redisConfigs: RedisOptions[]
   collectionOptions?:
     | {
         type: 'interval'

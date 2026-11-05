@@ -3,8 +3,7 @@ import type {
   BaseJobPayload,
 } from '@lokalise/background-jobs-common'
 import { AbstractBackgroundJobProcessor } from '@lokalise/background-jobs-common'
-
-import type { RedisConfig } from '@lokalise/node-core'
+import type { TestRedisConfig } from './TestDependencies.ts'
 
 export class TestBackgroundJobProcessor<
   JobData extends BaseJobPayload,
@@ -16,14 +15,16 @@ export class TestBackgroundJobProcessor<
     dependencies: BackgroundJobProcessorDependencies<JobData, JobReturn>,
     returnValue: JobReturn,
     queueId: string,
-    redisConfig: RedisConfig,
+    redisConfig: TestRedisConfig,
   ) {
     super(dependencies, {
       queueId,
       ownerName: 'test',
       isTest: true,
       workerOptions: { concurrency: 1 },
-      redisConfig,
+      // TODO: pass redisConfig as is once background-jobs-common takes ioredis RedisOptions instead of
+      // node-core's RedisConfig, which requires `useTls`. The library ignores that flag.
+      redisConfig: { ...redisConfig, useTls: redisConfig.tls !== undefined },
     })
     this.returnValue = returnValue
   }

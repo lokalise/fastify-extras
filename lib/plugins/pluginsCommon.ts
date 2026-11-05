@@ -1,4 +1,4 @@
-import type { AppConfig, CommonLogger } from '@lokalise/node-core'
+import type { CommonLogger } from '@lokalise/node-core'
 import {
   type FastifyInstance,
   type FastifyServerOptions,
@@ -25,7 +25,7 @@ const REQUEST_LOGGING_SKIP_PATHS = new Set(['/', '/health', '/ready', '/live', '
 const REQUEST_LOGGING_LEVELS = ['debug', 'trace', 'info']
 
 export function getFastifyAppLoggingConfig(
-  appLogLevel: AppConfig['logLevel'],
+  appLogLevel: string,
   requestLoggingLevels = REQUEST_LOGGING_LEVELS,
 ): Pick<FastifyServerOptions, 'logController' | 'disableRequestLogging'> {
   const enableRequestLogging = requestLoggingLevels.includes(appLogLevel)

@@ -1,8 +1,7 @@
-import { sanitizeRedisConfig } from '@lokalise/background-jobs-common'
-import type { RedisConfig } from '@lokalise/node-core'
 import type { FinishedStatus, JobType } from 'bullmq'
 import { Queue, QueueEvents } from 'bullmq'
 import type { FastifyBaseLogger } from 'fastify'
+import type { RedisOptions } from 'ioredis'
 import type { Metrics } from './MetricsCollector.ts'
 
 /**
@@ -50,8 +49,22 @@ export class ObservableQueue {
     }
   }
 
-  constructor(name: string, redisConfig: RedisConfig, metrics: Metrics, logger: FastifyBaseLogger) {
-    const sanitizedConfig = sanitizeRedisConfig(redisConfig)
+  constructor(
+    name: string,
+    redisConfig: RedisOptions,
+    metrics: Metrics,
+    logger: FastifyBaseLogger,
+  ) {
+    // BullMQ applies the key prefix through its own `prefix` option and needs `maxRetriesPerRequest: null`,
+    // see https://docs.bullmq.io/bull/patterns/persistent-connections#workers
+    const sanitizedConfig = {
+      ...redisConfig,
+      keyPrefix: undefined,
+      maxRetriesPerRequest: null,
+      // ioredis 6 takes `retryStrategy: null` to never reconnect, which BullMQ's connection types reject.
+      // A strategy that returns null stops ioredis from reconnecting the same way.
+      retryStrategy: redisConfig.retryStrategy === null ? () => null : redisConfig.retryStrategy,
+    }
     this.queue = new Queue(name, {
       connection: sanitizedConfig,
       prefix: redisConfig.keyPrefix,
