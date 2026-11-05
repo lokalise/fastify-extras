@@ -7,11 +7,11 @@ import type {
 import { waitAndRetry } from '@lokalise/node-core'
 import type { FastifyInstance } from 'fastify'
 import fastify from 'fastify'
-import { Redis } from 'ioredis'
+import { Redis, type RedisOptions } from 'ioredis'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { z } from 'zod/v4'
 import { TestBackgroundJobProcessor } from '../../test/mocks/TestBackgroundJobProcessor.ts'
-import { TestDependencies, type TestRedisConfig } from '../../test/mocks/TestDependencies.ts'
+import { TestDependencies } from '../../test/mocks/TestDependencies.ts'
 import { ObservableQueue } from './bull-mq-metrics/ObservableQueue.ts'
 import {
   BackgroundJobsBasedQueueDiscoverer,
@@ -75,7 +75,7 @@ describe.each([true, false])('bullMqMetricsPlugin', (useGenericRedisQueueDiscove
   let dependencies: TestDependencies
   let bgDependencies: BackgroundJobProcessorDependencies<any, any>
   let processor: AbstractBackgroundJobProcessor<BaseJobPayload, JobReturn>
-  let redisConfig: TestRedisConfig
+  let redisConfig: RedisOptions
 
   beforeEach(async () => {
     dependencies = new TestDependencies()
@@ -218,7 +218,7 @@ describe.each([true, false])('bullMqMetricsPlugin', (useGenericRedisQueueDiscove
   // this is not related to the changes in the PR where we started skipping the test.
   // This is working in production.
   it.skip('works with multiple redis clients', async () => {
-    const redisConfig2: TestRedisConfig = {
+    const redisConfig2: RedisOptions = {
       ...redisConfig,
       db: 1,
     }

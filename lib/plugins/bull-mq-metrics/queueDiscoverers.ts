@@ -72,15 +72,10 @@ export class RedisBasedQueueDiscoverer extends AbstractRedisBasedQueueDiscoverer
 
 export class BackgroundJobsBasedQueueDiscoverer extends AbstractRedisBasedQueueDiscoverer {
   protected async discoverQueuesForInstance(redisConfig: RedisOptions): Promise<RedisQueue[]> {
-    const redis = new Redis(redisConfig)
-    try {
-      const queueNames = await backgroundJobProcessorGetActiveQueueIds(redis)
-      return queueNames.map((queueName) => ({
-        redisConfig,
-        queueName,
-      }))
-    } finally {
-      redis.disconnect()
-    }
+    const queueNames = await backgroundJobProcessorGetActiveQueueIds(redisConfig)
+    return queueNames.map((queueName) => ({
+      redisConfig,
+      queueName,
+    }))
   }
 }

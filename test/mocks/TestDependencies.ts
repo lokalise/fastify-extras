@@ -4,23 +4,6 @@ import { globalLogger } from '@lokalise/node-core'
 import type { RedisOptions } from 'ioredis'
 import type { MockInstance } from 'vitest'
 
-/**
- * The Redis options the tests set, with host and port required: background-jobs-common still types its
- * `redisConfig` as node-core's `RedisConfig`, which needs them.
- */
-export type TestRedisConfig = Pick<
-  RedisOptions,
-  | 'db'
-  | 'keyPrefix'
-  | 'username'
-  | 'password'
-  | 'connectTimeout'
-  | 'commandTimeout'
-  | 'enableReadyCheck'
-  | 'maxRetriesPerRequest'
-  | 'tls'
-> & { host: string; port: number }
-
 const testLogger = globalLogger
 export let lastInfoSpy: MockInstance
 export let lastErrorSpy: MockInstance
@@ -50,7 +33,7 @@ export class TestDependencies {
     }
   }
 
-  getRedisConfig(): TestRedisConfig {
+  getRedisConfig(): RedisOptions {
     const host = process.env.REDIS_HOST
     const keyPrefix = process.env.REDIS_KEY_PREFIX
     const port = process.env.REDIS_PORT ? Number(process.env.REDIS_PORT) : undefined

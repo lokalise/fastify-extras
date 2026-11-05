@@ -3,7 +3,7 @@ import type {
   BaseJobPayload,
 } from '@lokalise/background-jobs-common'
 import { AbstractBackgroundJobProcessor } from '@lokalise/background-jobs-common'
-import type { TestRedisConfig } from './TestDependencies.ts'
+import type { RedisOptions } from 'ioredis'
 
 export class TestBackgroundJobProcessor<
   JobData extends BaseJobPayload,
@@ -15,14 +15,14 @@ export class TestBackgroundJobProcessor<
     dependencies: BackgroundJobProcessorDependencies<JobData, JobReturn>,
     returnValue: JobReturn,
     queueId: string,
-    redisConfig: TestRedisConfig,
+    redisConfig: RedisOptions,
   ) {
     super(dependencies, {
       queueId,
       ownerName: 'test',
       isTest: true,
       workerOptions: { concurrency: 1 },
-      redisConfig: { ...redisConfig, useTls: redisConfig.tls !== undefined },
+      redisConfig,
     })
     this.returnValue = returnValue
   }
