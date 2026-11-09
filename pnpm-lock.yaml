@@ -67,8 +67,8 @@ importers:
         specifier: ^17.0.2
         version: 17.0.2(bullmq@6.5.1(ioredis@6.0.0))(ioredis@6.0.0)(pino@10.4.0)(toad-scheduler@4.1.0)(zod@4.6.7)
       '@lokalise/biome-config':
-        specifier: ^4.0.0
-        version: 4.0.0
+        specifier: ^5.0.0
+        version: 5.0.0(@biomejs/biome@2.6.4)
       '@lokalise/errors':
         specifier: ^2.0.0
         version: 2.1.0(zod@4.6.7)
@@ -427,8 +427,10 @@ packages:
       toad-scheduler: ^4.2.0
       zod: '>=4.5.0 <5.0.0'
 
-  '@lokalise/biome-config@4.0.0':
-    resolution: {integrity: sha512-ShVhPJpEiXcEu+yhusmg6053YP4oHhMa5/Lzm9gPkIElpmGwsnoaclaKPOa9uMZYz2UfynRD3J3PKwts/nl46Q==}
+  '@lokalise/biome-config@5.0.0':
+    resolution: {integrity: sha512-ZtK58OBgMnSV0Ix5qxBW/csTiZNEMEplEu0WBpemStaWue1bc5bLCnoWqbZE6598Z1vGlBnqq83TWGlw6T5NMA==}
+    peerDependencies:
+      '@biomejs/biome': ^2.6.4
 
   '@lokalise/error-utils@4.0.0':
     resolution: {integrity: sha512-M1onujB0PEgtWarBcpTcjoyiQaIl4WT2nzpm4AwPfHVdJt9/kJyaJETF9j1tUYLNmlJhk5zllmirMamQS3JLZg==}
@@ -2211,7 +2213,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@lokalise/biome-config@4.0.0': {}
+  '@lokalise/biome-config@5.0.0(@biomejs/biome@2.6.4)':
+    dependencies:
+      '@biomejs/biome': 2.6.4
 
   '@lokalise/error-utils@4.0.0(@lokalise/node-core@14.12.0(zod@4.6.7))':
     dependencies:

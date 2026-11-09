@@ -83,7 +83,7 @@
     "@lokalise/api-contracts": "^8.1.0",
     "@lokalise/backend-http-client": "12.2.0",
     "@lokalise/background-jobs-common": "^17.0.2",
-    "@lokalise/biome-config": "^4.0.0",
+    "@lokalise/biome-config": "^5.0.0",
     "@lokalise/errors": "^2.0.0",
     "@lokalise/fastify-api-contracts": "^7.0.1",
     "@lokalise/node-core": "^14.4.2",
