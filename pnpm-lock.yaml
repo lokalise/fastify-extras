@@ -71,7 +71,7 @@ importers:
         version: 4.0.0
       '@lokalise/errors':
         specifier: ^2.0.0
-        version: 2.1.0(zod@4.6.7)
+        version: 2.2.0(zod@4.6.7)
       '@lokalise/fastify-api-contracts':
         specifier: ^7.0.1
         version: 7.0.1(@fastify/sse@0.6.1(fastify@5.12.7))(@lokalise/api-contracts@8.1.0(zod@4.6.7))(@lokalise/node-core@14.12.0(zod@4.6.7))(fastify-type-provider-zod@7.0.0(@fastify/swagger@9.9.2)(fastify@5.12.7)(openapi-types@12.1.3)(zod@4.6.7))(fastify@5.12.7)(zod@4.6.7)
@@ -436,8 +436,8 @@ packages:
     peerDependencies:
       '@lokalise/node-core': '>=11.0.0'
 
-  '@lokalise/errors@2.1.0':
-    resolution: {integrity: sha512-F/ikqnCPVvXd0tf8w6Sfc9mr++9lJX0oLHlJDe0r/55NoyC1A6M3wOpI9LnRAGl1yvQjpFf5ZxfILRccNAZLhA==}
+  '@lokalise/errors@2.2.0':
+    resolution: {integrity: sha512-ZLwLeNhKHTgFAvokE10CfxkIIK+iPmU1BBpHU2PsHjSkHGZLtnVmMxAVoinYTLC74Lctj8HsviYIHpkQfkOMXg==}
     peerDependencies:
       zod: ^4.0.0
 
@@ -2219,7 +2219,7 @@ snapshots:
       '@lokalise/node-core': 14.12.0(zod@4.6.7)
       pino-std-serializers: 7.1.0
 
-  '@lokalise/errors@2.1.0(zod@4.6.7)':
+  '@lokalise/errors@2.2.0(zod@4.6.7)':
     dependencies:
       zod: 4.6.7
 
