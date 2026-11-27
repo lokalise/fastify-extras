@@ -18,6 +18,9 @@ export {
 }
 
 // Typed from error-utils so the config always matches the Bugsnag client that reports errors
+/**
+ * @deprecated Use `NodeConfig` from `@bugsnag/node`, which `BugsnagErrorReporter` from `@lokalise/observability/bugsnag` takes.
+ */
 export type BugsnagConfig = Parameters<typeof startBugsnag>[0]
 
 export interface BugsnagPluginConfig {
@@ -31,6 +34,9 @@ function plugin(_app: FastifyInstance, opts: BugsnagPluginConfig, done: () => vo
   done()
 }
 
+/**
+ * @deprecated Use `BugsnagErrorReporter` from `@lokalise/observability/bugsnag` instead. It starts a client of its own, so remove this plugin when you add it, or uncaught errors are reported twice.
+ */
 export const bugsnagPlugin: FastifyPluginCallback<BugsnagPluginConfig> = fp(plugin, {
   fastify: '5.x',
   name: 'bugsnag-plugin',
