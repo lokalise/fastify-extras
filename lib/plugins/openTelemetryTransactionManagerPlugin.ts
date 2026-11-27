@@ -114,6 +114,9 @@ class EvictingSpanMap {
   }
 }
 
+/**
+ * @deprecated Use `OpenTelemetryTransactionManager` from `@lokalise/observability/opentelemetry` instead.
+ */
 export class OpenTelemetryTransactionManager implements TransactionObservabilityManager {
   private readonly isEnabled: boolean
   private readonly tracer: Tracer

@@ -259,6 +259,9 @@ More info about Split IO can be checked [here](https://help.split.io/hc/en-us/ar
 
 ### BugSnag Plugin
 
+> [!WARNING]
+> `bugsnagPlugin`, `BugsnagConfig` and the re-exported `reportErrorToBugsnag`, `bugsnagErrorReporter`, `addFeatureFlag` and `ErrorReport` are deprecated in favour of `BugsnagErrorReporter` from [`@lokalise/observability/bugsnag`](https://www.npmjs.com/package/@lokalise/observability) and will be removed in a future major version. `BugsnagErrorReporter` starts a client of its own, so remove this plugin when you switch, or uncaught errors are reported twice. To add feature flags, pass an `onError` callback that calls `event.addFeatureFlag` in its config.
+
 Plugin to report errors to BugSnag.
 
 Add the plugin to your Fastify instance by registering it with the following options:
@@ -323,6 +326,9 @@ If something goes wrong while starting the BullMQ metrics plugin, an `Error` is 
 
 ### OpenTelemetry Transaction Manager Plugin
 
+> [!WARNING]
+> The `OpenTelemetryTransactionManager` export is deprecated in favour of the same class from [`@lokalise/observability/opentelemetry`](https://www.npmjs.com/package/@lokalise/observability) and will be removed in a future major version. The plugin isn't deprecated.
+
 Plugin to create custom OpenTelemetry spans for background jobs.
 
 Add the plugin to your Fastify instance by registering it with the following options:
@@ -386,6 +392,9 @@ manager.stop('job-123', true) // true = successful
 > **Note:** This plugin requires `@opentelemetry/api` as a peer dependency. Make sure your application has OpenTelemetry configured with appropriate exporters (e.g., OTLP exporter) to send traces to your observability backend.
 
 ### Datadog Transaction Manager Plugin
+
+> [!WARNING]
+> The `DatadogTransactionManager` export is deprecated in favour of the same class from [`@lokalise/observability/datadog`](https://www.npmjs.com/package/@lokalise/observability) and will be removed in a future major version. The plugin isn't deprecated.
 
 Plugin to create custom Datadog APM spans for background jobs using `dd-trace`. This is an alternative to the OpenTelemetry Transaction Manager plugin for applications using Datadog for observability.
 

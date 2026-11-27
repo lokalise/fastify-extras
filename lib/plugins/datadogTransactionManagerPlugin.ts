@@ -14,6 +14,9 @@ export interface DatadogTransactionManagerOptions {
   isEnabled: boolean
 }
 
+/**
+ * @deprecated Use `DatadogTransactionManager` from `@lokalise/observability/datadog` instead.
+ */
 export class DatadogTransactionManager implements TransactionObservabilityManager {
   private readonly isEnabled: boolean
   private readonly spanMap: FifoMap<Span>
